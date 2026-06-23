@@ -11,6 +11,7 @@ import java.util.List;
 
 public class ConfigScreen extends Screen {
 
+    //   UI LAYOUT SETTINGS (Column sizes, spacing, and positional margins)
     private final List<ConfigCategory> categories = new ArrayList<>();
     private static final int COLUMN_WIDTH = 150;
     private static final int ROW_HEIGHT = 22;
@@ -19,18 +20,18 @@ public class ConfigScreen extends Screen {
 
     private final Screen parent;
 
-    // Define colors as ARGB hexadecimal (AARRGGBB)
-    // Keep standard vanilla dark color for 'OFF' (matches default)
+    //   COLOR SETTINGS (Hex values in AARRGGBB format)
     private static final int COLOR_DISABLED_BOX = 0xFF353535; // Normal dark background
-    // Vivid bright green box for 'ON'
     private static final int COLOR_ENABLED_BOX = 0xFF32A852;  // Hypixel Vivid Green
 
+    //   CONSTRUCTOR & INITIALIZATION
     public ConfigScreen(Screen parent) {
         super(Component.literal("Casual Skyblock Addons"));
         this.parent = parent;
         buildCategories();
     }
 
+    //   MOD CONFIG ENTRIES (Add your new toggle settings right here!)
     private void buildCategories() {
         ModConfig cfg = ModConfig.get();
 
@@ -42,14 +43,14 @@ public class ConfigScreen extends Screen {
         categories.add(general);
     }
 
-    // New helper method to generate dynamic button labels (ALWAYS FULL WHITE)
+    //   BUTTON LABEL UTILITIES (Dynamically builds plain white text indicators)
     private Component getButtonText(ConfigCategory.ToggleEntry entry) {
         boolean value = entry.getter.getAsBoolean();
         String suffix = value ? " [ON]" : " [OFF]";
-        // and the text must be full white (by default with no formatting)
         return Component.literal(entry.label + suffix);
     }
 
+    //   SCREEN DRAWING & WIDGET GENERATION
     @Override
     protected void init() {
         super.init();
@@ -63,13 +64,11 @@ public class ConfigScreen extends Screen {
                 int y = TOP_MARGIN + 20 + row * ROW_HEIGHT;
 
                 Button button = Button.builder(
-                        // 1. Text must be white
                         getButtonText(entry),
                         btn -> {
                             boolean newValue = !entry.getter.getAsBoolean();
                             entry.setter.accept(newValue);
                             ModConfig.save();
-                            // 2. Text must update
                             btn.setMessage(getButtonText(entry));
                         }
                 ).bounds(x, y, COLUMN_WIDTH, ROW_HEIGHT - 2).build();
@@ -81,7 +80,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        // Overlay background over the game scene so UI is readable
+        // --- Background Tint ---
         context.fillGradient(0, 0, this.width, this.height, 0xD0101010, 0xE0151515);
 
         // --- Render CUSTOM BOX COLOR Around ON/OFF State ---
@@ -95,12 +94,9 @@ public class ConfigScreen extends Screen {
                 ConfigCategory.ToggleEntry entry = category.entries.get(row);
                 int y = TOP_MARGIN + 20 + row * ROW_HEIGHT;
 
-                // 3. Determine color: keep default dark for OFF, use green for ON
                 boolean isEnabled = entry.getter.getAsBoolean();
                 int boxColor = isEnabled ? COLOR_ENABLED_BOX : COLOR_DISABLED_BOX;
 
-                // Draw the colored container box (the 'frame') just outside the button bounds
-                // Use fillGradient for a clean, professional looking box
                 renderColoredButtonBox(context, x, y, COLUMN_WIDTH, ROW_HEIGHT - 2, boxColor);
             }
         }
@@ -118,19 +114,15 @@ public class ConfigScreen extends Screen {
         }
     }
 
-    // Professional helper method to render the professional looking frame box
+    //   CUSTOM BUTTON RENDERING UTILITIES
     private static void renderColoredButtonBox(GuiGraphicsExtractor context, int x, int y, int width, int height, int colorARGB) {
-        // Use fillGradient for a professionally colored rectangle frame around the button
-        // We render it 1 pixel outside standard button bounds so it fully surrounds the default background
         int outerX = x - 1;
         int outerY = y - 1;
         int outerX2 = x + width + 1;
         int outerY2 = y + height + 1;
 
-        // Draw the main color (slight gradient looks clean in Minecraft UI)
         context.fillGradient(outerX, outerY, outerX2, outerY2, colorARGB, colorARGB);
 
-        // Add a clean 1-pixel dark border frame outside the colored box for definition
         context.fill(outerX - 1, outerY - 1, outerX2 + 1, outerY, 0xFF101010); // Top
         context.fill(outerX - 1, outerY2, outerX2 + 1, outerY2 + 1, 0xFF101010); // Bottom
         context.fill(outerX - 1, outerY, outerX, outerY2, 0xFF101010); // Left

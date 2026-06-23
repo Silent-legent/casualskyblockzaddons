@@ -18,21 +18,22 @@ import java.util.List;
 @Mixin(GuiGraphicsExtractor.class)
 public class RarityBackgroundMixin {
 
+    //   COLOR LOGIC (Reads item lore and determines background hex colors)
     private static int getRarityColor(ItemStack itemStack) {
         if (!com.example.client.config.ModConfig.get().showRarityBackgrounds) return -1;
         if (itemStack == null || itemStack.isEmpty()) return -1;
 
-        // 1. Guard against a null Lore component
+        // --- Configuration Check ---
         ItemLore lore = itemStack.get(DataComponents.LORE);
         if (lore == null) return -1;
 
-        // 2. Guard against an empty lines list
         List<Component> lines = lore.lines();
         if (lines == null || lines.isEmpty()) return -1;
 
-        // 3. Now it is completely safe to access the last index
+        // --- Read Last Line of Lore ---
         String lastLine = lines.get(lines.size() - 1).getString().toUpperCase();
 
+        // --- Color Mapping Settings ---
         if (lastLine.contains("ADMIN"))        return 0x60AA0000;
         if (lastLine.contains("ULTIMATE"))     return 0x60AA0000;
         if (lastLine.contains("VERY SPECIAL")) return 0x60FF5555;
@@ -48,6 +49,10 @@ public class RarityBackgroundMixin {
         return -1;
     }
 
+    // =========================================================================
+    //   MIXIN INJECTIONS (Hooks into Minecraft's rendering to draw backgrounds)
+
+    // --- Context 1: Items held/owned by entities ---
     @Inject(
             method = "item(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At("HEAD")
@@ -58,7 +63,7 @@ public class RarityBackgroundMixin {
         GuiGraphicsExtractor graphics = (GuiGraphicsExtractor) (Object) this;
         graphics.fill(x, y, x + 16, y + 16, color);
     }
-
+    // --- Context 2: Standard standalone inventory items ---
     @Inject(
             method = "item(Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At("HEAD")
@@ -69,7 +74,7 @@ public class RarityBackgroundMixin {
         GuiGraphicsExtractor graphics = (GuiGraphicsExtractor) (Object) this;
         graphics.fill(x, y, x + 16, y + 16, color);
     }
-
+    // --- Context 3: Ghost/Fake items (recipes, background previews, etc) ---
     @Inject(
             method = "fakeItem(Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At("HEAD")

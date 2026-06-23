@@ -10,6 +10,7 @@ import java.nio.file.Path;
 
 public class ModConfig {
 
+    //   GSON & CONFIG FILE INSTANCE FIELDS
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("casualskyblockaddons.json");
 
@@ -18,6 +19,7 @@ public class ModConfig {
     // --- settings go here ---
     public boolean showRarityBackgrounds = true;
 
+    // --- Get Active Config Instance ---
     public static ModConfig get() {
         if (instance == null) {
             load();
@@ -25,6 +27,7 @@ public class ModConfig {
         return instance;
     }
 
+    // --- Load Settings from JSON File ---
     public static void load() {
         if (Files.exists(PATH)) {
             try {
@@ -39,6 +42,7 @@ public class ModConfig {
         if (instance == null) instance = new ModConfig();
     }
 
+    // --- Save Current Settings to JSON File ---
     public static void save() {
         try {
             Files.writeString(PATH, GSON.toJson(instance));
