@@ -19,11 +19,18 @@ import java.util.List;
 public class RarityBackgroundMixin {
 
     private static int getRarityColor(ItemStack itemStack) {
-        if (itemStack.isEmpty()) return -1;
-        ItemLore lore = itemStack.get(DataComponents.LORE);
-        if (lore == null || lore.lines().isEmpty()) return -1;
+        if (!com.example.client.config.ModConfig.get().showRarityBackgrounds) return -1;
+        if (itemStack == null || itemStack.isEmpty()) return -1;
 
+        // 1. Guard against a null Lore component
+        ItemLore lore = itemStack.get(DataComponents.LORE);
+        if (lore == null) return -1;
+
+        // 2. Guard against an empty lines list
         List<Component> lines = lore.lines();
+        if (lines == null || lines.isEmpty()) return -1;
+
+        // 3. Now it is completely safe to access the last index
         String lastLine = lines.get(lines.size() - 1).getString().toUpperCase();
 
         if (lastLine.contains("ADMIN"))        return 0x60AA0000;
@@ -37,8 +44,10 @@ public class RarityBackgroundMixin {
         if (lastLine.contains("RARE"))         return 0x605555FF;
         if (lastLine.contains("UNCOMMON"))     return 0x6055FF55;
         if (lastLine.contains("COMMON"))       return 0x60FFFFFF;
+
         return -1;
     }
+
     @Inject(
             method = "item(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At("HEAD")
