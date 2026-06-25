@@ -1,6 +1,6 @@
-package com.example.client.mixin;
+package com.cbza.net.mixin;
 
-import com.example.client.feature.PowderChestSolver;
+import com.cbza.net.feature.PowderChestSolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
@@ -27,7 +27,7 @@ public class LevelRendererMixin {
     )
     private void onRenderWorld(CallbackInfo ci) {
 
-        List<Vec3> chestPositions = PowderChestSolver.getActiveChestPositions();
+        List<Vec3> chestPositions = PowderChestSolver.INSTANCE.getActiveChestPositions();
         if (chestPositions.isEmpty()) return;
 
         Minecraft mc = Minecraft.getInstance();

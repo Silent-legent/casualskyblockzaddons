@@ -1,0 +1,63 @@
+package com.cbza.net.feature
+
+import com.cbza.net.config.ModConfig
+import net.minecraft.world.phys.Vec3
+import java.util.concurrent.ConcurrentHashMap
+
+object PowderChestSolver {
+	private val chestExpireTimes = ConcurrentHashMap<String, Long>()
+	private val activeChests = ConcurrentHashMap<String, Vec3>()
+
+	@Volatile
+	private var expectingChest = false
+
+	@Volatile
+	private var expectingChestTime = 0L
+	private const val PARTICLE_POINT_LIFETIME_MS = 250L // each point lasts 1 second
+	private const val PARTICLE_WINDOW_MS = 60000L // listen for 60s after chest message
+
+	fun onChestSpawn() {
+		if (!ModConfig.get().PowderChestSolver) return
+		println("[PowderChest] Chest spawn detected!")
+		expectingChest = true
+		expectingChestTime = System.currentTimeMillis()
+	}
+
+	fun handleParticle(x: Double, y: Double, z: Double) {
+		if (!ModConfig.get().PowderChestSolver) return
+		if (!expectingChest) return
+
+		val now = System.currentTimeMillis()
+		if (now - expectingChestTime > PARTICLE_WINDOW_MS) {
+			expectingChest = false
+			return
+		}
+
+		val adjustedY = y + ModConfig.get().PowderChestYOffset
+		val key = "${Math.round(x)},${Math.round(adjustedY)},${Math.round(z)}"
+
+		activeChests[key] = Vec3(x, adjustedY, z)
+		chestExpireTimes[key] = now + PARTICLE_POINT_LIFETIME_MS
+	}
+
+	fun getActiveChestPositions(): List<Vec3> {
+		val now = System.currentTimeMillis()
+
+		chestExpireTimes.entries.removeIf { entry ->
+			if (now > entry.value) {
+				activeChests.remove(entry.key)
+				true
+			} else {
+				false
+			}
+		}
+
+		return ArrayList(activeChests.values)
+	}
+
+	fun clearChests() {
+		activeChests.clear()
+		chestExpireTimes.clear()
+		expectingChest = false
+	}
+}

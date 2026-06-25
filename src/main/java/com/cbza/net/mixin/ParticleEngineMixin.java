@@ -1,6 +1,6 @@
-package com.example.client.mixin;
+package com.cbza.net.mixin;
 
-import com.example.client.feature.PowderChestSolver;
+import com.cbza.net.feature.PowderChestSolver;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,10 +21,10 @@ public class ParticleEngineMixin {
             System.out.println("[PowderChest] CRIT particle at " + x + ", " + y + ", " + z);
 
             // FORCE THE SOLVER AWAKE FOR TESTING
-            PowderChestSolver.onChestSpawn();
+            PowderChestSolver.INSTANCE.onChestSpawn();
 
             // Send the coordinates over to the solver class
-            PowderChestSolver.handleParticle(x, y, z);
+            PowderChestSolver.INSTANCE.handleParticle(x, y, z);
         }
     }
 }

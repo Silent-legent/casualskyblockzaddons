@@ -1,8 +1,14 @@
 {
 	"required": true,
-	"package": "com.example.client.features",
+	"package": "com.cbza.net.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": [],
+	"mixins": [
+		"ChatComponentMixin",
+		"ExampleClientMixin",
+		"LevelRendererMixin",
+		"ParticleEngineMixin",
+		"RarityBackgroundMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	}
