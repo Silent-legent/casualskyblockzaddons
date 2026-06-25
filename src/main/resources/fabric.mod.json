@@ -15,19 +15,12 @@
 	"icon": "assets/casualskyblockaddons/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [
-			"com.example.Casualskyblockaddons"
-		],
 		"client": [
-			"com.example.client.CasualskyblockaddonsClient"
+			"com.cbza.net.CasualskyblockaddonsClient"
 		]
 	},
 	"mixins": [
-		"casualskyblockaddons.mixins.json",
-		{
-			"config": "casualskyblockaddons.client.mixins.json",
-			"environment": "client"
-		}
+		"casualskyblockaddons.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.19.3",

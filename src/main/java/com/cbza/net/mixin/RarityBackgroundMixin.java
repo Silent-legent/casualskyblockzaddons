@@ -1,5 +1,6 @@
-package com.example.client.mixin;
+package com.cbza.net.mixin;
 
+import com.cbza.net.config.ModConfig;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +21,7 @@ public class RarityBackgroundMixin {
 
     //   COLOR LOGIC (Reads item lore and determines background hex colors)
     private static int getRarityColor(ItemStack itemStack) {
-        if (!com.example.client.config.ModConfig.get().showRarityBackgrounds) return -1;
+        if (!ModConfig.Companion.get().showRarityBackgrounds) return -1;
         if (itemStack == null || itemStack.isEmpty()) return -1;
 
         // --- Configuration Check ---
