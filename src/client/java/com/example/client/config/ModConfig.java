@@ -18,6 +18,8 @@ public class ModConfig {
 
     // --- settings go here ---
     public boolean showRarityBackgrounds = true;
+    public boolean PowderChestSolver = true;
+    public double PowderChestYOffset;
 
     // --- Get Active Config Instance ---
     public static ModConfig get() {
