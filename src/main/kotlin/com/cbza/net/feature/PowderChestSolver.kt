@@ -8,17 +8,20 @@ object PowderChestSolver {
 	private val chestExpireTimes = ConcurrentHashMap<String, Long>()
 	private val activeChests = ConcurrentHashMap<String, Vec3>()
 
+	private val startupTime = System.currentTimeMillis()
+	private const val STARTUP_GRACE_MS = 10000L // ignore first 10s after launch
+
 	@Volatile
 	private var expectingChest = false
 
 	@Volatile
 	private var expectingChestTime = 0L
-	private const val PARTICLE_POINT_LIFETIME_MS = 250L // each point lasts 1 second
-	private const val PARTICLE_WINDOW_MS = 60000L // listen for 60s after chest message
+	private const val PARTICLE_POINT_LIFETIME_MS = 250L
+	private const val PARTICLE_WINDOW_MS = 60000L
 
 	fun onChestSpawn() {
 		if (!ModConfig.get().PowderChestSolver) return
-		println("[PowderChest] Chest spawn detected!")
+		if (System.currentTimeMillis() - startupTime < STARTUP_GRACE_MS) return
 		expectingChest = true
 		expectingChestTime = System.currentTimeMillis()
 	}
