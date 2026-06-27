@@ -17,10 +17,8 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 		private const val COLUMN_GAP = 10
 		private const val TOP_MARGIN = 10
 		private const val LEFT_MARGIN = 10
-
-		// Outline + fill color shown only when a toggle is ENABLED. Fully opaque bright green.
-		private const val COLOR_ENABLED_BOX: Int = 0xFF32CD32.toInt() // lime green (fill)
-		private const val COLOR_ENABLED_BORDER: Int = 0xFF1E8C1E.toInt() // darker green (border, matches fill)
+		private const val COLOR_ENABLED_BOX: Int = 0xFF32CD32.toInt()
+		private const val COLOR_ENABLED_BORDER: Int = 0xFF1E8C1E.toInt()
 	}
 
 	init {
@@ -39,6 +37,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 
 		val mining = ConfigCategory("Mining")
 			.toggle(
+				"Ability Announcer",
+				{ cfg.MiningAbilityAnnouncer },
+				{ value -> cfg.MiningAbilityAnnouncer = value }
+			)
+			.toggle(
 				"Chest Solver",
 				{ cfg.PowderChestSolver },
 				{ value -> cfg.PowderChestSolver = value }
@@ -47,7 +50,6 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 		categories.add(general)
 		categories.add(mining)
 
-		// all start open
 		for (cat in categories) {
 			collapsed[cat.name] = false
 		}
@@ -67,7 +69,6 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 			val x = LEFT_MARGIN + col * (COLUMN_WIDTH + COLUMN_GAP)
 			val isCollapsed = collapsed.getOrDefault(category.name, false)
 
-			// header button
 			val catName = category.name
 			val header = Button.builder(
 				Component.literal(category.name)
@@ -77,11 +78,10 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 			}.bounds(x, TOP_MARGIN, COLUMN_WIDTH, ROW_HEIGHT - 2).build()
 			addRenderableWidget(header)
 
-			// only show toggle buttons if not collapsed
 			if (!isCollapsed) {
 				for (row in category.entries.indices) {
 					val entry = category.entries[row]
-					val y = TOP_MARGIN + 20 + row * ROW_HEIGHT
+					val y = TOP_MARGIN + 20 + row * (ROW_HEIGHT + 4)
 
 					val button = Button.builder(
 						getButtonText(entry)
@@ -101,8 +101,6 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 	override fun extractRenderState(context: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
 		context.fillGradient(0, 0, width, height, 0x60101010, 0x60151515)
 
-		// Only draw a colored box for toggles that are currently ON.
-		// Headers and OFF toggles get no extra box/border at all — just the plain button.
 		for (col in categories.indices) {
 			val category = categories[col]
 			val x = LEFT_MARGIN + col * (COLUMN_WIDTH + COLUMN_GAP)
@@ -111,7 +109,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 			if (!isCollapsed) {
 				for (row in category.entries.indices) {
 					val entry = category.entries[row]
-					val y = TOP_MARGIN + 20 + row * ROW_HEIGHT
+					val y = TOP_MARGIN + 20 + row * (ROW_HEIGHT + 4)
 
 					val isEnabled = entry.getter.asBoolean
 					if (isEnabled) {

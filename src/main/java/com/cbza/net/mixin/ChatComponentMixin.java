@@ -1,5 +1,6 @@
 package com.cbza.net.mixin;
 
+import com.cbza.net.feature.MiningAbilityTracker;
 import com.cbza.net.feature.PowderChestSolver;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.chat.GuiMessageSource;
@@ -22,6 +23,13 @@ public class ChatComponentMixin {
         }
         if (text.contains("Sending to server")) {
             PowderChestSolver.INSTANCE.clearChests();
+            MiningAbilityTracker.INSTANCE.reset();
+        }
+        if (text.contains("You used your") && text.contains("Pickaxe Ability!")) {
+            MiningAbilityTracker.INSTANCE.onAbilityUsed(text);
+        }
+        if (text.contains("is now available!")) {
+            MiningAbilityTracker.INSTANCE.onAbilityReady(text);
         }
     }
 }

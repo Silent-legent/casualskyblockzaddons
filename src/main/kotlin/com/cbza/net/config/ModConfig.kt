@@ -3,14 +3,14 @@ package com.cbza.net.config
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.fabricmc.loader.api.FabricLoader
-import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
 class ModConfig {
 	@JvmField
-    var showRarityBackgrounds = true
+	var showRarityBackgrounds = true
 	var PowderChestSolver = true
+	var MiningAbilityAnnouncer = true
 	var PowderChestYOffset = 0.0
 
 	companion object {
