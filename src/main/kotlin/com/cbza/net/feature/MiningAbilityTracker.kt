@@ -2,6 +2,7 @@ package com.cbza.net.feature
 
 import com.cbza.net.config.ModConfig
 import net.minecraft.client.Minecraft
+import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
 object MiningAbilityTracker {
 
@@ -15,7 +16,7 @@ object MiningAbilityTracker {
     )
 
     @Volatile private var lastServerJoinTime = System.currentTimeMillis()
-    private const val STARTUP_GRACE_MS = 5000L
+    private const val STARTUP_GRACE_MS = 15000L
 
     @Volatile var popupMessage: String? = null
     @Volatile var popupExpireTime: Long = 0L
@@ -25,7 +26,18 @@ object MiningAbilityTracker {
     @Volatile private var waitingForReady: Boolean = false
     @Volatile private var readyTime: Long = 0L
     @Volatile private var gotTimeFromTab: Boolean = false
-    @Volatile private var tabReadDeadline: Long = 0L
+    @Volatile private var lastPopupTime: Long = 0L
+    private const val POPUP_COOLDOWN_MS = 3000L
+    @Volatile private var abilityUsedTime: Long = 0L
+    private const val TAB_READ_DELAY_MS = 2000L // wait 2s before reading tab
+
+    private val miningIslands = setOf(
+        SkyBlockIsland.DWARVEN_MINES,
+        SkyBlockIsland.CRYSTAL_HOLLOWS,
+        SkyBlockIsland.MINESHAFT,
+        SkyBlockIsland.CRIMSON_ISLE
+    )
+    private var wasOnMiningIsland = false
 
     fun onAbilityUsed(chatMessage: String) {
         if (!ModConfig.get().MiningAbilityAnnouncer) return
@@ -34,8 +46,9 @@ object MiningAbilityTracker {
         activeAbilityName = match
         waitingForReady = true
         gotTimeFromTab = false
-        tabReadDeadline = System.currentTimeMillis() + 3000L
         readyTime = Long.MAX_VALUE
+        popupMessage = null
+        abilityUsedTime = System.currentTimeMillis()
     }
 
     fun onAbilityReady(chatMessage: String) {
@@ -49,10 +62,14 @@ object MiningAbilityTracker {
     }
 
     fun tick() {
+        val onMiningIsland = miningIslands.any { it.inIsland() }
+        if (wasOnMiningIsland && !onMiningIsland) reset()
+        wasOnMiningIsland = onMiningIsland
+        if (!onMiningIsland) return
         if (!ModConfig.get().MiningAbilityAnnouncer) return
         if (!waitingForReady) return
 
-        if (!gotTimeFromTab && System.currentTimeMillis() < tabReadDeadline) {
+        if (!gotTimeFromTab && System.currentTimeMillis() - abilityUsedTime > TAB_READ_DELAY_MS) {
             val seconds = readTabListCooldownSeconds()
             if (seconds != null) {
                 readyTime = System.currentTimeMillis() + (seconds * 1000L)
@@ -68,9 +85,9 @@ object MiningAbilityTracker {
 
     private fun readTabListCooldownSeconds(): Long? {
         val mc = Minecraft.getInstance()
-        val playerList = mc.connection?.getOnlinePlayers() ?: return null
-
-        val lines = playerList.mapNotNull { it.getTabListDisplayName()?.string }
+        val lines = mc.connection?.getOnlinePlayers()
+            ?.mapNotNull { it.getTabListDisplayName()?.string }
+            ?: emptyList()
 
         val abilityLine = lines.firstOrNull { line ->
             abilityNames.any { abilityName -> line.contains(abilityName) }
@@ -83,8 +100,11 @@ object MiningAbilityTracker {
     }
 
     private fun showPopup(message: String) {
+        val now = System.currentTimeMillis()
+        if (now - lastPopupTime < POPUP_COOLDOWN_MS) return
+        lastPopupTime = now
         popupMessage = message
-        popupExpireTime = System.currentTimeMillis() + POPUP_DURATION_MS
+        popupExpireTime = now + POPUP_DURATION_MS
 
         val mc = Minecraft.getInstance()
         mc.execute {
@@ -110,7 +130,8 @@ object MiningAbilityTracker {
         activeAbilityName = ""
         popupMessage = null
         gotTimeFromTab = false
-        tabReadDeadline = 0L
+        readyTime = Long.MAX_VALUE
         lastServerJoinTime = System.currentTimeMillis()
+        lastPopupTime = 0L
     }
 }

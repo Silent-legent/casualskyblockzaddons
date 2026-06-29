@@ -17,6 +17,10 @@ repositories {
 		name = "shedaniel"
 		url = uri("https://maven.shedaniel.me/")
 	}
+	maven {
+		name = "teamresourceful"
+		url = uri("https://maven.teamresourceful.com/repository/maven-public/")
+	}
 	mavenCentral()
 }
 
@@ -43,6 +47,14 @@ dependencies {
 	implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
 	implementation("me.shedaniel.cloth:cloth-config-fabric:$clothConfigVersion")
 	implementation(kotlin("stdlib-jdk8"))
+	implementation("tech.thatgravyboat:skyblock-api:4.1.0") {
+		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.1") }
+		exclude(group = "me.djtheredstoner")
+	}
+	include("tech.thatgravyboat:skyblock-api:4.1.0") {
+		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.1") }
+		exclude(group = "me.djtheredstoner")
+	}
 }
 
 tasks.processResources {

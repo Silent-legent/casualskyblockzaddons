@@ -2,6 +2,7 @@ package com.cbza.net.mixin;
 
 import com.cbza.net.feature.MiningAbilityTracker;
 import com.cbza.net.feature.PowderChestSolver;
+import com.cbza.net.feature.NucleusMap;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.chat.GuiMessageSource;
 import net.minecraft.client.multiplayer.chat.GuiMessageTag;
@@ -23,7 +24,7 @@ public class ChatComponentMixin {
         }
         if (text.contains("Sending to server")) {
             PowderChestSolver.INSTANCE.clearChests();
-            MiningAbilityTracker.INSTANCE.reset();
+            NucleusMap.INSTANCE.reset();
         }
         if (text.contains("You used your") && text.contains("Pickaxe Ability!")) {
             MiningAbilityTracker.INSTANCE.onAbilityUsed(text);

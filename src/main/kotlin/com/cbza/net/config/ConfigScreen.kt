@@ -46,6 +46,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 				{ cfg.PowderChestSolver },
 				{ value -> cfg.PowderChestSolver = value }
 			)
+			.toggle(
+				"Nucleus Map",
+				{ cfg.NucleusMap },
+				{ value -> cfg.NucleusMap = value }
+			)
 
 		categories.add(general)
 		categories.add(mining)

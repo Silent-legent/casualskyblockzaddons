@@ -11,6 +11,7 @@ class ModConfig {
 	var showRarityBackgrounds = true
 	var PowderChestSolver = true
 	var MiningAbilityAnnouncer = true
+	var NucleusMap = true
 	var PowderChestYOffset = 0.0
 
 	companion object {
