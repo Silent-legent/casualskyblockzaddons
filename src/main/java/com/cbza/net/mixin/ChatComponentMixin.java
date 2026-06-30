@@ -32,5 +32,6 @@ public class ChatComponentMixin {
         if (text.contains("is now available!")) {
             MiningAbilityTracker.INSTANCE.onAbilityReady(text);
         }
+        NucleusMap.INSTANCE.onCoordsShared(text);
     }
 }

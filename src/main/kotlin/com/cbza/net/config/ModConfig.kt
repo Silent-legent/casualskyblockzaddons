@@ -14,6 +14,15 @@ class ModConfig {
 	var NucleusMap = true
 	var PowderChestYOffset = 0.0
 
+	// HUD positions and scales
+	var abilityAnnouncerX = -1 // -1 means default/centered
+	var abilityAnnouncerY = -1
+	var abilityAnnouncerScale = 3.5f
+
+	var nucleusMapX = 10
+	var nucleusMapY = 10
+	var nucleusMapScale = 1.0f
+
 	companion object {
 		private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
 		private val PATH: Path = FabricLoader.getInstance().configDir.resolve("casualskyblockaddons.json")
@@ -22,9 +31,7 @@ class ModConfig {
 		private var instance: ModConfig? = null
 
 		fun get(): ModConfig {
-			if (instance == null) {
-				load()
-			}
+			if (instance == null) load()
 			return instance!!
 		}
 

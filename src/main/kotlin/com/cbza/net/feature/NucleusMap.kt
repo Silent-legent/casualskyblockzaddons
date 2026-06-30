@@ -4,6 +4,7 @@ import com.cbza.net.config.ModConfig
 import net.minecraft.client.Minecraft
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+import com.cbza.net.feature.NucleusMap;
 
 object NucleusMap {
 
@@ -11,6 +12,7 @@ object NucleusMap {
     private const val NUCLEUS_CENTER_Z = 512.0
     private const val NUCLEUS_SIZE = 621.0
     private const val MAX_POI_SAMPLES = 20
+    private const val UNKNOWN_REMOVE_DISTANCE = 15.0 // blocks
 
     @Volatile var inCrystalHollows = false
 
@@ -36,6 +38,36 @@ object NucleusMap {
 
     val discoveredPois = mutableMapOf<String, Pair<Double, Double>>()
     private val poiPositionSamples = mutableMapOf<String, MutableList<Pair<Double, Double>>>()
+
+    // unknown markers: id -> (x, z)
+    val unknownMarkers = mutableMapOf<String, Pair<Double, Double>>()
+    private var unknownIdCounter = 0
+
+    private val coordRegex = Regex("x:\\s*(-?\\d+).*?y:\\s*(-?\\d+).*?z:\\s*(-?\\d+)")
+
+    fun onCoordsShared(text: String) {
+        if (!ModConfig.get().NucleusMap) return
+        if (!inCrystalHollows) return
+        if (discoveredPois.size >= poiColors.size) return // all found, ignore
+
+        val match = coordRegex.find(text) ?: return
+        val x = match.groupValues[1].toDoubleOrNull() ?: return
+        val z = match.groupValues[3].toDoubleOrNull() ?: return
+
+        // don't add if too close to an existing unknown or discovered poi
+        val tooClose = unknownMarkers.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE } ||
+                discoveredPois.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE }
+        if (tooClose) return
+
+        val id = "unknown_${unknownIdCounter++}"
+        unknownMarkers[id] = Pair(x, z)
+    }
+
+    private fun distance(x1: Double, z1: Double, x2: Double, z2: Double): Double {
+        val dx = x1 - x2
+        val dz = z1 - z2
+        return kotlin.math.sqrt(dx * dx + dz * dz)
+    }
 
     fun tick() {
         if (!ModConfig.get().NucleusMap) return
@@ -66,6 +98,20 @@ object NucleusMap {
                     }
                 }
             }
+
+            // clear all unknown markers once all pois are found
+            if (discoveredPois.size >= poiColors.size) {
+                unknownMarkers.clear()
+            }
+        }
+
+        // remove unknown markers the player has walked near (whether or not a poi was found there)
+        val player = mc.player
+        if (player != null && unknownMarkers.isNotEmpty()) {
+            val toRemove = unknownMarkers.entries.filter {
+                distance(it.value.first, it.value.second, player.x, player.z) < UNKNOWN_REMOVE_DISTANCE
+            }.map { it.key }
+            toRemove.forEach { unknownMarkers.remove(it) }
         }
     }
 
@@ -102,6 +148,7 @@ object NucleusMap {
         inCrystalHollows = false
         discoveredPois.clear()
         poiPositionSamples.clear()
+        unknownMarkers.clear()
         lastArea = ""
     }
 }

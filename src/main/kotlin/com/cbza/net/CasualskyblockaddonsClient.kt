@@ -1,6 +1,7 @@
 package com.cbza.net
 
 import com.cbza.net.config.ConfigScreen
+import com.cbza.net.config.HudEditorScreen
 import com.cbza.net.config.ModConfig
 import com.cbza.net.feature.MiningAbilityTracker
 import com.cbza.net.feature.NucleusMap
@@ -26,18 +27,27 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 						client.setScreen(ConfigScreen(client.screen))
 					}
 					1
-				})
+				}
+				.then(literal("hud")
+					.executes {
+						val client = Minecraft.getInstance()
+						client.execute {
+							client.setScreen(HudEditorScreen())
+						}
+						1
+					}))
 		}
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockaddons", "ability_hud")) { graphics, _ ->
 			val popup = MiningAbilityTracker.getActivePopup() ?: return@addLast
 			val mc = Minecraft.getInstance()
+			val cfg = ModConfig.get()
 			val screenWidth = mc.window.guiScaledWidth
 			val screenHeight = mc.window.guiScaledHeight
-			val scale = 3.5f
+			val scale = cfg.abilityAnnouncerScale
 			val textWidth = mc.font.width(popup)
-			val x = ((screenWidth - textWidth * scale) / 2).toInt()
-			val y = screenHeight / 3
+			val x = if (cfg.abilityAnnouncerX == -1) ((screenWidth - textWidth * scale) / 2).toInt() else cfg.abilityAnnouncerX
+			val y = if (cfg.abilityAnnouncerY == -1) screenHeight / 3 else cfg.abilityAnnouncerY
 			val color = ARGB.opaque(0x55FF55)
 			graphics.pose().pushMatrix()
 			graphics.pose().scale(scale, scale)
@@ -50,33 +60,39 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 			if (!NucleusMap.inCrystalHollows) return@addLast
 
 			val mc = Minecraft.getInstance()
-			val mapSize = 100
-			val margin = 10
-			val arrowWidth = 9
-			val arrowHeight = 9
+			val cfg = ModConfig.get()
+			val mapSize = (100 * cfg.nucleusMapScale).toInt()
+			val arrowWidth = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
+			val arrowHeight = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
 
-			val mapX = margin
-			val mapY = margin
+			val mapX = cfg.nucleusMapX
+			val mapY = cfg.nucleusMapY
 
 			Render2D.drawImage(graphics, textureId, mapX, mapY, mapSize, mapSize)
 
-			// draw POI dots
 			for ((name, coords) in NucleusMap.discoveredPois) {
 				val color = NucleusMap.poiColors[name] ?: continue
-				val size = NucleusMap.poiSizes[name] ?: 6
+				val size = ((NucleusMap.poiSizes[name] ?: 6) * cfg.nucleusMapScale).toInt()
 				val poiPos = NucleusMap.getPoiMapPosition(coords.first, coords.second, mapSize)
 				val px = mapX + poiPos.first
 				val py = mapY + poiPos.second
 				graphics.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, color)
 			}
 
-			// draw player arrow
+			// unknown markers (gray, possible POI)
+			for ((id, coords) in NucleusMap.unknownMarkers) {
+				val poiPos = NucleusMap.getPoiMapPosition(coords.first, coords.second, mapSize)
+				val px = mapX + poiPos.first
+				val py = mapY + poiPos.second
+				val size = (6 * cfg.nucleusMapScale).toInt()
+				graphics.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, 0xFF808080.toInt())
+			}
+
 			val pos = NucleusMap.getPlayerMapPosition(mapSize)
 			if (pos != null) {
 				val dotX = mapX + pos.first
 				val dotY = mapY + pos.second
 				val yaw = mc.player?.yRot ?: 0f
-
 
 				graphics.pose().pushMatrix()
 				graphics.pose().translate(dotX.toFloat(), dotY.toFloat())

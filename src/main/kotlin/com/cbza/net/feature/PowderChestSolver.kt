@@ -2,14 +2,12 @@ package com.cbza.net.feature
 
 import com.cbza.net.config.ModConfig
 import net.minecraft.world.phys.Vec3
+import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 import java.util.concurrent.ConcurrentHashMap
 
 object PowderChestSolver {
 	private val chestExpireTimes = ConcurrentHashMap<String, Long>()
 	private val activeChests = ConcurrentHashMap<String, Vec3>()
-
-	private val startupTime = System.currentTimeMillis()
-	private const val STARTUP_GRACE_MS = 10000L // ignore first 10s after launch
 
 	@Volatile
 	private var expectingChest = false
@@ -21,13 +19,14 @@ object PowderChestSolver {
 
 	fun onChestSpawn() {
 		if (!ModConfig.get().PowderChestSolver) return
-		if (System.currentTimeMillis() - startupTime < STARTUP_GRACE_MS) return
+		if (!SkyBlockIsland.CRYSTAL_HOLLOWS.inIsland()) return
 		expectingChest = true
 		expectingChestTime = System.currentTimeMillis()
 	}
 
 	fun handleParticle(x: Double, y: Double, z: Double) {
 		if (!ModConfig.get().PowderChestSolver) return
+		if (!SkyBlockIsland.CRYSTAL_HOLLOWS.inIsland()) return
 		if (!expectingChest) return
 
 		val now = System.currentTimeMillis()
