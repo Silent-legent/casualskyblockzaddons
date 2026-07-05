@@ -42,6 +42,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock 
 				{ value -> cfg.MiningAbilityAnnouncer = value }
 			)
 			.toggle(
+				"Ping Glide",
+				{ cfg.PingGlide },
+				{ value -> cfg.PingGlide = value }
+			)
+			.toggle(
 				"Chest Solver",
 				{ cfg.PowderChestSolver },
 				{ value -> cfg.PowderChestSolver = value }

@@ -12,16 +12,18 @@ class ModConfig {
 	var PowderChestSolver = true
 	var MiningAbilityAnnouncer = true
 	var NucleusMap = true
+	var PingGlide = true
 	var PowderChestYOffset = 0.0
 
-	// HUD positions and scales
-	var abilityAnnouncerX = -1 // -1 means default/centered
+	var abilityAnnouncerX = -1
 	var abilityAnnouncerY = -1
 	var abilityAnnouncerScale = 3.5f
 
 	var nucleusMapX = 10
 	var nucleusMapY = 10
 	var nucleusMapScale = 1.0f
+
+	var manualPing = 0
 
 	companion object {
 		private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()

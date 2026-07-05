@@ -21,4 +21,10 @@ object TabListReader {
         if (index == -1 || index + 1 >= lines.size) return null
         return lines[index + 1]
     }
+
+    fun getMiningSpeed(): Int? {
+        val line = findLine("Mining Speed:") ?: return null
+        val match = Regex("Mining Speed:\\s*[^\\d]*(\\d+)").find(line) ?: return null
+        return match.groupValues[1].toIntOrNull()
+    }
 }

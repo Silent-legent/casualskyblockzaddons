@@ -17,7 +17,7 @@ import net.minecraft.util.ARGB
 class CasualskyblockaddonsClient : ClientModInitializer {
 	override fun onInitializeClient() {
 		val textureId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "nucleus_map")
-		val arrowId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "untitled")
+		val arrowId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "player_arrow")
 
 		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
 			dispatcher.register(literal("csz")
@@ -34,6 +34,19 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 						client.execute {
 							client.setScreen(HudEditorScreen())
 						}
+						1
+					}))
+		}
+
+		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
+			dispatcher.register(literal("setping")
+				.then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("value", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 999))
+					.executes { ctx ->
+						val value = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "value")
+						ModConfig.get().manualPing = value
+						ModConfig.save()
+						val client = Minecraft.getInstance()
+						client.player?.sendSystemMessage(net.minecraft.network.chat.Component.literal("Ping set to ${value}ms"))
 						1
 					}))
 		}
@@ -79,7 +92,6 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 				graphics.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, color)
 			}
 
-			// unknown markers (gray, possible POI)
 			for ((id, coords) in NucleusMap.unknownMarkers) {
 				val poiPos = NucleusMap.getPoiMapPosition(coords.first, coords.second, mapSize)
 				val px = mapX + poiPos.first

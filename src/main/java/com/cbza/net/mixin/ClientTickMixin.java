@@ -2,6 +2,7 @@ package com.cbza.net.mixin;
 
 import com.cbza.net.feature.MiningAbilityTracker;
 import com.cbza.net.feature.NucleusMap;
+import com.cbza.net.feature.PingGlide;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,5 +15,6 @@ public class ClientTickMixin {
     private void onTick(CallbackInfo ci) {
         MiningAbilityTracker.INSTANCE.tick();
         NucleusMap.INSTANCE.tick();
+        PingGlide.INSTANCE.tick();
     }
 }
