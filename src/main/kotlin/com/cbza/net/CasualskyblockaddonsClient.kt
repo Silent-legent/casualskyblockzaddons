@@ -38,19 +38,6 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 					}))
 		}
 
-		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-			dispatcher.register(literal("setping")
-				.then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("value", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 999))
-					.executes { ctx ->
-						val value = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "value")
-						ModConfig.get().manualPing = value
-						ModConfig.save()
-						val client = Minecraft.getInstance()
-						client.player?.sendSystemMessage(net.minecraft.network.chat.Component.literal("Ping set to ${value}ms"))
-						1
-					}))
-		}
-
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockaddons", "ability_hud")) { graphics, _ ->
 			val popup = MiningAbilityTracker.getActivePopup() ?: return@addLast
 			val mc = Minecraft.getInstance()

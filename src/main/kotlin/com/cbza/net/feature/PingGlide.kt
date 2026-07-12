@@ -3,6 +3,7 @@ package com.cbza.net.feature
 import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.BlockStrengths
 import com.cbza.net.utility.TabListReader
+import com.cbza.net.utility.PingTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.BlockHitResult
@@ -80,7 +81,7 @@ object PingGlide {
     }
 
     fun getPing(): Int {
-        return ModConfig.get().manualPing
+        return PingTracker.getPing()?.toInt() ?: ModConfig.get().manualPing
     }
 
     fun getElapsedMs(): Long {
