@@ -37,6 +37,28 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 						1
 					}))
 		}
+		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
+			dispatcher.register(literal("sharelocation")
+				.then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("poi", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+					.suggests { _, builder ->
+						NucleusMap.discoveredPois.keys.forEach { builder.suggest(it) }
+						builder.buildFuture()
+					}
+					.executes { ctx ->
+						val name = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "poi")
+						val client = Minecraft.getInstance()
+						val coords = NucleusMap.discoveredPois[name]
+						if (coords == null) {
+							client.player?.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cPOI '$name' not discovered yet."))
+						} else {
+							val (x, z) = coords
+							val y = client.player?.blockY ?: 0
+							client.player?.connection?.sendCommand("ac x: ${x.toInt()} y: $y z: ${z.toInt()} $name")
+							client.player?.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aShared location for $name!"))
+						}
+						1
+					}))
+		}
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockaddons", "ability_hud")) { graphics, _ ->
 			val popup = MiningAbilityTracker.getActivePopup() ?: return@addLast

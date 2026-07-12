@@ -19,6 +19,40 @@ object PingGlide {
 
     private var lastSeenBlock: Pair<Any, MiningBlock>? = null
     private var lastTargetedPos: BlockPos? = null
+    private var warnedNoMiningSpeed = false
+
+    private var lastMiningSpeedWarn = 0L
+    private const val WARN_INTERVAL_MS = 5000L
+
+    private fun startMiningTimer(pos: BlockPos) {
+        val mc = Minecraft.getInstance()
+        val blockMatch = MiningBlock.currentlyActiveBlocks.firstOrNull {
+            it.blocks.contains(mc.level?.getBlockState(pos)?.block)
+        } ?: return
+        val blockKey = blockMatch.name
+        val miningSpeed = TabListReader.getMiningSpeed()
+        if (miningSpeed == null) {
+            val now = System.currentTimeMillis()
+            if (now - lastMiningSpeedWarn > WARN_INTERVAL_MS) {
+                lastMiningSpeedWarn = now
+                mc.player?.sendSystemMessage(
+                    net.minecraft.network.chat.Component.literal(
+                        "§c[§6CasualSkyblockAddons§c] §fPingGlide needs §eMining Speed §fvisible in your tab list — enable it in your §eSkyBlock §fstats settings."
+                    )
+                )
+            }
+            return
+        }
+        val ticks = BlockStrengths.calculateTicks(blockKey, miningSpeed) ?: return
+        val ms = BlockStrengths.ticksToMs(ticks)
+        val ping = getPing()
+        val safeToMoveMs = (ms - (ping / 2)).coerceAtLeast(0L)
+        currentMineStartTime = System.currentTimeMillis()
+        currentTotalMs = ms
+        currentSafeToMoveMs = safeToMoveMs
+        _currentBlockPos = pos
+        _isCurrentlyMining = true
+    }
 
     fun isCurrentlyMining(): Boolean = _isCurrentlyMining
     fun getCurrentBlockPos(): BlockPos? = _currentBlockPos
@@ -57,27 +91,6 @@ object PingGlide {
     private fun isBreakingBlock(): Boolean {
         val mc = Minecraft.getInstance()
         return mc.gameMode?.isDestroying() ?: false
-    }
-
-    private fun startMiningTimer(pos: BlockPos) {
-        val mc = Minecraft.getInstance()
-        val blockMatch = MiningBlock.currentlyActiveBlocks.firstOrNull {
-            it.blocks.contains(mc.level?.getBlockState(pos)?.block)
-        } ?: return
-
-        val blockKey = blockMatch.name
-        val miningSpeed = TabListReader.getMiningSpeed() ?: return
-
-        val ticks = BlockStrengths.calculateTicks(blockKey, miningSpeed) ?: return
-        val ms = BlockStrengths.ticksToMs(ticks)
-        val ping = getPing()
-        val safeToMoveMs = (ms - (ping / 2)).coerceAtLeast(0L)
-
-        currentMineStartTime = System.currentTimeMillis()
-        currentTotalMs = ms
-        currentSafeToMoveMs = safeToMoveMs
-        _currentBlockPos = pos
-        _isCurrentlyMining = true
     }
 
     fun getPing(): Int {

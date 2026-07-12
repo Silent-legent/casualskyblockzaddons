@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 import com.cbza.net.feature.NucleusMap;
+private val sharedUnconfirmedPois = mutableSetOf<String>()
 
 object NucleusMap {
 
@@ -48,11 +49,23 @@ object NucleusMap {
     fun onCoordsShared(text: String) {
         if (!ModConfig.get().NucleusMap) return
         if (!inCrystalHollows) return
-        if (discoveredPois.size >= poiColors.size) return // all found, ignore
 
         val match = coordRegex.find(text) ?: return
         val x = match.groupValues[1].toDoubleOrNull() ?: return
         val z = match.groupValues[3].toDoubleOrNull() ?: return
+
+        // check for a named POI share first — bypasses the unknown-marker system entirely
+        val afterCoords = text.substring(match.range.last + 1)
+        val namedPoi = poiColors.keys.firstOrNull { afterCoords.contains(it) }
+        if (namedPoi != null) {
+            if (!discoveredPois.containsKey(namedPoi)) {
+                discoveredPois[namedPoi] = Pair(x, z)
+                sharedUnconfirmedPois.add(namedPoi)
+            }
+            return
+        }
+
+        if (discoveredPois.size >= poiColors.size) return // all found, ignore
 
         // don't add if too close to an existing unknown or discovered poi
         val tooClose = unknownMarkers.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE } ||
@@ -113,6 +126,22 @@ object NucleusMap {
             }.map { it.key }
             toRemove.forEach { unknownMarkers.remove(it) }
         }
+
+        // verify shared (semi-trusted) POIs once the player walks near them
+        if (player != null && sharedUnconfirmedPois.isNotEmpty()) {
+            val checked = mutableListOf<String>()
+            for (name in sharedUnconfirmedPois) {
+                val pos = discoveredPois[name] ?: continue
+                if (distance(pos.first, pos.second, player.x, player.z) < UNKNOWN_REMOVE_DISTANCE) {
+                    val confirmed = poiPositionSamples[name]?.isNotEmpty() == true
+                    if (!confirmed) {
+                        discoveredPois.remove(name) // got close, wasn't actually there — drop it
+                    }
+                    checked.add(name)
+                }
+            }
+            checked.forEach { sharedUnconfirmedPois.remove(it) }
+        }
     }
 
     fun getPlayerMapPosition(mapSize: Int): Pair<Int, Int>? {
@@ -149,6 +178,7 @@ object NucleusMap {
         discoveredPois.clear()
         poiPositionSamples.clear()
         unknownMarkers.clear()
+        sharedUnconfirmedPois.clear()
         lastArea = ""
     }
 }
