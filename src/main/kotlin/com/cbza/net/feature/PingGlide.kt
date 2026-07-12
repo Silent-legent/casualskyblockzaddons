@@ -24,6 +24,9 @@ object PingGlide {
     private var lastMiningSpeedWarn = 0L
     private const val WARN_INTERVAL_MS = 5000L
 
+    private var lastBreakingTime = 0L
+    private const val STOP_MINING_GRACE_MS = 400L // tune this — too short brings back flicker, too long feels delayed
+
     private fun startMiningTimer(pos: BlockPos) {
         val mc = Minecraft.getInstance()
         val blockMatch = MiningBlock.currentlyActiveBlocks.firstOrNull {
@@ -63,14 +66,30 @@ object PingGlide {
         val mc = Minecraft.getInstance()
         val hit = mc.hitResult as? BlockHitResult
         val targetPos = hit?.blockPos
+        val now = System.currentTimeMillis()
 
         if (isBreakingBlock()) {
+            lastBreakingTime = now
             if (targetPos != null && lastTargetedPos != targetPos) {
-                startMiningTimer(targetPos)
+                val blockMatch = MiningBlock.currentlyActiveBlocks.firstOrNull {
+                    it.blocks.contains(mc.level?.getBlockState(targetPos)?.block)
+                }
+                if (blockMatch != null) {
+                    startMiningTimer(targetPos)
+                } else {
+                    // switched to an untracked block — clear the old tracked one
+                    _isCurrentlyMining = false
+                    _currentBlockPos = null
+                }
             }
             lastTargetedPos = targetPos?.immutable()
         } else {
             lastTargetedPos = null
+            // stopped breaking entirely (not just a brief look-away) — clear after grace period
+            if (_isCurrentlyMining && now - lastBreakingTime > STOP_MINING_GRACE_MS) {
+                _isCurrentlyMining = false
+                println("[PingGlide] Cleared mining state after grace period")
+            }
         }
 
         // only reset if timer expired naturally
