@@ -42,7 +42,7 @@ object BlockStrengths {
     /**
      * Converts ticks to milliseconds (20 ticks per second).
      */
-    fun ticksToMs(ticks: Int): Long {
-        return (ticks * 50L) // 1 tick = 50ms
+    fun ticksToMs(ticks: Int, tps: Double = 20.0): Long {
+        return (ticks * (1000.0 / tps)).toLong()
     }
 }

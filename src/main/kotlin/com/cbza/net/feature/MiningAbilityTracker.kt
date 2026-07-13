@@ -16,7 +16,7 @@ object MiningAbilityTracker {
     )
 
     @Volatile private var lastServerJoinTime = System.currentTimeMillis()
-    private const val STARTUP_GRACE_MS = 15000L
+    private const val STARTUP_GRACE_MS = 15000L // ignore chat-history replay right after connecting
 
     @Volatile var popupMessage: String? = null
     @Volatile var popupExpireTime: Long = 0L
@@ -26,10 +26,20 @@ object MiningAbilityTracker {
     @Volatile private var waitingForReady: Boolean = false
     @Volatile private var readyTime: Long = 0L
     @Volatile private var gotTimeFromTab: Boolean = false
+
     @Volatile private var lastPopupTime: Long = 0L
-    private const val POPUP_COOLDOWN_MS = 3000L
+    @Volatile private var lastPopupMessage: String? = null
+    private const val POPUP_COOLDOWN_MS = 500L // dedupe only the same message firing twice in a row
+
     @Volatile private var abilityUsedTime: Long = 0L
-    private const val TAB_READ_DELAY_MS = 2000L // wait 2s before reading tab
+    private const val TAB_READ_DELAY_MS = 500L // wait before first attempting to read tab
+
+    private const val MIN_PLAUSIBLE_SECONDS = 10L // shorter than this = stale leftover, not a real reading
+
+    @Volatile private var pendingTabSeconds: Long? = null
+    @Volatile private var pendingTabReadTime: Long = 0L
+
+    @Volatile private var hasWarnedTabMissingThisIsland: Boolean = false
 
     private val miningIslands = setOf(
         SkyBlockIsland.DWARVEN_MINES,
@@ -47,7 +57,7 @@ object MiningAbilityTracker {
         waitingForReady = true
         gotTimeFromTab = false
         readyTime = Long.MAX_VALUE
-        popupMessage = null
+        pendingTabSeconds = null
         abilityUsedTime = System.currentTimeMillis()
     }
 
@@ -57,6 +67,10 @@ object MiningAbilityTracker {
         if (!waitingForReady) return
         if (activeAbilityName.isEmpty()) return
         if (!chatMessage.contains(activeAbilityName)) return
+        if (gotTimeFromTab) return // tab already handling this cast, message is just a fallback
+        // Ignore a message that arrives faster than any real cooldown allows -
+        // it's a stale leftover from a previous cast, not this one.
+        if (System.currentTimeMillis() - abilityUsedTime < MIN_PLAUSIBLE_SECONDS * 1000L) return
         waitingForReady = false
         showPopup("$activeAbilityName Ready!")
     }
@@ -71,9 +85,31 @@ object MiningAbilityTracker {
 
         if (!gotTimeFromTab && System.currentTimeMillis() - abilityUsedTime > TAB_READ_DELAY_MS) {
             val seconds = readTabListCooldownSeconds()
-            if (seconds != null) {
-                readyTime = System.currentTimeMillis() + (seconds * 1000L)
-                gotTimeFromTab = true
+            val now = System.currentTimeMillis()
+
+            if (seconds == null || seconds <= MIN_PLAUSIBLE_SECONDS) {
+                // Bad/missing reading - skip it, keep any existing candidate intact.
+            } else {
+                val pending = pendingTabSeconds
+                if (pending == null) {
+                    // First sighting - don't trust it yet, confirm next tick.
+                    pendingTabSeconds = seconds
+                    pendingTabReadTime = now
+                } else {
+                    // A real countdown drops by roughly the time that passed.
+                    // If it doesn't line up, the tab was mid-update - restart confirmation.
+                    val elapsedSec = (now - pendingTabReadTime) / 1000.0
+                    val isConsistent = kotlin.math.abs((pending - elapsedSec) - seconds) <= 1.0
+
+                    if (isConsistent) {
+                        readyTime = now + (seconds * 1000L)
+                        gotTimeFromTab = true
+                        pendingTabSeconds = null
+                    } else {
+                        pendingTabSeconds = seconds
+                        pendingTabReadTime = now
+                    }
+                }
             }
         }
 
@@ -91,7 +127,19 @@ object MiningAbilityTracker {
 
         val abilityLine = lines.firstOrNull { line ->
             abilityNames.any { abilityName -> line.contains(abilityName) }
-        } ?: return null
+        }
+
+        if (abilityLine == null) {
+            if (!hasWarnedTabMissingThisIsland) {
+                hasWarnedTabMissingThisIsland = true
+                mc.player?.sendSystemMessage(
+                    net.minecraft.network.chat.Component.literal(
+                        "§c[§6CasualSkyblockAddons§c] §fAbilityAnnouncer works more accurately with the §ePickaxe Ability Widget §fPickaxe Ability Widget visible in your tab list."
+                    )
+                )
+            }
+            return null
+        }
 
         if (abilityLine.contains("Available")) return null
 
@@ -101,7 +149,8 @@ object MiningAbilityTracker {
 
     private fun showPopup(message: String) {
         val now = System.currentTimeMillis()
-        if (now - lastPopupTime < POPUP_COOLDOWN_MS) return
+        if (message == lastPopupMessage && now - lastPopupTime < POPUP_COOLDOWN_MS) return
+        lastPopupMessage = message
         lastPopupTime = now
         popupMessage = message
         popupExpireTime = now + POPUP_DURATION_MS
@@ -133,5 +182,14 @@ object MiningAbilityTracker {
         readyTime = Long.MAX_VALUE
         lastServerJoinTime = System.currentTimeMillis()
         lastPopupTime = 0L
+        lastPopupMessage = null
+        pendingTabSeconds = null
+        hasWarnedTabMissingThisIsland = false
+    }
+
+    // Call from your actual "connected to server" event, not just mod load -
+    // otherwise chat-history replay mods can trigger fake popups on join.
+    fun onServerJoin() {
+        reset()
     }
 }

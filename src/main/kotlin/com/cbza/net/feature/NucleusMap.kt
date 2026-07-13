@@ -173,6 +173,31 @@ object NucleusMap {
         )
     }
 
+    data class ServerSnapshot(val pois: Map<String, Pair<Double, Double>>, val timestamp: Long)
+
+    private val serverSnapshots = mutableMapOf<String, ServerSnapshot>()
+    private var currentServerId: String? = null
+    private const val SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000L // 30 minutes
+
+    fun onServerSwitch(newServerId: String) {
+        val oldId = currentServerId
+        if (oldId != null && inCrystalHollows && discoveredPois.isNotEmpty()) {
+            serverSnapshots[oldId] = ServerSnapshot(discoveredPois.toMap(), System.currentTimeMillis())
+        }
+
+        currentServerId = newServerId
+
+        reset() // your existing function — clears discoveredPois, unknownMarkers, etc.
+
+        val now = System.currentTimeMillis()
+        serverSnapshots.entries.removeIf { now - it.value.timestamp > SNAPSHOT_EXPIRY_MS }
+
+        val snapshot = serverSnapshots[newServerId]
+        if (snapshot != null) {
+            discoveredPois.putAll(snapshot.pois)
+        }
+    }
+
     fun reset() {
         inCrystalHollows = false
         discoveredPois.clear()

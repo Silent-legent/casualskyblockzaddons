@@ -4,11 +4,12 @@ import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.BlockStrengths
 import com.cbza.net.utility.TabListReader
 import com.cbza.net.utility.PingTracker
+import com.cbza.net.utility.TpsTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.BlockHitResult
 import tech.thatgravyboat.skyblockapi.api.area.mining.MiningBlock
-
+import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 object PingGlide {
 
     @Volatile var currentMineStartTime: Long = 0L
@@ -24,8 +25,14 @@ object PingGlide {
     private var lastMiningSpeedWarn = 0L
     private const val WARN_INTERVAL_MS = 5000L
 
-    private var lastBreakingTime = 0L
-    private const val STOP_MINING_GRACE_MS = 400L // tune this — too short brings back flicker, too long feels delayed
+    private val eligibleIslands = setOf(
+        SkyBlockIsland.CRYSTAL_HOLLOWS,
+        SkyBlockIsland.DWARVEN_MINES,
+        SkyBlockIsland.MINESHAFT,
+        SkyBlockIsland.THE_END
+    )
+
+    private fun isEligibleIsland(): Boolean = eligibleIslands.any { it.inIsland() }
 
     private fun startMiningTimer(pos: BlockPos) {
         val mc = Minecraft.getInstance()
@@ -40,14 +47,15 @@ object PingGlide {
                 lastMiningSpeedWarn = now
                 mc.player?.sendSystemMessage(
                     net.minecraft.network.chat.Component.literal(
-                        "§c[§6CasualSkyblockAddons§c] §fPingGlide needs §eMining Speed §fvisible in your tab list — enable it in your §eSkyBlock §fstats settings."
+                        "§c[§6CasualSkyblockAddons§c] §fPingGlide needs §eMining Speed §fvisible in your tab list, enable it in your §eSkyBlock §fstats settings."
                     )
                 )
             }
             return
         }
         val ticks = BlockStrengths.calculateTicks(blockKey, miningSpeed) ?: return
-        val ms = BlockStrengths.ticksToMs(ticks)
+        val tps = TpsTracker.getAverageTps() ?: 20.0
+        val ms = BlockStrengths.ticksToMs(ticks, tps)
         val ping = getPing()
         val safeToMoveMs = (ms - (ping / 2)).coerceAtLeast(0L)
         currentMineStartTime = System.currentTimeMillis()
@@ -62,14 +70,15 @@ object PingGlide {
 
     fun tick() {
         if (!ModConfig.get().PingGlide) return
-
+        if (!isEligibleIsland()) {
+            _isCurrentlyMining = false
+            return
+        }
         val mc = Minecraft.getInstance()
         val hit = mc.hitResult as? BlockHitResult
         val targetPos = hit?.blockPos
-        val now = System.currentTimeMillis()
 
         if (isBreakingBlock()) {
-            lastBreakingTime = now
             if (targetPos != null && lastTargetedPos != targetPos) {
                 val blockMatch = MiningBlock.currentlyActiveBlocks.firstOrNull {
                     it.blocks.contains(mc.level?.getBlockState(targetPos)?.block)
@@ -85,11 +94,7 @@ object PingGlide {
             lastTargetedPos = targetPos?.immutable()
         } else {
             lastTargetedPos = null
-            // stopped breaking entirely (not just a brief look-away) — clear after grace period
-            if (_isCurrentlyMining && now - lastBreakingTime > STOP_MINING_GRACE_MS) {
-                _isCurrentlyMining = false
-                println("[PingGlide] Cleared mining state after grace period")
-            }
+            _isCurrentlyMining = false
         }
 
         // only reset if timer expired naturally
@@ -109,7 +114,7 @@ object PingGlide {
 
     private fun isBreakingBlock(): Boolean {
         val mc = Minecraft.getInstance()
-        return mc.gameMode?.isDestroying() ?: false
+        return mc.options.keyAttack.isDown && mc.hitResult is BlockHitResult
     }
 
     fun getPing(): Int {

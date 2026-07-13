@@ -4,11 +4,12 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"ChatComponentMixin",
-		"ExampleClientMixin",
+		"ClientPacketListenerMixin",
+		"ClientTickMixin",
 		"LevelRendererMixin",
 		"ParticleEngineMixin",
-		"RarityBackgroundMixin",
-		"ClientTickMixin"
+		"PingDebugMonitorMixin",
+		"RarityBackgroundMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
