@@ -13,6 +13,17 @@ version = project.property("mod_version") as String
 group = project.property("maven_group") as String
 
 repositories {
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = "Modrinth"
+				url = uri("https://api.modrinth.com/maven")
+			}
+		}
+		filter {
+			includeGroup("maven.modrinth")
+		}
+	}
 	maven {
 		name = "shedaniel"
 		url = uri("https://maven.shedaniel.me/")
@@ -47,11 +58,11 @@ dependencies {
 	implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
 	implementation("me.shedaniel.cloth:cloth-config-fabric:$clothConfigVersion")
 	implementation(kotlin("stdlib-jdk8"))
-	implementation("tech.thatgravyboat:skyblock-api:4.1.0") {
+	implementation("tech.thatgravyboat:skyblock-api:4.2.9") {
 		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.1") }
 		exclude(group = "me.djtheredstoner")
 	}
-	include("tech.thatgravyboat:skyblock-api:4.1.0") {
+	include("tech.thatgravyboat:skyblock-api:4.2.9") {
 		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.1") }
 		exclude(group = "me.djtheredstoner")
 	}

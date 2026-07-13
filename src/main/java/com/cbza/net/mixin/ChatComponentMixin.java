@@ -12,9 +12,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Mixin(ChatComponent.class)
 public class ChatComponentMixin {
+
+    private static final Pattern SERVER_ID_PATTERN = Pattern.compile("Sending to server (\\S+)");
 
     @Inject(method = "addMessage", at = @At("HEAD"))
     private void onAddMessage(Component message, MessageSignature signature, GuiMessageSource source, GuiMessageTag tag, CallbackInfo ci) {
@@ -24,7 +28,10 @@ public class ChatComponentMixin {
         }
         if (text.contains("Sending to server")) {
             PowderChestSolver.INSTANCE.clearChests();
-            NucleusMap.INSTANCE.reset();
+            Matcher matcher = SERVER_ID_PATTERN.matcher(text);
+            if (matcher.find()) {
+                NucleusMap.INSTANCE.onServerSwitch(matcher.group(1));
+            }
         }
         if (text.contains("You used your") && text.contains("Pickaxe Ability!")) {
             MiningAbilityTracker.INSTANCE.onAbilityUsed(text);

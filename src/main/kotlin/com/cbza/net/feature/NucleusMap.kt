@@ -4,8 +4,6 @@ import com.cbza.net.config.ModConfig
 import net.minecraft.client.Minecraft
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
-import com.cbza.net.feature.NucleusMap;
-private val sharedUnconfirmedPois = mutableSetOf<String>()
 
 object NucleusMap {
 
@@ -20,6 +18,8 @@ object NucleusMap {
     private var lastAreaCheck = 0L
     private const val AREA_CHECK_INTERVAL_MS = 2000L
     private var lastArea = ""
+
+    private val sharedUnconfirmedPois = mutableSetOf<String>()
 
     val poiColors = mapOf(
         "Jungle Temple"       to 0xFFAA00FF.toInt(),
@@ -54,7 +54,6 @@ object NucleusMap {
         val x = match.groupValues[1].toDoubleOrNull() ?: return
         val z = match.groupValues[3].toDoubleOrNull() ?: return
 
-        // check for a named POI share first — bypasses the unknown-marker system entirely
         val afterCoords = text.substring(match.range.last + 1)
         val namedPoi = poiColors.keys.firstOrNull { afterCoords.contains(it) }
         if (namedPoi != null) {
@@ -65,9 +64,8 @@ object NucleusMap {
             return
         }
 
-        if (discoveredPois.size >= poiColors.size) return // all found, ignore
+        if (discoveredPois.size >= poiColors.size) return
 
-        // don't add if too close to an existing unknown or discovered poi
         val tooClose = unknownMarkers.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE } ||
                 discoveredPois.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE }
         if (tooClose) return
@@ -93,6 +91,7 @@ object NucleusMap {
             val area = LocationAPI.area.name
 
             inCrystalHollows = SkyBlockIsland.CRYSTAL_HOLLOWS.inIsland()
+            println("[NucleusMapDebug] inCrystalHollows=$inCrystalHollows area=$area currentServerId=$currentServerId")
 
             if (area != lastArea) {
                 lastArea = area
@@ -112,13 +111,11 @@ object NucleusMap {
                 }
             }
 
-            // clear all unknown markers once all pois are found
             if (discoveredPois.size >= poiColors.size) {
                 unknownMarkers.clear()
             }
         }
 
-        // remove unknown markers the player has walked near (whether or not a poi was found there)
         val player = mc.player
         if (player != null && unknownMarkers.isNotEmpty()) {
             val toRemove = unknownMarkers.entries.filter {
@@ -127,7 +124,6 @@ object NucleusMap {
             toRemove.forEach { unknownMarkers.remove(it) }
         }
 
-        // verify shared (semi-trusted) POIs once the player walks near them
         if (player != null && sharedUnconfirmedPois.isNotEmpty()) {
             val checked = mutableListOf<String>()
             for (name in sharedUnconfirmedPois) {
@@ -135,7 +131,7 @@ object NucleusMap {
                 if (distance(pos.first, pos.second, player.x, player.z) < UNKNOWN_REMOVE_DISTANCE) {
                     val confirmed = poiPositionSamples[name]?.isNotEmpty() == true
                     if (!confirmed) {
-                        discoveredPois.remove(name) // got close, wasn't actually there — drop it
+                        discoveredPois.remove(name)
                     }
                     checked.add(name)
                 }
@@ -187,7 +183,7 @@ object NucleusMap {
 
         currentServerId = newServerId
 
-        reset() // your existing function — clears discoveredPois, unknownMarkers, etc.
+        reset()
 
         val now = System.currentTimeMillis()
         serverSnapshots.entries.removeIf { now - it.value.timestamp > SNAPSHOT_EXPIRY_MS }
