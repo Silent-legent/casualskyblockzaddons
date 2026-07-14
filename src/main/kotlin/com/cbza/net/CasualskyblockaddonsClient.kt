@@ -19,6 +19,10 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 		val textureId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "nucleus_map")
 		val arrowId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "player_arrow")
 
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
+			MiningAbilityTracker.onServerJoin()
+		}
+
 		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
 			dispatcher.register(literal("csz")
 				.executes {

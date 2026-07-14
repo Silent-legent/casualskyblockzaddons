@@ -16,7 +16,7 @@ object MiningAbilityTracker {
     )
 
     @Volatile private var lastServerJoinTime = System.currentTimeMillis()
-    private const val STARTUP_GRACE_MS = 15000L // ignore chat-history replay right after connecting
+    private const val STARTUP_GRACE_MS = 3000L // ignore chat-history replay right after connecting
 
     @Volatile var popupMessage: String? = null
     @Volatile var popupExpireTime: Long = 0L
@@ -134,7 +134,7 @@ object MiningAbilityTracker {
                 hasWarnedTabMissingThisIsland = true
                 mc.player?.sendSystemMessage(
                     net.minecraft.network.chat.Component.literal(
-                        "§c[§6CasualSkyblockAddons§c] §fAbilityAnnouncer works more accurately with the §ePickaxe Ability Widget §fPickaxe Ability Widget visible in your tab list."
+                        "§c[§6CasualSkyblockAddons§c] §fAbilityAnnouncer works more accurately with the §ePickaxe Ability Widget §fvisible in your tab list."
                     )
                 )
             }

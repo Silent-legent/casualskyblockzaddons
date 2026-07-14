@@ -19,33 +19,34 @@ import java.util.List;
 @Mixin(GuiGraphicsExtractor.class)
 public class RarityBackgroundMixin {
 
-    //   COLOR LOGIC (Reads item lore and determines background hex colors)
     private static int getRarityColor(ItemStack itemStack) {
         if (!ModConfig.Companion.get().showRarityBackgrounds) return -1;
         if (itemStack == null || itemStack.isEmpty()) return -1;
 
-        // --- Configuration Check ---
         ItemLore lore = itemStack.get(DataComponents.LORE);
         if (lore == null) return -1;
 
         List<Component> lines = lore.lines();
         if (lines == null || lines.isEmpty()) return -1;
 
-        // --- Read Last Line of Lore ---
-        String lastLine = lines.get(lines.size() - 1).getString().toUpperCase();
+        // Scan backwards from the last line, checking up to 8 lines -
+        // some contexts (sellable menus) append extra footer lines after the real rarity line.
+        int linesToCheck = Math.min(8, lines.size());
+        for (int i = 0; i < linesToCheck; i++) {
+            String line = lines.get(lines.size() - 1 - i).getString().toUpperCase();
 
-        // --- Color Mapping Settings ---
-        if (lastLine.contains("ADMIN"))        return 0x60AA0000;
-        if (lastLine.contains("ULTIMATE"))     return 0x60AA0000;
-        if (lastLine.contains("VERY SPECIAL")) return 0x60FF5555;
-        if (lastLine.contains("SPECIAL"))      return 0x60FF5555;
-        if (lastLine.contains("DIVINE"))       return 0x6055FFFF;
-        if (lastLine.contains("MYTHIC"))       return 0x60FF55FF;
-        if (lastLine.contains("LEGENDARY"))    return 0x60FFAA00;
-        if (lastLine.contains("EPIC"))         return 0x60AA00AA;
-        if (lastLine.contains("RARE"))         return 0x605555FF;
-        if (lastLine.contains("UNCOMMON"))     return 0x6055FF55;
-        if (lastLine.contains("COMMON"))       return 0x60FFFFFF;
+            if (line.contains("ADMIN"))        return 0x60AA0000;
+            if (line.contains("ULTIMATE"))     return 0x60AA0000;
+            if (line.contains("VERY SPECIAL")) return 0x60FF5555;
+            if (line.contains("SPECIAL"))      return 0x60FF5555;
+            if (line.contains("DIVINE"))       return 0x6055FFFF;
+            if (line.contains("MYTHIC"))       return 0x60FF55FF;
+            if (line.contains("LEGENDARY"))    return 0x60FFAA00;
+            if (line.contains("EPIC"))         return 0x60AA00AA;
+            if (line.contains("RARE"))         return 0x605555FF;
+            if (line.contains("UNCOMMON"))     return 0x6055FF55;
+            if (line.contains("COMMON"))       return 0x60FFFFFF;
+        }
 
         return -1;
     }

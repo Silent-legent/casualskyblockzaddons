@@ -1,6 +1,7 @@
 package com.cbza.net.feature
 
 import com.cbza.net.config.ModConfig
+import com.cbza.net.utility.TabListReader
 import net.minecraft.client.Minecraft
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
@@ -30,11 +31,11 @@ object NucleusMap {
     )
 
     val poiSizes = mapOf(
-        "Jungle Temple"       to 8,
-        "Mines of Divan"      to 12,
-        "Goblin Queen's Den"  to 8,
-        "Lost Precursor City" to 10,
-        "Khazad-dûm"          to 8
+        "Jungle Temple"       to 9,
+        "Mines of Divan"      to 13,
+        "Goblin Queen's Den"  to 9,
+        "Lost Precursor City" to 13,
+        "Khazad-dûm"          to 9
     )
 
     val discoveredPois = mutableMapOf<String, Pair<Double, Double>>()
@@ -90,8 +91,17 @@ object NucleusMap {
             lastAreaCheck = now
             val area = LocationAPI.area.name
 
+            var currentServer = LocationAPI.serverId
+            if (currentServer.isNullOrEmpty()) {
+                currentServer = TabListReader.getServer()
+            }
+
+            // server-switch detection FIRST, so its reset() doesn't wipe inCrystalHollows right after we set it
+            if (currentServer != null && currentServer != currentServerId) {
+                onServerSwitch(currentServer)
+            }
+
             inCrystalHollows = SkyBlockIsland.CRYSTAL_HOLLOWS.inIsland()
-            println("[NucleusMapDebug] inCrystalHollows=$inCrystalHollows area=$area currentServerId=$currentServerId")
 
             if (area != lastArea) {
                 lastArea = area
