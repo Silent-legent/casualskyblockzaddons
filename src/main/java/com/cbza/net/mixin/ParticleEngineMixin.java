@@ -1,5 +1,6 @@
 package com.cbza.net.mixin;
 
+import com.cbza.net.utility.WishingCompassSolver;
 import com.cbza.net.feature.PowderChestSolver;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.particles.ParticleOptions;
@@ -19,6 +20,8 @@ public class ParticleEngineMixin {
     private void onSpawnParticle(ParticleOptions options, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, CallbackInfoReturnable<?> ci) {
         if (options.getType() == ParticleTypes.CRIT) {
             PowderChestSolver.INSTANCE.handleParticle(x, y, z);
+        } else if (options.getType() == ParticleTypes.HAPPY_VILLAGER) {
+            WishingCompassSolver.INSTANCE.handleParticle(x, y, z);
         }
     }
 }

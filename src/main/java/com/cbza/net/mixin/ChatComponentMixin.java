@@ -3,6 +3,7 @@ package com.cbza.net.mixin;
 import com.cbza.net.feature.MiningAbilityTracker;
 import com.cbza.net.feature.PowderChestSolver;
 import com.cbza.net.feature.NucleusMap;
+import com.cbza.net.utility.WishingCompassSolver;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.chat.GuiMessageSource;
 import net.minecraft.client.multiplayer.chat.GuiMessageTag;
@@ -39,6 +40,8 @@ public class ChatComponentMixin {
         if (text.contains("is now available!")) {
             MiningAbilityTracker.INSTANCE.onAbilityReady(text);
         }
-        NucleusMap.INSTANCE.onCoordsShared(text);
+        if (text.contains("Get to the Queen before my stench goes away and you'll be able to sneak past her imbecile Guards!"))  {
+            WishingCompassSolver.INSTANCE.onKingsScentGranted();
+        }
     }
 }

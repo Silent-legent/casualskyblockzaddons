@@ -39,6 +39,19 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 							client.setScreen(HudEditorScreen())
 						}
 						1
+					})
+				.then(literal("help")
+					.executes {
+						val client = Minecraft.getInstance()
+						val msg = net.minecraft.network.chat.Component.literal(
+							"§6§lCasualSkyblockAddons §7- §fCommands:\n" +
+									"§e/csz §7- Open the mod settings screen.\n" +
+									"§e/csz hud §7- Open the HUD editor.\n" +
+									"§e/sharelocation <poi> §7- Share a discovered Crystal Hollows POI.\n" +
+									"§e/csz help §7- Show this list."
+						)
+						client.player?.sendSystemMessage(msg)
+						1
 					}))
 		}
 		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
