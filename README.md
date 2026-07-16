@@ -36,7 +36,7 @@
 | `/csz` | Opens the interactive configuration screen. |
 | `/csz hud` | Opens the drag-and-drop HUD layout editor. |
 | `/csz help` | Prints the mod command registry in chat. |
-| `/sharelocation <poi>` | Broadcasts discovered Crystal Hollows POI coordinates to your team. |
+| `/sharelocation <poi>` | Broadcasts discovered Crystal Hollows POI coordinates to your lobby. |
 
 ---
 
