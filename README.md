@@ -42,11 +42,11 @@
 
 ## Credits
 
-* **luckkytigger** - Project owner and organizer.
-* **Eclipse-5214** - Creator of stella; Than u so much for all the support/help along the way.
+* **luckkytigger;** Project owner.
+* **Eclipse-5214;** Creator of stella; Than u so much for all the support/help along the way.
 https://github.com/Eclipse-5214/stella
-* **Saotzuri** - Creator of **SBO**; Than u so Much for recoding my mod in korl when i started out.
+* **Saotzuri;** Creator of **SBO**; Than u so Much for recoding my mod in korl when i started out.
 https://github.com/SkyblockOverhaul/SBO
-* **Revvilon** - Creator oF **PingOffsetMiner**: Thank u so much for helping with ping detection. [Ping ofset miner is higely inspired by him!]
+* **Revvilon;** Creator oF **PingOffsetMiner**: Thank u so much for helping with ping detection. [Ping ofset miner is higely inspired by him!]
 https://github.com/Revvilon/PingOffsetMiner
-* **Artificial Intelligence** - For making it much easier to get into coding/learning, we stil have a long way to go.
+* **Artificial Intelligence;** For making it much easier to get into coding/learning, we stil have a long way to go.
