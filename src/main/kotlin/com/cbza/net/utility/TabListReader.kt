@@ -38,13 +38,4 @@
             val match = Regex("$crystalName:\\s*(.*)").find(line) ?: return null
             return match.groupValues[1]
         }
-        fun getCommissionName(name: String): String? {
-            val line = findLine(name) ?: return null
-           return name
-        }
-        fun getCommissionProgress(commissionName: String): String? {
-            val line = findLine(commissionName) ?: return null
-            val match = Regex("$commissionName:\\s*(.*)").find(line) ?: return null
-            return match.groupValues[1]
-        }
     }

@@ -27,7 +27,7 @@ class ModConfig {
 
 	companion object {
 		private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
-		private val PATH: Path = FabricLoader.getInstance().configDir.resolve("casualskyblockaddons.json")
+		private val PATH: Path = FabricLoader.getInstance().configDir.resolve("casualskyblockzaddons.json")
 
 		@Volatile
 		private var instance: ModConfig? = null

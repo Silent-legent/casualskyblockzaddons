@@ -12,8 +12,8 @@ import net.minecraft.util.ARGB
 
 class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
-    private val textureId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "nucleus_map")
-    private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "player_arrow")
+    private val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")
+    private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "player_arrow")
 
     private var draggingElement: String? = null
     private var dragOffsetX = 0

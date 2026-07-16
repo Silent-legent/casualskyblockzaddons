@@ -88,7 +88,7 @@ object WishingCompassSolver {
 
         if (isCompassUnreliableFor(targetPoi)) {
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockAddons§c] §fIgnoring compass reading for §e$targetPoi§f, its crystal is placed/found. So this reading can't be trusted.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c] §fIgnoring compass reading for §e$targetPoi§f, its crystal is placed/found. So this reading can't be trusted.")
             )
             return
         }
@@ -112,7 +112,7 @@ object WishingCompassSolver {
                 } else {
                     // Send the player a warning message!
                     Minecraft.getInstance().player?.sendSystemMessage(
-                        Component.literal("§c[§6CasualSkyblockAddons§c] §fIgnoring compass reading. You need a §5Jungle Key§f to find the Jungle Temple.")
+                        Component.literal("§c[§6CasualSkyblockZAddons§c] §fIgnoring compass reading. You need a §5Jungle Key§f to find the Jungle Temple.")
                     )
                     null // Still returns null to stop the solver safely!
                 }
@@ -191,7 +191,7 @@ object WishingCompassSolver {
         if (first == null) {
             pendingRay = ray
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockAddons§c] §fDirection captured for §e${ray.targetPoi}§f. Move to a different spot and use another compass to solve it.")
+                Component.literal("§c[§6CasuakSKyblockZAddons§c] §fDirection captured for §e${ray.targetPoi}§f. Move to a different spot and use another compass to solve it.")
             )
             return
         }
@@ -199,7 +199,7 @@ object WishingCompassSolver {
         if (first.targetPoi != ray.targetPoi) {
             pendingRay = ray
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockAddons§c] §fTarget changed to §e${ray.targetPoi}§f, direction captured. Use it again elsewhere to solve.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c] §fTarget changed to §e${ray.targetPoi}§f, direction captured. Use it again elsewhere to solve.")
             )
             return
         }
@@ -207,7 +207,7 @@ object WishingCompassSolver {
         val baselineDist = distance3D(first.origin, ray.origin)
         if (baselineDist < MIN_BASELINE_DISTANCE) {
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockAddons§c] §fToo close to your first use (§e${"%.1f".format(baselineDist)}§f blocks). Move further away and use the compass again.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c] §fToo close to your first use (§e${"%.1f".format(baselineDist)}§f blocks). Move further away and use the compass again.")
             )
             return
         }
@@ -216,14 +216,14 @@ object WishingCompassSolver {
         val solved = closestPointBetweenRays(first, ray)
         if (solved == null) {
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockAddons§c] §fRays too close to parallel to solve. Try again from a more different angle.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c] §fRays too close to parallel to solve. Try again from a more different angle.")
             )
             return
         }
 
         val (x, y, z) = solved
         Minecraft.getInstance().player?.sendSystemMessage(
-            Component.literal("§c[§6CasualSkyblockAddons§c] §fSolved §e${ray.targetPoi}§f: x:${"%.1f".format(x)} z:${"%.1f".format(z)}")
+            Component.literal("§c[§6CasualSkyblockZAddons§c] §fSolved §e${ray.targetPoi}§f: x:${"%.1f".format(x)} z:${"%.1f".format(z)}")
         )
 
         NucleusMap.registerCompassSolvedPoi(ray.targetPoi, x, z)

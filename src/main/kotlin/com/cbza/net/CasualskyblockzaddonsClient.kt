@@ -14,10 +14,10 @@ import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
 
-class CasualskyblockaddonsClient : ClientModInitializer {
+class CasualskyblockzaddonsClient : ClientModInitializer {
 	override fun onInitializeClient() {
-		val textureId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "nucleus_map")
-		val arrowId = Identifier.fromNamespaceAndPath("casualskyblockaddons", "player_arrow")
+		val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")
+		val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "player_arrow")
 
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
 			MiningAbilityTracker.onServerJoin()
@@ -44,7 +44,7 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 					.executes {
 						val client = Minecraft.getInstance()
 						val msg = net.minecraft.network.chat.Component.literal(
-							"§6§lCasualSkyblockAddons §7- §fCommands:\n" +
+							"§6§lCasualSkyblockZAddons §7- §fCommands:\n" +
 									"§e/csz §7- Open the mod settings screen.\n" +
 									"§e/csz hud §7- Open the HUD editor.\n" +
 									"§e/sharelocation <poi> §7- Share a discovered Crystal Hollows POI.\n" +
@@ -77,7 +77,7 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 					}))
 		}
 
-		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockaddons", "ability_hud")) { graphics, _ ->
+		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "ability_hud")) { graphics, _ ->
 			val popup = MiningAbilityTracker.getActivePopup() ?: return@addLast
 			val mc = Minecraft.getInstance()
 			val cfg = ModConfig.get()
@@ -94,7 +94,7 @@ class CasualskyblockaddonsClient : ClientModInitializer {
 			graphics.pose().popMatrix()
 		}
 
-		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockaddons", "nucleus_map")) { graphics, _ ->
+		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")) { graphics, _ ->
 			if (!ModConfig.get().NucleusMap) return@addLast
 			if (!NucleusMap.inCrystalHollows) return@addLast
 

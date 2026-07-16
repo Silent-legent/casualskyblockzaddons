@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component
 import java.util.ArrayList
 import java.util.HashMap
 
-class ConfigScreen(parent: Screen?) : Screen(Component.literal("Casual Skyblock Addons")) {
+class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzAddons")) {
 
 	private val categories = ArrayList<ConfigCategory>()
 	private val collapsed = HashMap<String, Boolean>()

@@ -47,7 +47,7 @@ object PingGlide {
                 lastMiningSpeedWarn = now
                 mc.player?.sendSystemMessage(
                     net.minecraft.network.chat.Component.literal(
-                        "§c[§6CasualSkyblockAddons§c] §fPingGlide needs §eMining Speed §fvisible in your tab list, enable it in your §eSkyBlock §fstats settings."
+                        "§c[§6CasualSkyblockZAddons§c] §fPingGlide needs §eMining Speed §fvisible in your tab list, enable it in your §eSkyBlock §fstats settings."
                     )
                 )
             }

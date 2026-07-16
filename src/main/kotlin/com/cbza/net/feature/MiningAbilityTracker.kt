@@ -134,7 +134,7 @@ object MiningAbilityTracker {
                 hasWarnedTabMissingThisIsland = true
                 mc.player?.sendSystemMessage(
                     net.minecraft.network.chat.Component.literal(
-                        "§c[§6CasualSkyblockAddons§c] §fAbilityAnnouncer works more accurately with the §ePickaxe Ability Widget §fvisible in your tab list."
+                        "§c[§6CasualSkyblockZAddons§c] §fAbilityAnnouncer works more accurately with the §ePickaxe Ability Widget §fvisible in your tab list."
                     )
                 )
             }
