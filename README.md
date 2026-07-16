@@ -6,7 +6,7 @@
   
   [![Discord](https://img.shields.io/badge/Discord-Discord_Server-blue?style=flat&logo=discord&logoColor=white)](https://discord.gg/GvEu34hzcz)
   [![Releases](https://img.shields.io/badge/Releases-Download_Latest-purple?style=flat)](https://github.com/Silent-legent/Casual-SkyblockZ/releases)
-  [![Modrinth](https://img.shields.io/badge/Modrinth-Casual_SkyblockZ-green?style=flat&logo=modrinth&logoColor=white)](https://modrinth.com/modpack/skyblock-essentials-(se))
+  [![Modrinth](https://img.shields.io/badge/Modrinth-Casual_SkyblockZ-green?style=flat&logo=modrinth&logoColor=white)](https://modrinth.com/mod/casualskyblockaddons-csz)
 
   <br>
 
