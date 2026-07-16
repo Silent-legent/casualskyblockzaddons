@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "com.cbza.net.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"ChatComponentMixin",
+		"ClientPacketListenerMixin",
+		"ClientTickMixin",
+		"LevelRendererMixin",
+		"ParticleEngineMixin",
+		"PingDebugMonitorMixin",
+		"RarityBackgroundMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

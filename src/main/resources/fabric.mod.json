@@ -1,33 +1,26 @@
 {
 	"schemaVersion": 1,
-	"id": "casualskyblockaddons",
+	"id": "casualskyblockzaddons",
 	"version": "${version}",
-	"name": "casualskyblockaddons",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "casualskyblockzaddons",
+	"description": "A small QOL mod, mainly filling the gaps from not having Skyblocker!",
 	"authors": [
-		"Me!"
+		"Silent_Legent.!"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/casualskyblockaddons/icon.png",
+	"icon": "assets/casualskyblockzaddons/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [
-			"com.example.Casualskyblockaddons"
-		],
 		"client": [
-			"com.example.client.CasualskyblockaddonsClient"
+			"com.cbza.net.CasualskyblockzaddonsClient"
 		]
 	},
 	"mixins": [
-		"casualskyblockaddons.mixins.json",
-		{
-			"config": "casualskyblockaddons.client.mixins.json",
-			"environment": "client"
-		}
+		"casualskyblockzaddons.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.19.3",

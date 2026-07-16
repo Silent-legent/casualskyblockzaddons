@@ -1,5 +1,6 @@
-package com.example.client.mixin;
+package com.cbza.net.mixin;
 
+import com.cbza.net.config.ModConfig;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,26 +20,41 @@ import java.util.List;
 public class RarityBackgroundMixin {
 
     private static int getRarityColor(ItemStack itemStack) {
-        if (itemStack.isEmpty()) return -1;
+        if (!ModConfig.Companion.get().showRarityBackgrounds) return -1;
+        if (itemStack == null || itemStack.isEmpty()) return -1;
+
         ItemLore lore = itemStack.get(DataComponents.LORE);
-        if (lore == null || lore.lines().isEmpty()) return -1;
+        if (lore == null) return -1;
 
         List<Component> lines = lore.lines();
-        String lastLine = lines.get(lines.size() - 1).getString().toUpperCase();
+        if (lines == null || lines.isEmpty()) return -1;
 
-        if (lastLine.contains("ADMIN"))        return 0x60AA0000;
-        if (lastLine.contains("ULTIMATE"))     return 0x60AA0000;
-        if (lastLine.contains("VERY SPECIAL")) return 0x60FF5555;
-        if (lastLine.contains("SPECIAL"))      return 0x60FF5555;
-        if (lastLine.contains("DIVINE"))       return 0x6055FFFF;
-        if (lastLine.contains("MYTHIC"))       return 0x60FF55FF;
-        if (lastLine.contains("LEGENDARY"))    return 0x60FFAA00;
-        if (lastLine.contains("EPIC"))         return 0x60AA00AA;
-        if (lastLine.contains("RARE"))         return 0x605555FF;
-        if (lastLine.contains("UNCOMMON"))     return 0x6055FF55;
-        if (lastLine.contains("COMMON"))       return 0x60FFFFFF;
+        // Scan backwards from the last line, checking up to 8 lines -
+        // some contexts (sellable menus) append extra footer lines after the real rarity line.
+        int linesToCheck = Math.min(8, lines.size());
+        for (int i = 0; i < linesToCheck; i++) {
+            String line = lines.get(lines.size() - 1 - i).getString().toUpperCase();
+
+            if (line.contains("ADMIN"))        return 0x60AA0000;
+            if (line.contains("ULTIMATE"))     return 0x60AA0000;
+            if (line.contains("VERY SPECIAL")) return 0x60FF5555;
+            if (line.contains("SPECIAL"))      return 0x60FF5555;
+            if (line.contains("DIVINE"))       return 0x6055FFFF;
+            if (line.contains("MYTHIC"))       return 0x60FF55FF;
+            if (line.contains("LEGENDARY"))    return 0x60FFAA00;
+            if (line.contains("EPIC"))         return 0x60AA00AA;
+            if (line.contains("RARE"))         return 0x605555FF;
+            if (line.contains("UNCOMMON"))     return 0x6055FF55;
+            if (line.contains("COMMON"))       return 0x60FFFFFF;
+        }
+
         return -1;
     }
+
+    // =========================================================================
+    //   MIXIN INJECTIONS (Hooks into Minecraft's rendering to draw backgrounds)
+
+    // --- Context 1: Items held/owned by entities ---
     @Inject(
             method = "item(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At("HEAD")
@@ -49,7 +65,7 @@ public class RarityBackgroundMixin {
         GuiGraphicsExtractor graphics = (GuiGraphicsExtractor) (Object) this;
         graphics.fill(x, y, x + 16, y + 16, color);
     }
-
+    // --- Context 2: Standard standalone inventory items ---
     @Inject(
             method = "item(Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At("HEAD")
@@ -60,7 +76,7 @@ public class RarityBackgroundMixin {
         GuiGraphicsExtractor graphics = (GuiGraphicsExtractor) (Object) this;
         graphics.fill(x, y, x + 16, y + 16, color);
     }
-
+    // --- Context 3: Ghost/Fake items (recipes, background previews, etc) ---
     @Inject(
             method = "fakeItem(Lnet/minecraft/world/item/ItemStack;III)V",
             at = @At("HEAD")
