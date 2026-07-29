@@ -1,7 +1,11 @@
 package com.cbza.net.utility
 
-object BlockStrengths {
+// Holds how "tough" each type of block/gemstone is to mine, and does the math
+// to convert that toughness + the player's mining speed into an actual time
+// (in ticks/milliseconds) it should take to break.
+object BlockStrength {
 
+    // How tough each block type is. higher number means it takes longer to mine.
     val strengths = mapOf(
         "RUBY" to 2300,
         "AMBER" to 3000,
@@ -44,5 +48,13 @@ object BlockStrengths {
      */
     fun ticksToMs(ticks: Int, tps: Double = 20.0): Long {
         return (ticks * (1000.0 / tps)).toLong()
+    }
+
+    // Works out how much mining speed the player would need to shave one more
+    // tick off the current mining time (used to suggest gear/speed upgrades).
+    fun speedForNextTick(strength: Int, currentTicks: Int): Int? {
+        if (currentTicks <= 4) return null // 4 is the effective floor (clamp)
+        val denominator = 2 * currentTicks - 1
+        return (60 * strength) / denominator + 1
     }
 }

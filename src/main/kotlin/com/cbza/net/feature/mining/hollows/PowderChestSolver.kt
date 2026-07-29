@@ -1,4 +1,4 @@
-package com.cbza.net.feature
+package com.cbza.net.feature.mining.hollows
 
 import com.cbza.net.config.ModConfig
 import net.minecraft.client.Minecraft

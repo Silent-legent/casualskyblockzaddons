@@ -1,7 +1,7 @@
 package com.cbza.net.mixin;
 
-import com.cbza.net.feature.PingGlide;
-import com.cbza.net.feature.PowderChestSolver;
+import com.cbza.net.feature.mining.general.PingGlide;
+import com.cbza.net.feature.mining.hollows.PowderChestSolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;

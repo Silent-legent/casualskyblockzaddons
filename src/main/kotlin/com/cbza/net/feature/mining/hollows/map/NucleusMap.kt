@@ -1,12 +1,17 @@
-package com.cbza.net.feature
+package com.cbza.net.feature.mining.hollows.map
 
 import com.cbza.net.config.ModConfig
+import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.TabListReader
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+import kotlin.math.sqrt
 
+// Builds a live map of the Crystal Hollows: tracks where each named point of
+// interest (POI) is located, remembers unknown/unconfirmed marker positions,
+// and carries that knowledge over when the player switches servers.
 object NucleusMap {
 
     private const val NUCLEUS_CENTER_X = 512.0
@@ -21,43 +26,45 @@ object NucleusMap {
     private const val AREA_CHECK_INTERVAL_MS = 2000L
     private var lastArea = ""
 
+    // POIs someone else shared coordinates for, but we haven't personally confirmed yet.
     private val sharedUnconfirmedPois = mutableSetOf<String>()
 
-    // POIs whose position came from an indicator NPC or a solved Wishing Compass triangulation
-    // (walk-in fallback won't touch these)
+    // POIs we're fully confident about the location of (found via NPC or compass solve).
     private val confirmedPois = mutableSetOf<String>()
 
     val poiColors = mapOf(
-        "Jungle Temple"       to 0xFFAA00FF.toInt(),
-        "Mines of Divan"      to 0xFFFFFF00.toInt(),
-        "King Yolkar"         to 0xFFFFA500.toInt(),
-        "Goblin Queen's Den"  to 0xFF00FF00.toInt(),
-        "Lost Precursor City" to 0xFFFFFFFF.toInt(),
-        "Khazad-dûm"          to 0xFFFF0000.toInt(),
+        "Jungle Temple"       to ColorCatalog.PURPLE,
+        "Mines of Divan"      to ColorCatalog.Yellow,
+        "King Yolkar"         to ColorCatalog.ORANGE,
+        "Goblin Queen's Den"  to ColorCatalog.GREEN,
+        "Lost Precursor City" to ColorCatalog.WHITE,
+        "Khazad-dûm"          to ColorCatalog.RED,
+        "Odawa"               to ColorCatalog.DARK_GREEN
     )
 
     val poiSizes = mapOf(
         "Jungle Temple"       to 13,
         "Mines of Divan"      to 15,
         "Goblin Queen's Den"  to 15,
-        "King Yolkar"         to 8,
+        "King Yolkar"         to 10,
         "Lost Precursor City" to 15,
-        "Khazad-dûm"          to 12
+        "Khazad-dûm"          to 12,
+        "Odawa"               to 8
     )
 
+    // The best-known (x, z) position for each POI found so far.
     val discoveredPois = mutableMapOf<String, Pair<Double, Double>>()
 
-    // walk-in fallback samples - only used for POIs not yet confirmed by NPC or compass solve
+    // Rough position guesses for a POI, collected over time and averaged for accuracy.
     private val poiPositionSamples = mutableMapOf<String, MutableList<Pair<Double, Double>>>()
 
-    // unknown markers: id -> (x, z)
+    // Markers for POIs we can't identify yet (no name, just a rough position).
     val unknownMarkers = mutableMapOf<String, Pair<Double, Double>>()
     private var unknownIdCounter = 0
 
     private val coordRegex = Regex("x:\\s*(-?\\d+).*?y:\\s*(-?\\d+).*?z:\\s*(-?\\d+)")
 
-    // --- NPC-based instant POI detection ---
-    // Maps an indicator NPC's exact custom name to the POI it confirms.
+    // Special NPCs that, when spotted, confirm a nearby POI's exact location.
     private val poiIndicatorEntities: Map<String, String> = mapOf(
         "Kalhuiki Door Guardian" to "Jungle Temple",
         "Keeper of Diamond"      to "Mines of Divan",
@@ -66,13 +73,11 @@ object NucleusMap {
         "Keeper of Emerald"      to "Mines of Divan",
         "Professor Robot"        to "Lost Precursor City",
         "King Yolkar"            to "King Yolkar",
-        "Bal"                    to "Khazad-dûm"
+        "Bal"                    to "Khazad-dûm",
+        "Odawa"                  to "Odawa"
     )
 
-    // Manually-measured offset from EACH INDIVIDUAL NPC's position to the POI's true center.
-    // Keyed per-NPC (not per-POI) since e.g. the four Mines of Divan Keepers each stand
-    // in a different spot relative to the mine's true center.
-    // Format: NPC name -> Pair(offsetX, offsetZ), where trueCenter = npcPos + offset
+    // How far off each NPC stands from the actual POI location, so we can correct for it.
     private val poiNpcOffsets: Map<String, Pair<Double, Double>> = mapOf(
         "Kalhuiki Door Guardian" to Pair(0.0, 0.0),
         "Keeper of Diamond"      to Pair(33.0, -3.0),
@@ -81,22 +86,23 @@ object NucleusMap {
         "Keeper of Emerald"      to Pair(-3.0, 33.0),
         "Professor Robot"        to Pair(16.0, -21.0),
         "King Yolkar"            to Pair(0.0, 0.0),
-        "Bal"                    to Pair(0.0, 0.0)
+        "Bal"                    to Pair(0.0, 0.0),
+        "Odawa"                  to Pair(0.0, 0.0)
     )
 
-    // Manually-measured offset from the Wishing Compass triangulation's solved point to the
-    // POI's true center. Keyed per-POI (not per-NPC) since the compass consistently resolves
-    // to the same relative spot within a given POI regardless of which NPC lives there.
-    // Format: POI name -> Pair(offsetX, offsetZ), where trueCenter = solvedPos + offset
+    // Similar correction offsets, but for locations solved using the in-game compass tool.
     private val poiCompassOffsets: Map<String, Pair<Double, Double>> = mapOf(
         "Jungle Temple"       to Pair(-16.0, -23.0),
         "Mines of Divan"      to Pair(0.0, 0.0),
         "King Yolkar"         to Pair(2.0, -2.0),
         "Goblin Queen's Den"  to Pair(0.0, 0.0),
         "Lost Precursor City" to Pair(40.0, -41.0),
-        "Khazad-dûm"          to Pair(2.0, 16.0)
+        "Khazad-dûm"          to Pair(2.0, 16.0),
+        "Odawa"               to Pair(-4.0, -16.0)
     )
 
+    // Looks at nearby entities for one of the "indicator" NPCs above, and if found,
+    // uses it to pin down that POI's exact location.
     private fun scanForPoiEntities(level: ClientLevel) {
         for (entity in level.entitiesForRendering()) {
             val name = entity.customName?.string ?: continue
@@ -113,6 +119,8 @@ object NucleusMap {
         }
     }
 
+    // Called when someone (in chat) shares a set of coordinates. Tries to match
+    // them to a named POI, or otherwise stores them as an unknown marker.
     fun onCoordsShared(text: String) {
         if (!ModConfig.get().NucleusMap) return
         if (!inCrystalHollows) return
@@ -133,6 +141,7 @@ object NucleusMap {
 
         if (discoveredPois.size >= poiColors.size) return
 
+        // Skip it if it's basically on top of a marker we already have.
         val tooClose = unknownMarkers.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE } ||
                 discoveredPois.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE }
         if (tooClose) return
@@ -144,9 +153,12 @@ object NucleusMap {
     private fun distance(x1: Double, z1: Double, x2: Double, z2: Double): Double {
         val dx = x1 - x2
         val dz = z1 - z2
-        return kotlin.math.sqrt(dx * dx + dz * dz)
+        return sqrt(dx * dx + dz * dz)
     }
 
+    // Runs every game tick. Periodically re-checks the player's location/server,
+    // scans for POI-confirming NPCs, estimates POI positions by sampling the
+    // player's own position, and cleans up markers that are no longer needed.
     fun tick() {
         if (!ModConfig.get().NucleusMap) return
 
@@ -162,7 +174,6 @@ object NucleusMap {
                 currentServer = TabListReader.getServer()
             }
 
-            // server-switch detection FIRST, so its reset() doesn't wipe inCrystalHollows right after we set it
             if (currentServer != null && currentServer != currentServerId) {
                 onServerSwitch(currentServer)
             }
@@ -173,13 +184,13 @@ object NucleusMap {
                 lastArea = area
             }
 
-            // instant NPC-based detection - authoritative, runs first so it can overwrite fallback data
             val level = mc.level
             if (level != null && inCrystalHollows) {
                 scanForPoiEntities(level)
             }
 
-            // walk-in fallback - only applies to POIs not yet confirmed by NPC or compass solve
+            // If we're standing inside a named area but don't have a confirmed
+            // location for it yet, take a position sample and average them for a rough guess.
             val matchedPoi = poiColors.keys.firstOrNull { area.contains(it) }
             if (matchedPoi != null && !confirmedPois.contains(matchedPoi)) {
                 val player = mc.player
@@ -194,11 +205,13 @@ object NucleusMap {
                 }
             }
 
+            // Once every POI has been found, unknown markers are no longer useful.
             if (discoveredPois.size >= poiColors.size) {
                 unknownMarkers.clear()
             }
         }
 
+        // Remove unknown markers once the player walks close enough to them (no longer useful/unknown).
         val player = mc.player
         if (player != null && unknownMarkers.isNotEmpty()) {
             val toRemove = unknownMarkers.entries.filter {
@@ -207,6 +220,8 @@ object NucleusMap {
             toRemove.forEach { unknownMarkers.remove(it) }
         }
 
+        // Double-check POIs someone else reported: if the player walks there and
+        // it turns out not confirmed, drop it since it may have been inaccurate.
         if (player != null && sharedUnconfirmedPois.isNotEmpty()) {
             val checked = mutableListOf<String>()
             for (name in sharedUnconfirmedPois) {
@@ -223,9 +238,7 @@ object NucleusMap {
         }
     }
 
-    // Called by WishingCompassSolver once a triangulated solve resolves to a tracked POI.
-    // x/z here are the raw triangulated point - we correct it to the POI's true center
-    // using poiCompassOffsets before storing it.
+    // Called when a POI's location has been worked out using the compass tool.
     fun registerCompassSolvedPoi(poi: String, x: Double, z: Double) {
         if (confirmedPois.contains(poi)) return // NPC (or an earlier compass solve) already confirmed this one
         val offset = poiCompassOffsets[poi] ?: Pair(0.0, 0.0)
@@ -234,6 +247,7 @@ object NucleusMap {
         poiPositionSamples.remove(poi)
     }
 
+    // Converts the player's real in-world position into an (x, y) pixel position on the map image.
     fun getPlayerMapPosition(mapSize: Int): Pair<Int, Int>? {
         val mc = Minecraft.getInstance()
         val player = mc.player ?: return null
@@ -250,6 +264,7 @@ object NucleusMap {
         )
     }
 
+    // Same conversion as above, but for a given POI's world position instead of the player's.
     fun getPoiMapPosition(x: Double, z: Double, mapSize: Int): Pair<Int, Int> {
         val relX = (x - (NUCLEUS_CENTER_X - NUCLEUS_SIZE / 2)) / NUCLEUS_SIZE
         val relZ = (z - (NUCLEUS_CENTER_Z - NUCLEUS_SIZE / 2)) / NUCLEUS_SIZE
@@ -263,12 +278,35 @@ object NucleusMap {
         )
     }
 
+    fun isInJungleQuadrant(x: Double, z: Double): Boolean {
+        return x < NUCLEUS_CENTER_X && z < NUCLEUS_CENTER_Z
+    }
+
+    // A saved copy of everything we knew about a server's POIs, so it can be
+    // restored if the player returns to that same server later.
     data class ServerSnapshot(val pois: Map<String, Pair<Double, Double>>, val timestamp: Long)
 
     private val serverSnapshots = mutableMapOf<String, ServerSnapshot>()
     private var currentServerId: String? = null
     private const val SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000L // 30 minutes
 
+    // Tracks servers where the "Odawa" POI is known to not have spawned (so we don't keep expecting it there).
+    private val odawaNotSpawnedServers = mutableMapOf<String, Long>()
+
+    fun isOdawaNotSpawned(): Boolean {
+        val server = currentServerId ?: return false
+        return odawaNotSpawnedServers.containsKey(server)
+    }
+
+    fun markOdawaUnreliable(): Boolean {
+        val server = currentServerId ?: return false
+        if (odawaNotSpawnedServers.containsKey(server)) return false
+        odawaNotSpawnedServers[server] = System.currentTimeMillis()
+        return true
+    }
+
+    // Called when the player switches to a different server. Saves the current
+    // server's discovered POIs for later, then restores any saved data for the new one.
     fun onServerSwitch(newServerId: String) {
         val oldId = currentServerId
         if (oldId != null && inCrystalHollows && discoveredPois.isNotEmpty()) {
@@ -279,8 +317,10 @@ object NucleusMap {
 
         reset()
 
+        // Clean out old saved data that's expired.
         val now = System.currentTimeMillis()
         serverSnapshots.entries.removeIf { now - it.value.timestamp > SNAPSHOT_EXPIRY_MS }
+        odawaNotSpawnedServers.entries.removeIf { now - it.value > SNAPSHOT_EXPIRY_MS }
 
         val snapshot = serverSnapshots[newServerId]
         if (snapshot != null) {
@@ -288,6 +328,7 @@ object NucleusMap {
         }
     }
 
+    // Wipes all currently tracked map data back to a clean slate.
     fun reset() {
         inCrystalHollows = false
         discoveredPois.clear()
@@ -296,5 +337,6 @@ object NucleusMap {
         unknownMarkers.clear()
         sharedUnconfirmedPois.clear()
         lastArea = ""
+        WishingCompassSolver.reset()
     }
 }

@@ -1,3 +1,7 @@
+    /*
+     * Code given to me by Revvilon Creator of PingOfsetMiner
+     */
+
 package com.cbza.net.mixin;
 
 import com.cbza.net.utility.PingTracker;

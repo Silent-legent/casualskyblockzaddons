@@ -1,6 +1,9 @@
 package com.cbza.net.config
 
-import com.cbza.net.feature.NucleusMap
+import com.cbza.net.feature.mining.general.CommissionsDisplay
+import com.cbza.net.feature.mining.general.CommissionsDisplay.commissionPattern
+import com.cbza.net.feature.mining.hollows.map.NucleusMap
+import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.Render2D
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
@@ -28,9 +31,12 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             cfg.abilityAnnouncerX = -1
             cfg.abilityAnnouncerY = -1
             cfg.abilityAnnouncerScale = 3.5f
-            cfg.nucleusMapX = 10
-            cfg.nucleusMapY = 10
+            cfg.nucleusMapX = 0
+            cfg.nucleusMapY = 0
             cfg.nucleusMapScale = 1.0f
+            cfg.CommissionsDisplayX = 0
+            cfg.CommissionsDisplayY = 100
+            cfg.CommissionsDisplayScale = 1.0f
             ModConfig.save()
         }.bounds(width / 2 - 50, height - 30, 100, 20).build()
         addRenderableWidget(resetButton)
@@ -51,8 +57,48 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
             context.pose().pushMatrix()
             context.pose().scale(scale, scale)
-            context.text(this.font, text, (x / scale).toInt(), (y / scale).toInt(), ARGB.opaque(0x55FF55), true)
+            context.text(this.font, text, (x / scale).toInt(), (y / scale).toInt(), ARGB.opaque(ColorCatalog.GREEN), true)
+        } // 0x55FF55
+        context.pose().popMatrix()
+
+        if (cfg.CommissionsDisplay) {
+            val fakeCommissions = listOf(
+                                "Sludge slayer: 74.5% ",
+                                "Yog slayer: 25%",
+                                "Boss corleon slayer: DONE",
+                                "Amber Crystal Hunter: 0%"
+            )
+            val scale = cfg.CommissionsDisplayScale
+            val y = cfg.CommissionsDisplayY
+            val x = cfg.CommissionsDisplayX
+            val lineHeight = 10
+            val nameColor = ColorCatalog.WHITE
+            val percentColor = ColorCatalog.RED
+            val doneColor = ColorCatalog.GREEN
+
+            drawEditorBox(context, x, y, (fakeCommissions.maxOf { this.font.width(it) } * scale).toInt(), (fakeCommissions.size * lineHeight * scale).toInt())
+
+            context.pose().pushMatrix()
+            context.pose().scale(scale, scale)
+
+            val ux = (x / scale).toInt()
+            val uy = (y / scale).toInt()
+
+            for ((index, line) in fakeCommissions.withIndex()) {
+                val match = CommissionsDisplay.commissionPattern.find(line) ?: continue
+                val name = match.groupValues[1]
+                val value = match.groupValues[2]
+
+                val y = uy + (index * lineHeight)
+                val namePrefix = "$name: "
+
+                context.text(this.font, namePrefix, ux, y, nameColor, true)
+                val valueX = ux + this.font.width(namePrefix)
+                val valueColor = if (value == "DONE") doneColor else percentColor
+                context.text(this.font, value, valueX, y, valueColor, true)
+            }
             context.pose().popMatrix()
+
         }
 
         if (cfg.NucleusMap) {
@@ -127,6 +173,27 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             return true
         }
 
+        val ctext = listOf(
+            "Sludge slayer: 74.5% ",
+            "Yog slayer: 25%",
+            "Boss corleon slayer: DONE",
+            "Amber Crystal Hunter: 0%"
+        )
+        val cscale = cfg.CommissionsDisplayScale
+        val lineHeight = 10
+        val cw = (ctext.maxOf { this.font.width(it) } * cscale).toInt()
+        val ch = (ctext.size * lineHeight * cscale).toInt()
+        val cx = if (cfg.CommissionsDisplayX == -1) (width - cw) / 2 else cfg.CommissionsDisplayX
+        val cy = if (cfg.CommissionsDisplayY == -1) height / 3 else cfg.CommissionsDisplayY
+        if (mx in cx..(cx + cw) && my in cy..(cy + ch)) {
+            draggingElement = "Commission_Display"
+            dragOffsetX = mx - cx
+            dragOffsetY = my - cy
+            cfg.CommissionsDisplayX = cx
+            cfg.CommissionsDisplayY = cy
+            return true
+        }
+
         return super.mouseClicked(event, doubleClick)
     }
 
@@ -142,6 +209,10 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             "ability_announcer" -> {
                 cfg.abilityAnnouncerX = mx - dragOffsetX
                 cfg.abilityAnnouncerY = my - dragOffsetY
+            }
+            "Commission_Display" -> {
+                cfg.CommissionsDisplayX = mx - dragOffsetX
+                cfg.CommissionsDisplayY = my - dragOffsetY
             }
         }
         return true
@@ -171,6 +242,22 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         val ay = if (cfg.abilityAnnouncerY == -1) height / 3 else cfg.abilityAnnouncerY
         if (mx in ax..(ax + aw) && my in ay..(ay + ah)) {
             cfg.abilityAnnouncerScale = (cfg.abilityAnnouncerScale + scrollY.toFloat() * 0.1f).coerceIn(1.0f, 6.0f)
+            return true
+        }
+        val ctext = listOf(
+            "Sludge slayer: 74.5% ",
+            "Yog slayer: 25%",
+            "Boss corleon slayer: DONE",
+            "Amber Crystal Hunter: 0%"
+        )
+        val cscale = cfg.CommissionsDisplayScale
+        val lineHeight = 10
+        val cw = (ctext.maxOf { this.font.width(it) } * cscale).toInt()
+        val ch = (ctext.size * lineHeight * cscale).toInt()
+        val cx = if (cfg.CommissionsDisplayX == -1) (width - cw) / 2 else cfg.CommissionsDisplayX
+        val cy = if (cfg.CommissionsDisplayY == -1) height / 3 else cfg.CommissionsDisplayY
+        if (mx in cx..(cx + cw) && my in cy..(cy + ch)) {
+            cfg.CommissionsDisplayScale = (cfg.CommissionsDisplayScale + scrollY.toFloat() * 0.1f).coerceIn(1.0f, 6.0f)
             return true
         }
 

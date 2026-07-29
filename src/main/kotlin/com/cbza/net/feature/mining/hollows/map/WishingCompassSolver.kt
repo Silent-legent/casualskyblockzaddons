@@ -1,11 +1,18 @@
-package com.cbza.net.utility
+package com.cbza.net.feature.mining.hollows.map
 
 import com.cbza.net.config.ModConfig
-import com.cbza.net.feature.NucleusMap
+import com.cbza.net.feature.mining.hollows.map.NucleusMap.markOdawaUnreliable
+import com.cbza.net.utility.TabListReader
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
+import kotlin.math.abs
+import kotlin.math.sqrt
 
+// Solves the exact location of a Crystal Hollows POI using the "Wishing Compass"
+// item. The compass leaves a trail of particles pointing toward the target; this
+// figures out that direction, and by using the compass twice from two different
+// spots, works out where the two directions cross to get an exact location.
 object WishingCompassSolver {
 
     private const val TRAIL_WINDOW_MS = 250L
@@ -16,6 +23,8 @@ object WishingCompassSolver {
 
     private var kingsScentExpiresAt: Long = 0L
 
+    // A "direction line" from one compass use: where the player stood, which way
+    // it pointed, and which POI it was aimed at.
     data class Ray(
         val origin: Triple<Double, Double, Double>,
         val dir: Triple<Double, Double, Double>,
@@ -27,6 +36,7 @@ object WishingCompassSolver {
     private var trailOrigin: Triple<Double, Double, Double>? = null
     private var pendingRay: Ray? = null
 
+    // Which gemstone crystal corresponds to each POI (used to check if a reading can be trusted).
     private val poiCrystalMap = mapOf(
         "King Yolkar" to "Amber",
         "Goblin Queen's Den" to "Amber",
@@ -34,15 +44,24 @@ object WishingCompassSolver {
         "Mines of Divan" to "Jade",
         "Jungle Temple" to "Amethyst",
         "Khazad-dûm" to "Topaz",
-        "Key Guardian" to ""
     )
 
+    // If the relevant crystal has already been placed/found, the compass reading
+    // for that POI can no longer be trusted.
     private fun isCompassUnreliableFor(targetPoi: String): Boolean {
         val crystalName = poiCrystalMap[targetPoi] ?: return false
         val status = TabListReader.getCrystalStatus(crystalName) ?: return false
         return !status.contains("Not Found", ignoreCase = true)
     }
+    private var compassJustShattered = false
 
+    // Called when the player actually uses (breaks) a compass.
+    fun onCompassUsed() {
+        compassJustShattered = true
+    }
+
+    // Called for every particle spawned by the compass. Collects them into a
+    // "trail" that we'll later use to figure out the pointing direction.
     fun handleParticle(x: Double, y: Double, z: Double) {
         if (!ModConfig.get().NucleusMap) return
         if (!NucleusMap.inCrystalHollows) return
@@ -52,14 +71,15 @@ object WishingCompassSolver {
             finishTrail()
         }
 
+        // Ignore particles that jumped too far from the last one - likely unrelated/noise.
         val last = currentTrail.lastOrNull()
         if (last != null) {
             val dx = x - last.first
             val dy = y - last.second
             val dz = z - last.third
-            val stepDist = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
+            val stepDist = sqrt(dx * dx + dy * dy + dz * dz)
             if (stepDist > MAX_STEP_DISTANCE) {
-                return // too far from the last real point - not part of this trail, drop it silently
+                return
             }
         }
 
@@ -72,7 +92,10 @@ object WishingCompassSolver {
         currentTrail.add(Triple(x, y, z))
     }
 
+    // Called once a particle trail stops coming in. Turns the collected trail
+    // into a direction ("ray") pointing at the target POI, if possible.
     private fun finishTrail() {
+
         val points = currentTrail.toList()
         val origin = trailOrigin
         currentTrail.clear()
@@ -86,9 +109,22 @@ object WishingCompassSolver {
             return
         }
 
+        if (targetPoi == "Odawa" && NucleusMap.isOdawaNotSpawned()) {
+            if (compassJustShattered) {
+                compassJustShattered = false
+                pendingRay = null
+                Minecraft.getInstance().player?.sendSystemMessage(
+                    Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                            "§fOdawa isn't in this lobby. Make sure you have a §5Jungle Key§f before searching for the Jungle Temple.")
+                )
+            }
+            return
+        }
+
         if (isCompassUnreliableFor(targetPoi)) {
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockZAddons§c] §fIgnoring compass reading for §e$targetPoi§f, its crystal is placed/found. So this reading can't be trusted.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                        "§fIgnoring compass reading for §e$targetPoi§f, its crystal is placed/found. So this reading can't be trusted.")
             )
             return
         }
@@ -96,8 +132,11 @@ object WishingCompassSolver {
         val ray = fitRay(points, origin, targetPoi) ?: return
 
         onRaySolved(ray)
+
     }
 
+    // Works out which POI the compass is currently pointing towards, based on what
+    // zone of the Hollows the player is standing in.
     private fun resolveTargetPoi(): String? {
         val zone = LocationAPI.area.name
 
@@ -106,17 +145,8 @@ object WishingCompassSolver {
             zone.contains("Precursor Remnants") -> "Lost Precursor City"
             zone.contains("Mithril Deposits")   -> "Mines of Divan"
             zone.contains("Magma Fields")       -> "Khazad-dûm"
-            zone.contains("Jungle")             -> {
-                if (hasJungleKey()) {
-                    "Jungle Temple"
-                } else {
-                    // Send the player a warning message!
-                    Minecraft.getInstance().player?.sendSystemMessage(
-                        Component.literal("§c[§6CasualSkyblockZAddons§c] §fIgnoring compass reading. You need a §5Jungle Key§f to find the Jungle Temple.")
-                    )
-                    null // Still returns null to stop the solver safely!
-                }
-            }
+            zone.contains("Jungle")             -> if (hasJungleKey()) "Jungle Temple" else "Odawa"
+
             else -> null
         }
     }
@@ -124,6 +154,8 @@ object WishingCompassSolver {
     private fun hasKingsScent(): Boolean {
         return System.currentTimeMillis() < kingsScentExpiresAt
     }
+
+    // Called when the player picks up the "King's Scent" buff, which changes which POI a compass targets.
     fun onKingsScentGranted() {
         if (!ModConfig.get().NucleusMap) return
         if (!NucleusMap.inCrystalHollows) return
@@ -131,6 +163,7 @@ object WishingCompassSolver {
         kingsScentExpiresAt = System.currentTimeMillis() + KINGS_CENT_DURATION_MS
     }
 
+    // Checks the player's inventory for a "Jungle Key" item.
     private fun hasJungleKey(): Boolean {
         val player = Minecraft.getInstance().player ?: return false
         val inventory = player.inventory
@@ -141,6 +174,9 @@ object WishingCompassSolver {
         return false
     }
 
+    // Takes the collected particle trail points and works out the best-fit
+    // straight-line direction they're travelling in (math: like drawing the
+    // straightest possible line through a cloud of dots).
     private fun fitRay(
         points: List<Triple<Double, Double, Double>>,
         origin: Triple<Double, Double, Double>,
@@ -163,19 +199,21 @@ object WishingCompassSolver {
         var vx = points.last().first - points.first().first
         var vy = points.last().second - points.first().second
         var vz = points.last().third - points.first().third
-        var vlen = kotlin.math.sqrt(vx * vx + vy * vy + vz * vz)
+        var vlen = sqrt(vx * vx + vy * vy + vz * vz)
         if (vlen < 1e-6) { vx = 1.0; vy = 0.0; vz = 0.0 } else { vx /= vlen; vy /= vlen; vz /= vlen }
 
+        // Refine the direction estimate repeatedly until it stabilizes.
         repeat(25) {
             val nx = sxx * vx + sxy * vy + sxz * vz
             val ny = sxy * vx + syy * vy + syz * vz
             val nz = sxz * vx + syz * vy + szz * vz
-            val nlen = kotlin.math.sqrt(nx * nx + ny * ny + nz * nz)
+            val nlen = sqrt(nx * nx + ny * ny + nz * nz)
             if (nlen > 1e-9) {
                 vx = nx / nlen; vy = ny / nlen; vz = nz / nlen
             }
         }
 
+        // Make sure the direction points toward the particle cloud, not away from it.
         val toCloudX = cx - origin.first
         val toCloudY = cy - origin.second
         val toCloudZ = cz - origin.third
@@ -185,29 +223,54 @@ object WishingCompassSolver {
         return Ray(origin, Triple(vx, vy, vz), targetPoi)
     }
 
+    // Called once we have a fresh direction ("ray") from a compass use. Needs two
+    // rays (from two different spots) aimed at the same POI to actually solve its
+    // location, so this stores the first one and waits for a second.
     private fun onRaySolved(ray: Ray) {
+        if (!compassJustShattered) return
+        compassJustShattered = false
+
         val first = pendingRay
 
         if (first == null) {
+            // This is the first reading. store it and ask the player to try again elsewhere.
             pendingRay = ray
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasuakSKyblockZAddons§c] §fDirection captured for §e${ray.targetPoi}§f. Move to a different spot and use another compass to solve it.")
+                Component.literal("§c[§6CasuakSKyblockZAddons§c]\n" +
+                        "§fDirection captured for §e${ray.targetPoi}§f. Move to a different spot and use another compass to solve it.")
             )
+            if (ray.targetPoi == "Odawa" && !hasJungleKey()) {
+                Minecraft.getInstance().player?.sendSystemMessage(
+                    Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                            "§fHINT!. You need a §5Jungle Key§f to find the Jungle Temple.")
+                )
+            }
             return
         }
 
         if (first.targetPoi != ray.targetPoi) {
+            // Player is now aiming at a different POI than before. start over with this new one.
             pendingRay = ray
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockZAddons§c] §fTarget changed to §e${ray.targetPoi}§f, direction captured. Use it again elsewhere to solve.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                        "§fTarget changed to §e${ray.targetPoi}§f, direction captured. Use it again elsewhere to solve.")
             )
+            if (ray.targetPoi == "Odawa" && !hasJungleKey()) {
+                Minecraft.getInstance().player?.sendSystemMessage(
+                    Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                            "§fHINT!. You need a §5Jungle Key§f to find the Jungle Temple.")
+                )
+            }
             return
         }
 
+        // Two readings need to come from sufficiently different spots, or the
+        // triangulation math becomes too inaccurate to trust.
         val baselineDist = distance3D(first.origin, ray.origin)
         if (baselineDist < MIN_BASELINE_DISTANCE) {
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockZAddons§c] §fToo close to your first use (§e${"%.1f".format(baselineDist)}§f blocks). Move further away and use the compass again.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                        "§fToo close to your first use (§e${"%.1f".format(baselineDist)}§f blocks). Move further away and use the compass again.")
             )
             return
         }
@@ -216,14 +279,30 @@ object WishingCompassSolver {
         val solved = closestPointBetweenRays(first, ray)
         if (solved == null) {
             Minecraft.getInstance().player?.sendSystemMessage(
-                Component.literal("§c[§6CasualSkyblockZAddons§c] §fRays too close to parallel to solve. Try again from a more different angle.")
+                Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                        "§fRays too close to parallel to solve. Try again from a more different angle.")
             )
             return
         }
 
         val (x, y, z) = solved
+
+        // Special case: if the solved spot for Odawa isn't even in the right
+        // part of the map, it means Odawa didn't spawn in this world at all.
+        if (ray.targetPoi == "Odawa" && !NucleusMap.isInJungleQuadrant(x, z)) {
+            val firstTime = markOdawaUnreliable()
+            if (firstTime) {
+                Minecraft.getInstance().player?.sendSystemMessage(
+                    Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                            "§fOdawa didn't spawn in this lobby.")
+                )
+            }
+            return
+        }
+
         Minecraft.getInstance().player?.sendSystemMessage(
-            Component.literal("§c[§6CasualSkyblockZAddons§c] §fSolved §e${ray.targetPoi}§f: x:${"%.1f".format(x)} z:${"%.1f".format(z)}")
+            Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
+                    "§fSolved §e${ray.targetPoi}§f: x:${"%.1f".format(x)} z:${"%.1f".format(z)}")
         )
 
         NucleusMap.registerCompassSolvedPoi(ray.targetPoi, x, z)
@@ -233,9 +312,11 @@ object WishingCompassSolver {
         val dx = a.first - b.first
         val dy = a.second - b.second
         val dz = a.third - b.third
-        return kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
+        return sqrt(dx * dx + dy * dy + dz * dz)
     }
 
+    // Given two direction lines (rays) from two different spots, finds the point
+    // in space where they come closest to crossing - that's the solved location.
     private fun closestPointBetweenRays(a: Ray, b: Ray): Triple<Double, Double, Double>? {
         val (ox1, oy1, oz1) = a.origin
         val (dx1, dy1, dz1) = a.dir
@@ -253,7 +334,7 @@ object WishingCompassSolver {
         val b2 = dx2 * rx + dy2 * ry + dz2 * rz
 
         val denom = a11 * a22 - a12 * a12
-        if (kotlin.math.abs(denom) < 1e-6) return null
+        if (abs(denom) < 1e-6) return null // rays are too close to parallel to find a clear crossing point
 
         val t1 = (a12 * b2 - a22 * b1) / denom
         val t2 = (a11 * b2 - a12 * b1) / denom
@@ -264,6 +345,7 @@ object WishingCompassSolver {
         return Triple((p1.first + p2.first) / 2, (p1.second + p2.second) / 2, (p1.third + p2.third) / 2)
     }
 
+    // Clears all in-progress compass tracking data.
     fun reset() {
         currentTrail.clear()
         trailOrigin = null

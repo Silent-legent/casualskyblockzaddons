@@ -72,6 +72,12 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 				{ value -> cfg.NucleusMap = value },
 				"Shows a mini-map of Crystal Hollows."
 			)
+			.toggle(
+				"Commission Display",
+				{cfg.CommissionsDisplay},
+				{value -> cfg.CommissionsDisplay = value },
+				"Show your curent commissions and there progression."
+			)
 
 		categories.add(general)
 		categories.add(mining)

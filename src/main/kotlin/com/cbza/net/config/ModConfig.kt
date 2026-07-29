@@ -13,6 +13,7 @@ class ModConfig {
 	var MiningAbilityAnnouncer = true
 	var NucleusMap = true
 	var PingGlide = true
+	var CommissionsDisplay = true
 	var PowderChestYOffset = 0.0
 
 	var abilityAnnouncerX = -1
@@ -22,6 +23,10 @@ class ModConfig {
 	var nucleusMapX = 10
 	var nucleusMapY = 10
 	var nucleusMapScale = 1.0f
+
+	var CommissionsDisplayX = 0
+	var CommissionsDisplayY = 100
+	var CommissionsDisplayScale = 1.0f
 
 	var manualPing = 0
 

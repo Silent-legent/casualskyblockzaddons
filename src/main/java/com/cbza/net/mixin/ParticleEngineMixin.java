@@ -1,7 +1,7 @@
 package com.cbza.net.mixin;
 
-import com.cbza.net.utility.WishingCompassSolver;
-import com.cbza.net.feature.PowderChestSolver;
+import com.cbza.net.feature.mining.hollows.map.WishingCompassSolver;
+import com.cbza.net.feature.mining.hollows.PowderChestSolver;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;

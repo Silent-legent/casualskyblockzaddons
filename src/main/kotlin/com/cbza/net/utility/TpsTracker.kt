@@ -1,5 +1,8 @@
 package com.cbza.net.utility
 
+// Estimates the server's current TPS (ticks per second. basically how well the
+// server is keeping up / how laggy it is), by timing how far apart game updates
+// arrive and smoothing that out over recent samples.
 object TpsTracker {
 
     // Ring buffer of recent tick deltas (ms), used to smooth the TPS reading
@@ -14,6 +17,8 @@ object TpsTracker {
 
     @Volatile private var latestTps: Double? = null
 
+    // Called on every game update. Measures the time since the last update and
+    // uses it to refresh the smoothed TPS estimate.
     @Synchronized
     fun onTimeUpdate() {
         val now = System.currentTimeMillis()

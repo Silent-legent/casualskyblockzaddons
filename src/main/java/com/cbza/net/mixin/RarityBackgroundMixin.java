@@ -14,38 +14,62 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import static com.cbza.net.utility.ColorCatalog.*;
 
 @Mixin(GuiGraphicsExtractor.class)
 public class RarityBackgroundMixin {
+
+    private static final Map<ItemStack, Integer> RARITY_COLOR_CACHE =
+            Collections.synchronizedMap(new WeakHashMap<>());
+
+    private static String stripLeadingIcon(String line) {
+        int i = 0;
+        while (i < line.length() && !(line.charAt(i) >= 'A' && line.charAt(i) <= 'Z')) {
+            i++;
+        }
+        return line.substring(i);
+    }
 
     private static int getRarityColor(ItemStack itemStack) {
         if (!ModConfig.Companion.get().showRarityBackgrounds) return -1;
         if (itemStack == null || itemStack.isEmpty()) return -1;
 
+        Integer cached = RARITY_COLOR_CACHE.get(itemStack);
+        if (cached != null) return cached;
+
+        int color = computeRarityColor(itemStack);
+        RARITY_COLOR_CACHE.put(itemStack, color);
+        return color;
+    }
+
+    private static int computeRarityColor(ItemStack itemStack) {
         ItemLore lore = itemStack.get(DataComponents.LORE);
         if (lore == null) return -1;
 
         List<Component> lines = lore.lines();
         if (lines == null || lines.isEmpty()) return -1;
 
-        // Scan backwards from the last line, checking up to 8 lines -
-        // some contexts (sellable menus) append extra footer lines after the real rarity line.
         int linesToCheck = Math.min(8, lines.size());
         for (int i = 0; i < linesToCheck; i++) {
-            String line = lines.get(lines.size() - 1 - i).getString().toUpperCase();
+            String rawLine = stripLeadingIcon(lines.get(lines.size() - 1 - i).getString().trim());
 
-            if (line.contains("ADMIN"))        return 0x60AA0000;
-            if (line.contains("ULTIMATE"))     return 0x60AA0000;
-            if (line.contains("VERY SPECIAL")) return 0x60FF5555;
-            if (line.contains("SPECIAL"))      return 0x60FF5555;
-            if (line.contains("DIVINE"))       return 0x6055FFFF;
-            if (line.contains("MYTHIC"))       return 0x60FF55FF;
-            if (line.contains("LEGENDARY"))    return 0x60FFAA00;
-            if (line.contains("EPIC"))         return 0x60AA00AA;
-            if (line.contains("RARE"))         return 0x605555FF;
-            if (line.contains("UNCOMMON"))     return 0x6055FF55;
-            if (line.contains("COMMON"))       return 0x60FFFFFF;
+            if (rawLine.startsWith("ADMIN"))        return TRANSLUCENT_DARK_RED;
+            if (rawLine.startsWith("ULTIMATE"))     return TRANSLUCENT_DARK_RED;
+            if (rawLine.startsWith("VERY SPECIAL")) return TRANSLUCENT_LIGHT_RED;
+            if (rawLine.startsWith("SPECIAL"))      return TRANSLUCENT_LIGHT_RED;
+            if (rawLine.startsWith("DIVINE"))       return TRANSLUCENT_CYAN;
+            if (rawLine.startsWith("MYTHIC"))       return TRANSLUCENT_LIGHT_MAGENTA;
+            if (rawLine.startsWith("LEGENDARY"))    return TRANSLUCENT_GOLD;
+            if (rawLine.startsWith("EPIC"))         return TRANSLUCENT_DARK_PURPLE;
+            if (rawLine.startsWith("RARE"))         return TRANSLUCENT_LIGHT_BLUE;
+            if (rawLine.startsWith("UNCOMMON"))     return TRANSLUCENT_LIGHT_GREEN;
+            if (rawLine.startsWith("COMMON"))       return TRANSLUCENT_WHITE;
+
         }
 
         return -1;

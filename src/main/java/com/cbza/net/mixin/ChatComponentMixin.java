@@ -1,9 +1,9 @@
 package com.cbza.net.mixin;
 
-import com.cbza.net.feature.MiningAbilityTracker;
-import com.cbza.net.feature.PowderChestSolver;
-import com.cbza.net.feature.NucleusMap;
-import com.cbza.net.utility.WishingCompassSolver;
+import com.cbza.net.feature.mining.general.MiningAbilityTracker;
+import com.cbza.net.feature.mining.hollows.PowderChestSolver;
+import com.cbza.net.feature.mining.hollows.map.NucleusMap;
+import com.cbza.net.feature.mining.hollows.map.WishingCompassSolver;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.chat.GuiMessageSource;
 import net.minecraft.client.multiplayer.chat.GuiMessageTag;
@@ -40,8 +40,12 @@ public class ChatComponentMixin {
         if (text.contains("is now available!")) {
             MiningAbilityTracker.INSTANCE.onAbilityReady(text);
         }
+        if (text.contains("Your Wishing Compass shattered into pieces!")) {
+            WishingCompassSolver.INSTANCE.onCompassUsed();
+        }
         if (text.contains("Get to the Queen before my stench goes away and you'll be able to sneak past her imbecile Guards!"))  {
             WishingCompassSolver.INSTANCE.onKingsScentGranted();
         }
+        NucleusMap.INSTANCE.onCoordsShared(text);
     }
 }

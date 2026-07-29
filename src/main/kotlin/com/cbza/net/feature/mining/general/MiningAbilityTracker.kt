@@ -1,9 +1,14 @@
-package com.cbza.net.feature
+package com.cbza.net.feature.mining.general
 
 import com.cbza.net.config.ModConfig
 import net.minecraft.client.Minecraft
+import net.minecraft.network.chat.Component
+import net.minecraft.sounds.SoundEvents
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+import kotlin.math.abs
 
+// Watches chat and the player list to detect when a mining ability was used,
+// figures out when it will be ready again, and shows a popup + sound when it is.
 object MiningAbilityTracker {
 
     private val abilityNames = listOf(
@@ -12,7 +17,7 @@ object MiningAbilityTracker {
         "Maniac Miner",
         "Tunnel Vision",
         "Sheer Force",
-        "Gemstone Infusion"
+        "Gemstone Infusion",
     )
 
     @Volatile private var lastServerJoinTime = System.currentTimeMillis()
@@ -49,6 +54,7 @@ object MiningAbilityTracker {
     )
     private var wasOnMiningIsland = false
 
+    // Called when chat suggests an ability was just activated. Starts tracking it.
     fun onAbilityUsed(chatMessage: String) {
         if (!ModConfig.get().MiningAbilityAnnouncer) return
         if (System.currentTimeMillis() - lastServerJoinTime < STARTUP_GRACE_MS) return
@@ -61,6 +67,7 @@ object MiningAbilityTracker {
         abilityUsedTime = System.currentTimeMillis()
     }
 
+    // Called when chat suggests the tracked ability is ready again (fallback if the tab-list check below doesn't catch it first).
     fun onAbilityReady(chatMessage: String) {
         if (!ModConfig.get().MiningAbilityAnnouncer) return
         if (System.currentTimeMillis() - lastServerJoinTime < STARTUP_GRACE_MS) return
@@ -68,13 +75,15 @@ object MiningAbilityTracker {
         if (activeAbilityName.isEmpty()) return
         if (!chatMessage.contains(activeAbilityName)) return
         if (gotTimeFromTab) return // tab already handling this cast, message is just a fallback
-        // Ignore a message that arrives faster than any real cooldown allows -
+        // Ignore a message that arrives faster than any real cooldown allows
         // it's a stale leftover from a previous cast, not this one.
         if (System.currentTimeMillis() - abilityUsedTime < MIN_PLAUSIBLE_SECONDS * 1000L) return
         waitingForReady = false
         showPopup("$activeAbilityName Ready!")
     }
 
+    // Runs every game tick. Handles leaving/entering mining islands, and reads the
+    // player list to pin down exactly when the tracked ability becomes ready.
     fun tick() {
         val onMiningIsland = miningIslands.any { it.inIsland() }
         if (wasOnMiningIsland && !onMiningIsland) reset()
@@ -83,23 +92,21 @@ object MiningAbilityTracker {
         if (!ModConfig.get().MiningAbilityAnnouncer) return
         if (!waitingForReady) return
 
+        // Try to read the cooldown from the tab list, requiring two consistent
+        // readings in a row before trusting it (avoids acting on a glitchy value).
         if (!gotTimeFromTab && System.currentTimeMillis() - abilityUsedTime > TAB_READ_DELAY_MS) {
             val seconds = readTabListCooldownSeconds()
             val now = System.currentTimeMillis()
 
             if (seconds == null || seconds <= MIN_PLAUSIBLE_SECONDS) {
-                // Bad/missing reading - skip it, keep any existing candidate intact.
             } else {
                 val pending = pendingTabSeconds
                 if (pending == null) {
-                    // First sighting - don't trust it yet, confirm next tick.
                     pendingTabSeconds = seconds
                     pendingTabReadTime = now
                 } else {
-                    // A real countdown drops by roughly the time that passed.
-                    // If it doesn't line up, the tab was mid-update - restart confirmation.
                     val elapsedSec = (now - pendingTabReadTime) / 1000.0
-                    val isConsistent = kotlin.math.abs((pending - elapsedSec) - seconds) <= 1.0
+                    val isConsistent = abs((pending - elapsedSec) - seconds) <= 1.0
 
                     if (isConsistent) {
                         readyTime = now + (seconds * 1000L)
@@ -119,6 +126,8 @@ object MiningAbilityTracker {
         }
     }
 
+    // Looks for the tracked ability's line in the player list and reads its
+    // remaining cooldown in seconds. Returns null if it can't find/read one.
     private fun readTabListCooldownSeconds(): Long? {
         val mc = Minecraft.getInstance()
         val lines = mc.connection?.getOnlinePlayers()
@@ -130,11 +139,13 @@ object MiningAbilityTracker {
         }
 
         if (abilityLine == null) {
+            // No ability widget visible in tab list. warn the player once per island.
             if (!hasWarnedTabMissingThisIsland) {
                 hasWarnedTabMissingThisIsland = true
                 mc.player?.sendSystemMessage(
-                    net.minecraft.network.chat.Component.literal(
-                        "§c[§6CasualSkyblockZAddons§c] §fAbilityAnnouncer works more accurately with the §ePickaxe Ability Widget §fvisible in your tab list."
+                    Component.literal(
+                        "§c[§6CasualSkyblockZAddons§c]\n" +
+                                "§fAbilityAnnouncer works more accurately with the §ePickaxe Ability Widget §fvisible in your tab list."
                     )
                 )
             }
@@ -147,6 +158,7 @@ object MiningAbilityTracker {
         return match.groupValues[1].toLongOrNull()
     }
 
+    // Shows the on-screen popup text and plays a notification sound.
     private fun showPopup(message: String) {
         val now = System.currentTimeMillis()
         if (message == lastPopupMessage && now - lastPopupTime < POPUP_COOLDOWN_MS) return
@@ -158,13 +170,14 @@ object MiningAbilityTracker {
         val mc = Minecraft.getInstance()
         mc.execute {
             mc.player?.playSound(
-                net.minecraft.sounds.SoundEvents.NOTE_BLOCK_PLING.value(),
+                SoundEvents.NOTE_BLOCK_PLING.value(),
                 1.0f,
                 2.0f
             )
         }
     }
 
+    // Returns the popup that should be showing right now, or null if there isn't one / it expired.
     fun getActivePopup(): String? {
         val msg = popupMessage ?: return null
         if (System.currentTimeMillis() > popupExpireTime) {
@@ -174,6 +187,7 @@ object MiningAbilityTracker {
         return msg
     }
 
+    // Clears all tracking state back to a clean slate.
     fun reset() {
         waitingForReady = false
         activeAbilityName = ""
@@ -187,8 +201,6 @@ object MiningAbilityTracker {
         hasWarnedTabMissingThisIsland = false
     }
 
-    // Call from your actual "connected to server" event, not just mod load -
-    // otherwise chat-history replay mods can trigger fake popups on join.
     fun onServerJoin() {
         reset()
     }

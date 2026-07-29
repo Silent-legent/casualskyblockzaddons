@@ -1,0 +1,19 @@
+# Attribution
+
+The name-coloring / cosmetics feature in this mod is based on code
+originally written by Eclipse-5214 for their mod, Stella:
+https://github.com/Eclipse-5214/stella
+
+Eclipse-5214 gave permission to use and adapt this code here.
+
+- `MixinFont.java` (in com.cbza.net.mixin) is very close to the
+  original, just repointed at this mod's package. It lives outside
+  this folder because Fabric's mixin loader requires it to sit in
+  the main mixin package.
+- `Cosmetics.java` here is based on Stella's core idea of intercepting
+  and recoloring chat text, but the UUID lookup, JSON fetching, and
+  gradient support were rewritten for this mod.
+- `NameData.java` was inspired by a similar data class Eclipse-5214
+  shared alongside the above, extended here with gradients.
+
+Thanks to Eclipse-5214 for letting me build on his work.
