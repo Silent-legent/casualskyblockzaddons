@@ -3,9 +3,16 @@ package com.cbza.net.feature.mining.hollows.map
 import com.cbza.net.config.ModConfig
 import com.cbza.net.feature.mining.hollows.map.NucleusMap.markOdawaUnreliable
 import com.cbza.net.utility.TabListReader
+import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.ChatMessageEvent
+import com.cbza.net.event.events.ParticleSpawnEvent
+
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import net.minecraft.core.particles.ParticleTypes
+
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
+
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -14,6 +21,22 @@ import kotlin.math.sqrt
 // figures out that direction, and by using the compass twice from two different
 // spots, works out where the two directions cross to get an exact location.
 object WishingCompassSolver {
+    init {
+        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+            val text = event.text
+            if (text.contains("Your Wishing Compass shattered into pieces!")) {
+                onCompassUsed()
+            }
+            if (text.contains("Get to the Queen before my stench goes away and you'll be able to sneak past her imbecile Guards!")) {
+                onKingsScentGranted()
+            }
+        }
+        EventBus.subscribe(ParticleSpawnEvent::class.java) { event ->
+            if (event.options.type == ParticleTypes.HAPPY_VILLAGER) {
+                handleParticle(event.x, event.y, event.z)
+            }
+        }
+    }
 
     private const val TRAIL_WINDOW_MS = 250L
     private const val MIN_TRAIL_POINTS = 20

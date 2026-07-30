@@ -3,9 +3,18 @@ package com.cbza.net
 import com.cbza.net.config.ConfigScreen
 import com.cbza.net.config.HudEditorScreen
 import com.cbza.net.config.ModConfig
+import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.ServerJoinEvent
 import com.cbza.net.feature.mining.general.MiningAbilityTracker
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.utility.Render2D
+import com.cbza.net.feature.mining.hollows.PowderChestSolver
+import com.cbza.net.feature.mining.hollows.map.WishingCompassSolver
+import com.cbza.net.feature.mining.general.PingGlide
+import com.cbza.net.feature.dungeons.MimicChest
+import com.cbza.net.feature.mining.general.CommissionsDisplay
+import com.cbza.net.external.stella.customname.Cosmetics
+
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
@@ -13,20 +22,25 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
-import com.cbza.net.external.stella.customname.Cosmetics
-import com.cbza.net.feature.mining.general.CommissionsDisplay
-import net.minecraft.commands.arguments.ColorArgument.color
 
 class CasualskyblockzaddonsClient : ClientModInitializer {
 	override fun onInitializeClient() {
 		Cosmetics.init()
 		CommissionsDisplay.register()
 
+		// calls run at startup instead of whenever something else happens to touch them first.
+		PowderChestSolver
+		NucleusMap
+		MiningAbilityTracker
+		WishingCompassSolver
+		PingGlide
+		MimicChest
+
 		val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")
 		val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "player_arrow")
 
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
-			MiningAbilityTracker.onServerJoin()
+			EventBus.post(ServerJoinEvent())
 		}
 
 		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->

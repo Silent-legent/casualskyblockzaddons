@@ -1,15 +1,39 @@
 package com.cbza.net.feature.mining.general
 
 import com.cbza.net.config.ModConfig
+import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.ChatMessageEvent
+import com.cbza.net.event.events.ServerJoinEvent
+import com.cbza.net.event.events.TickEvent
+
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
+
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+
 import kotlin.math.abs
 
 // Watches chat and the player list to detect when a mining ability was used,
 // figures out when it will be ready again, and shows a popup + sound when it is.
 object MiningAbilityTracker {
+    init {
+        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+            val text = event.text
+            if (text.contains("You used your") && text.contains("Pickaxe Ability!")) {
+                onAbilityUsed(text)
+            }
+            if (text.contains("is now available!")) {
+                onAbilityReady(text)
+            }
+        }
+        EventBus.subscribe(TickEvent::class.java) {
+            tick()
+        }
+        EventBus.subscribe(ServerJoinEvent::class.java) {
+            onServerJoin()
+        }
+    }
 
     private val abilityNames = listOf(
         "Pickobulus",

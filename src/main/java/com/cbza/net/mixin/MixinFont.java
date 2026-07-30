@@ -6,8 +6,10 @@
 package com.cbza.net.mixin;
 
 import com.cbza.net.external.stella.customname.Cosmetics;
+
 import net.minecraft.client.gui.Font;
 import net.minecraft.util.FormattedCharSequence;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;

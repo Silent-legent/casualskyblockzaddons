@@ -5,6 +5,7 @@ import com.cbza.net.feature.mining.general.CommissionsDisplay.commissionPattern
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.Render2D
+
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen

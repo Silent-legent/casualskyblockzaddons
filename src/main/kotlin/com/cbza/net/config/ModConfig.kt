@@ -1,8 +1,11 @@
 package com.cbza.net.config
 
+import com.cbza.net.feature.dungeons.MimicChest
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+
 import net.fabricmc.loader.api.FabricLoader
+
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -14,6 +17,7 @@ class ModConfig {
 	var NucleusMap = true
 	var PingGlide = true
 	var CommissionsDisplay = true
+	var MimicChest = true
 	var PowderChestYOffset = 0.0
 
 	var abilityAnnouncerX = -1

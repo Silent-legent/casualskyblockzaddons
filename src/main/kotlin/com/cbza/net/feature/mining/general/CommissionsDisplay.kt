@@ -7,20 +7,30 @@ import com.cbza.net.utility.TabListReader
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
+import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
 object CommissionsDisplay {
+
+    private val miningIslands = setOf(
+        SkyBlockIsland.DWARVEN_MINES,
+        SkyBlockIsland.CRYSTAL_HOLLOWS,
+        SkyBlockIsland.MINESHAFT,
+    )
+    private var wasOnMiningIsland = false
 
     val commissionPattern = Regex("""(.+): (\d+(?:\.\d+)?%|DONE)""")
 
     fun register() {
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "commissions")) { graphics, _ ->
+            val onMiningIsland = miningIslands.any { it.inIsland() }
+            if (wasOnMiningIsland && !onMiningIsland) reset()
+            wasOnMiningIsland = onMiningIsland
+            if (!onMiningIsland) return@addLast
+
             val cfg = ModConfig.get()
             if (!cfg.CommissionsDisplay) return@addLast
 
-            val currentScreen = Minecraft.getInstance().screen
-            if (currentScreen is HudEditorScreen) {
-                if (Minecraft.getInstance().screen is HudEditorScreen) return@addLast
-            }
+            if (Minecraft.getInstance().screen is HudEditorScreen) return@addLast
 
             val lines = TabListReader.getCommissionLines()
             if (lines.isEmpty()) return@addLast
@@ -31,8 +41,6 @@ object CommissionsDisplay {
             val scale = cfg.CommissionsDisplayScale
             val lineHeight = 10
             val nameColor = ColorCatalog.WHITE
-            val percentColor = ColorCatalog.RED
-            val doneColor = ColorCatalog.GREEN
 
             graphics.pose().pushMatrix()
             graphics.pose().scale(scale, scale)
@@ -69,5 +77,7 @@ object CommissionsDisplay {
 
             graphics.pose().popMatrix()
         }
+    }
+    fun reset() {
     }
 }

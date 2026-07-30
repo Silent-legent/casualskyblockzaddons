@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
+
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -47,6 +48,14 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 				"Colors item backgrounds based on their rarity."
 			)
 
+		val dungeons = ConfigCategory("Dungeons")
+			.toggle(
+				"Mimic Chest",
+				{ cfg.MimicChest},
+				{ value -> cfg.MimicChest = value },
+				"Outlines the mimic chest inside Dungeons."
+			)
+
 		val mining = ConfigCategory("Mining")
 			.toggle(
 				"Ability Announcer",
@@ -80,6 +89,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 			)
 
 		categories.add(general)
+		categories.add(dungeons)
 		categories.add(mining)
 
 		for (cat in categories) {

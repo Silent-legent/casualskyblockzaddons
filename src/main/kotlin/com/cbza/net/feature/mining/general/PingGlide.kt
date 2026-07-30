@@ -9,11 +9,22 @@ import com.cbza.net.utility.BlockStrength
 import com.cbza.net.utility.PingTracker
 import com.cbza.net.utility.TabListReader
 import com.cbza.net.utility.TpsTracker
+import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.TickEvent
+import com.cbza.net.event.events.WorldRenderEvent
+import com.cbza.net.utility.Render3D
+import com.mojang.blaze3d.vertex.PoseStack
+
+import net.minecraft.client.renderer.rendertype.RenderTypes
+import net.minecraft.client.renderer.ShapeRenderer
+import net.minecraft.util.ARGB
+import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.tags.ItemTags
 import net.minecraft.world.phys.BlockHitResult
+
 import tech.thatgravyboat.skyblockapi.api.area.mining.MiningBlock
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockId.Companion.getSkyBlockId
@@ -22,6 +33,14 @@ import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockId.Companion.getSky
 // how long it will actually take to break it. so the player knows the exact
 // moment it's "safe" to move on to the next block without wasting the swing.
 object PingGlide {
+    init {
+        EventBus.subscribe(TickEvent::class.java) {
+            tick()
+        }
+        EventBus.subscribe(WorldRenderEvent::class.java) { event ->
+            render(event)
+        }
+    }
 
     @Volatile var currentMineStartTime: Long = 0L
     @Volatile var currentSafeToMoveMs: Long? = null
@@ -42,6 +61,39 @@ object PingGlide {
         SkyBlockIsland.MINESHAFT,
         SkyBlockIsland.THE_END
     )
+
+    private fun render(event: WorldRenderEvent) {
+        if (!ModConfig.get().PingGlide) return
+        if (!_isCurrentlyMining) return
+        val blockPos = _currentBlockPos ?: return
+
+        val mc = Minecraft.getInstance()
+        val safe = isSafeToMove()
+        val outlineColor = if (safe) ARGB.colorFromFloat(1.0f, 0.0f, 1.0f, 0.0f) else ARGB.colorFromFloat(1.0f, 1.0f, 0.0f, 0.0f)
+        val fillColor = if (safe) ARGB.colorFromFloat(0.3f, 0.0f, 1.0f, 0.0f) else ARGB.colorFromFloat(0.3f, 1.0f, 0.0f, 0.0f)
+
+        val level = mc.level
+        val shape = level?.getBlockState(blockPos)?.getShape(level, blockPos) ?: Shapes.block()
+        val camPos = event.camPos
+        val dx = blockPos.x - camPos.x
+        val dy = blockPos.y - camPos.y
+        val dz = blockPos.z - camPos.z
+
+        val fillBuffer = event.bufferSource.getBuffer(RenderTypes.debugQuads())
+        shape.forAllBoxes { x1, y1, z1, x2, y2, z2 ->
+            Render3D.drawBox(fillBuffer, event.matrix,
+                dx + (x1 + x2) / 2, dy + (y1 + y2) / 2, dz + (z1 + z2) / 2,
+                (x2 - x1) / 1.9, (y2 - y1) / 1.9, (z2 - z1) / 1.9,
+                fillColor)
+        }
+        event.bufferSource.endBatch(RenderTypes.debugQuads())
+
+        val outlinePoseStack = PoseStack()
+        outlinePoseStack.last().pose().set(event.matrix)
+        val lineBuffer = event.bufferSource.getBuffer(RenderTypes.lines())
+        ShapeRenderer.renderShape(outlinePoseStack, lineBuffer, shape, dx, dy, dz, outlineColor, 10.0f)
+        event.bufferSource.endBatch(RenderTypes.lines())
+    }
 
     // Only run this feature on islands where mining actually happens.
     private fun isEligibleIsland(): Boolean = eligibleIslands.any { it.inIsland() }

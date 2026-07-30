@@ -3,16 +3,39 @@ package com.cbza.net.feature.mining.hollows.map
 import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.TabListReader
+import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.ChatMessageEvent
+import com.cbza.net.event.events.TickEvent
+
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
+
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+
 import kotlin.math.sqrt
+
+private val SERVER_ID_PATTERN = Regex("Sending to server (\\S+)")
 
 // Builds a live map of the Crystal Hollows: tracks where each named point of
 // interest (POI) is located, remembers unknown/unconfirmed marker positions,
 // and carries that knowledge over when the player switches servers.
 object NucleusMap {
+    init {
+        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+            val text = event.text
+            if (text.contains("Sending to server")) {
+                val match = SERVER_ID_PATTERN.find(text)
+                if (match != null) {
+                    onServerSwitch(match.groupValues[1])
+                }
+            }
+            onCoordsShared(text)
+        }
+        EventBus.subscribe(TickEvent::class.java) {
+            tick()
+        }
+    }
 
     private const val NUCLEUS_CENTER_X = 512.0
     private const val NUCLEUS_CENTER_Z = 512.0

@@ -10,6 +10,7 @@
         "MixinFont",
 		"ParticleEngineMixin",
 		"PingDebugMonitorMixin",
+		"PlayerInteractMixin",
 		"RarityBackgroundMixin"
 	],
 	"injectors": {

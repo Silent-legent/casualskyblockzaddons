@@ -2,7 +2,9 @@ package com.cbza.net.utility
 
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+
 import org.objectweb.asm.util.CheckClassAdapter
+
 import javax.sound.sampled.Line
 
 // Reads text from the player list (the "tab" menu you see when holding Tab

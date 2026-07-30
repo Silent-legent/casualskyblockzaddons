@@ -1,12 +1,42 @@
 package com.cbza.net.feature.mining.hollows
 
 import com.cbza.net.config.ModConfig
+import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.ChatMessageEvent
+import com.cbza.net.event.events.ParticleSpawnEvent
+import com.cbza.net.event.events.WorldRenderEvent
+import com.cbza.net.utility.Render3D
+
+import net.minecraft.util.ARGB
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.rendertype.RenderTypes
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.phys.Vec3
+
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+
 import java.util.concurrent.ConcurrentHashMap
 
 object PowderChestSolver {
+	init {
+		EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+			val text = event.text
+			if (text.contains("You uncovered a treasure chest!") && !text.contains("[DEBUG]")) {
+				onChestSpawn()
+			}
+			if (text.contains("Sending to server")) {
+				clearChests()
+			}
+		}
+		EventBus.subscribe(ParticleSpawnEvent::class.java) { event ->
+			if (event.options.type == ParticleTypes.CRIT) {
+				handleParticle(event.x, event.y, event.z)
+			}
+		}
+		EventBus.subscribe(WorldRenderEvent::class.java) { event ->
+			render(event)
+		}
+	}
 
 	private val chestExpireTimes = ConcurrentHashMap<String, Long>()
 	private val activeChests = ConcurrentHashMap<String, Vec3>()
@@ -19,6 +49,23 @@ object PowderChestSolver {
 
 	private const val PARTICLE_POINT_LIFETIME_MS = 250L
 	private const val PARTICLE_WINDOW_MS = 60000L
+
+	private fun render(event: WorldRenderEvent) {
+		if (!ModConfig.get().PowderChestSolver) return
+		val positions = getActiveChestPositions()
+		if (positions.isEmpty()) return
+
+		val buffer = event.bufferSource.getBuffer(RenderTypes.debugFilledBox())
+		val color = ARGB.colorFromFloat(1.0f, 0.0f, 1.0f, 0.0f)
+		val camPos = event.camPos
+
+		for (targetPos in positions) {
+			Render3D.drawBox(buffer, event.matrix,
+				targetPos.x - camPos.x, targetPos.y - camPos.y, targetPos.z - camPos.z,
+				0.05, 0.05, 0.05, color)
+		}
+		event.bufferSource.endBatch(RenderTypes.debugFilledBox())
+	}
 
 	private fun isRecentlyMining(): Boolean {
 		val mc = Minecraft.getInstance()
