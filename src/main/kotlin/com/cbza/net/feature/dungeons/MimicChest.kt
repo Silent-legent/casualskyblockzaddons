@@ -2,7 +2,7 @@ package com.cbza.net.feature.dungeons
 
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
-import com.cbza.net.event.events.BlockInteractEvent
+import com.cbza.net.event.events.ChatMessageEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.event.events.WorldRenderEvent
 import com.cbza.net.utility.Render3D
@@ -23,14 +23,18 @@ object MimicChest {
         EventBus.subscribe(WorldRenderEvent::class.java) { event ->
             render(event)
         }
-        EventBus.subscribe(BlockInteractEvent::class.java) { event ->
-            interact(event)
+        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+            val text = event.text
+            if (text.contains("The Catacombs")) {
+                clearChests()
+            }
         }
     }
 
     private val trackedChests = mutableSetOf<BlockPos>()
     private val openedChests = mutableSetOf<BlockPos>()
     private var tickCounter = 0
+    private var clearChestsDelay = 0
 
     private fun render(event: WorldRenderEvent) {
         if (!ModConfig.get().MimicChest) return
@@ -55,6 +59,14 @@ object MimicChest {
     }
 
     fun tick() {
+        if (clearChestsDelay > 0) {
+            clearChestsDelay--
+            if (clearChestsDelay == 0) {
+                trackedChests.clear()
+                openedChests.clear()
+            }
+        }
+
         if (!SkyBlockIsland.THE_CATACOMBS.inIsland()) {
             trackedChests.clear()
             openedChests.clear()
@@ -81,13 +93,10 @@ object MimicChest {
                 }
             }
         }
-    }
-    fun interact(event: BlockInteractEvent) {
-        removeChest(event.blockPos)
+        trackedChests.removeIf { chestPos -> level.getBlockState(chestPos).block != Blocks.TRAPPED_CHEST }
     }
 
-    fun removeChest(pos: BlockPos) {
-        trackedChests.remove(pos)
-        openedChests.add(pos)
+    fun clearChests() {
+        clearChestsDelay = 60 // 3s
     }
 }
