@@ -10,7 +10,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class ModConfig {
+	var hudLayerOrder: MutableList<String> = mutableListOf("ability_announcer", "Commission_Display", "nucleus_map")
+
 	@JvmField
+
 	var showRarityBackgrounds = true
 	var PowderChestSolver = true
 	var MiningAbilityAnnouncer = true

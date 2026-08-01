@@ -1,7 +1,6 @@
 package com.cbza.net.config
 
 import com.cbza.net.feature.mining.general.CommissionsDisplay
-import com.cbza.net.feature.mining.general.CommissionsDisplay.commissionPattern
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.Render2D
@@ -10,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.client.input.KeyEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
@@ -18,6 +18,9 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
     private val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")
     private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "player_arrow")
+
+    private var lastMouseX = 0
+    private var lastMouseY = 0
 
     private var draggingElement: String? = null
     private var dragOffsetX = 0
@@ -29,6 +32,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         super.init()
         val resetButton = Button.builder(Component.literal("Reset Positions")) {
             val cfg = ModConfig.get()
+            cfg.hudLayerOrder = mutableListOf("Commission_Display", "ability_announcer", "nucleus_map")
             cfg.abilityAnnouncerX = -1
             cfg.abilityAnnouncerY = -1
             cfg.abilityAnnouncerScale = 3.5f
@@ -46,92 +50,110 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
     override fun extractRenderState(context: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
         context.fillGradient(0, 0, width, height, 0x90101010.toInt(), 0x90151515.toInt())
 
+        lastMouseX = mouseX
+        lastMouseY = mouseY
+
         val cfg = ModConfig.get()
 
-        if (cfg.MiningAbilityAnnouncer) {
-            val text = "Maniac Miner Ready!"
-            val scale = cfg.abilityAnnouncerScale
-            val x = if (cfg.abilityAnnouncerX == -1) (width - this.font.width(text) * scale).toInt() / 2 else cfg.abilityAnnouncerX
-            val y = if (cfg.abilityAnnouncerY == -1) height / 3 else cfg.abilityAnnouncerY
+        for (name in cfg.hudLayerOrder) {
+            when (name) {
+                "ability_announcer" -> {
+                    if (cfg.MiningAbilityAnnouncer) {
+                        val text = "Maniac Miner Ready!"
+                        val scale = cfg.abilityAnnouncerScale
 
-            drawEditorBox(context, x, y, (this.font.width(text) * scale).toInt(), (10 * scale).toInt())
+                        val x = if (cfg.abilityAnnouncerX == -1) (width - this.font.width(text) * scale).toInt() / 2 else cfg.abilityAnnouncerX
+                        val y = if (cfg.abilityAnnouncerY == -1) height / 3 else cfg.abilityAnnouncerY
 
-            context.pose().pushMatrix()
-            context.pose().scale(scale, scale)
-            context.text(this.font, text, (x / scale).toInt(), (y / scale).toInt(), ARGB.opaque(ColorCatalog.GREEN), true)
-        } // 0x55FF55
-        context.pose().popMatrix()
+                        drawEditorBox(context, x, y, (this.font.width(text) * scale).toInt(), (10 * scale).toInt())
 
-        if (cfg.CommissionsDisplay) {
-            val fakeCommissions = listOf(
-                                "Sludge slayer: 74.5% ",
-                                "Yog slayer: 25%",
-                                "Boss corleon slayer: DONE",
-                                "Amber Crystal Hunter: 0%"
-            )
-            val scale = cfg.CommissionsDisplayScale
-            val y = cfg.CommissionsDisplayY
-            val x = cfg.CommissionsDisplayX
-            val lineHeight = 10
-            val nameColor = ColorCatalog.WHITE
-            val percentColor = ColorCatalog.RED
-            val doneColor = ColorCatalog.GREEN
+                        context.pose().pushMatrix()
+                        context.pose().scale(scale, scale)
+                        context.text(this.font, text, (x / scale).toInt(), (y / scale).toInt(), ARGB.opaque(ColorCatalog.GREEN), true)
 
-            drawEditorBox(context, x, y, (fakeCommissions.maxOf { this.font.width(it) } * scale).toInt(), (fakeCommissions.size * lineHeight * scale).toInt())
-
-            context.pose().pushMatrix()
-            context.pose().scale(scale, scale)
-
-            val ux = (x / scale).toInt()
-            val uy = (y / scale).toInt()
-
-            for ((index, line) in fakeCommissions.withIndex()) {
-                val match = CommissionsDisplay.commissionPattern.find(line) ?: continue
-                val name = match.groupValues[1]
-                val value = match.groupValues[2]
-
-                val y = uy + (index * lineHeight)
-                val namePrefix = "$name: "
-
-                context.text(this.font, namePrefix, ux, y, nameColor, true)
-                val valueX = ux + this.font.width(namePrefix)
-                val valueColor = if (value == "DONE") doneColor else percentColor
-                context.text(this.font, value, valueX, y, valueColor, true)
+                        context.pose().popMatrix()
+                    } // 0x55FF55
             }
-            context.pose().popMatrix()
+                "Commission_Display" -> {
+                if (cfg.CommissionsDisplay) {
+                    val fakeCommissions = listOf(
+                        "Sludge slayer: 74.5% ",
+                        "Yog slayer: 25%",
+                        "Boss corleon slayer: DONE",
+                        "Amber Crystal Hunter: 0%"
+                    )
+                    val scale = cfg.CommissionsDisplayScale
+                    val y = cfg.CommissionsDisplayY
+                    val x = cfg.CommissionsDisplayX
+                    val lineHeight = 10
+                    val nameColor = ColorCatalog.WHITE
+                    val percentColor = ColorCatalog.RED
+                    val doneColor = ColorCatalog.GREEN
 
-        }
+                    drawEditorBox(
+                        context,
+                        x,
+                        y,
+                        (fakeCommissions.maxOf { this.font.width(it) } * scale).toInt(),
+                        (fakeCommissions.size * lineHeight * scale).toInt())
 
-        if (cfg.NucleusMap) {
-            val mapSize = (100 * cfg.nucleusMapScale).toInt()
-            val x = cfg.nucleusMapX
-            val y = cfg.nucleusMapY
+                    context.pose().pushMatrix()
+                    context.pose().scale(scale, scale)
 
-            drawEditorBox(context, x, y, mapSize, mapSize)
+                    val ux = (x / scale).toInt()
+                    val uy = (y / scale).toInt()
 
-            Render2D.drawImage(context, textureId, x, y, mapSize, mapSize)
+                    for ((index, line) in fakeCommissions.withIndex()) {
+                        val match = CommissionsDisplay.commissionPattern.find(line) ?: continue
+                        val name = match.groupValues[1]
+                        val value = match.groupValues[2]
 
-            // fake POI dots using real colors and real sizes scaled with the map
-            val fakePoiOrder = listOf("Jungle Temple", "Mines of Divan", "Goblin Queen's Den")
-            val fakeOffsets = listOf(Pair(0.25, 0.25), Pair(0.75, 0.25), Pair(0.25, 0.75))
-            for (i in fakePoiOrder.indices) {
-                val name = fakePoiOrder[i]
-                val color = NucleusMap.poiColors[name] ?: continue
-                val size = ((NucleusMap.poiSizes[name] ?: 6) * cfg.nucleusMapScale).toInt()
-                val (offX, offY) = fakeOffsets[i]
-                val px = x + (mapSize * offX).toInt()
-                val py = y + (mapSize * offY).toInt()
-                context.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, color)
+                        val y = uy + (index * lineHeight)
+                        val namePrefix = "$name: "
+
+                        context.text(this.font, namePrefix, ux, y, nameColor, true)
+                        val valueX = ux + this.font.width(namePrefix)
+                        val valueColor = if (value == "DONE") doneColor else percentColor
+                        context.text(this.font, value, valueX, y, valueColor, true)
+                    }
+                    context.pose().popMatrix()
+
+                }
             }
+                "nucleus_map" -> {
+                    if (cfg.NucleusMap) {
+                        val mapSize = (100 * cfg.nucleusMapScale).toInt()
+                        val x = cfg.nucleusMapX
+                        val y = cfg.nucleusMapY
 
-            val centerX = x + mapSize / 2
-            val centerY = y + mapSize / 2
-            val arrowSize = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
-            context.pose().pushMatrix()
-            context.pose().translate(centerX.toFloat(), centerY.toFloat())
-            context.pose().translate(-(arrowSize / 2).toFloat(), -(arrowSize / 2).toFloat())
-            Render2D.drawImage(context, arrowId, 0, 0, arrowSize, arrowSize)
-            context.pose().popMatrix()
+                        drawEditorBox(context, x, y, mapSize, mapSize)
+
+                        Render2D.drawImage(context, textureId, x, y, mapSize, mapSize)
+
+                        // fake POI dots using real colors and real sizes scaled with the map
+                        val fakePoiOrder = listOf("Jungle Temple", "Mines of Divan", "Goblin Queen's Den")
+                        val fakeOffsets = listOf(Pair(0.25, 0.25), Pair(0.75, 0.25), Pair(0.25, 0.75))
+                        for (i in fakePoiOrder.indices) {
+                            val name = fakePoiOrder[i]
+                            val color = NucleusMap.poiColors[name] ?: continue
+                            val size = ((NucleusMap.poiSizes[name] ?: 6) * cfg.nucleusMapScale).toInt()
+                            val (offX, offY) = fakeOffsets[i]
+                            val px = x + (mapSize * offX).toInt()
+                            val py = y + (mapSize * offY).toInt()
+                            context.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, color)
+                        }
+
+                        val centerX = x + mapSize / 2
+                        val centerY = y + mapSize / 2
+                        val arrowSize = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
+                        context.pose().pushMatrix()
+                        context.pose().translate(centerX.toFloat(), centerY.toFloat())
+                        context.pose().translate(-(arrowSize / 2).toFloat(), -(arrowSize / 2).toFloat())
+                        Render2D.drawImage(context, arrowId, 0, 0, arrowSize, arrowSize)
+                        context.pose().popMatrix()
+                    }
+                }
+            }
         }
 
         context.text(this.font, "Drag to move, scroll to resize. Press ESC to close and save.", 10, height - 40, 0xFFFFFFFF.toInt(), true)
@@ -146,53 +168,118 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         context.fill(x + w, y, x + w + 1, y + h, 0x80FFFFFF.toInt())
     }
 
+    private fun elementAt(mx: Int, my: Int): String? {
+        val cfg = ModConfig.get()
+        for (name in HudLayerManager.hitOrder()) {
+            when (name) {
+                "nucleus_map" -> {
+                    val mapSize = (100 * cfg.nucleusMapScale).toInt()
+                    if (mx in cfg.nucleusMapX..(cfg.nucleusMapX + mapSize) && my in cfg.nucleusMapY..(cfg.nucleusMapY + mapSize)) {
+                        return "nucleus_map"
+                    }
+                }
+                "ability_announcer" -> {
+                    val text = "Maniac Miner Ready!"
+                    val scale = cfg.abilityAnnouncerScale
+                    val aw = (this.font.width(text) * scale).toInt()
+                    val ah = (10 * scale).toInt()
+                    val ax = if (cfg.abilityAnnouncerX == -1) (width - aw) / 2 else cfg.abilityAnnouncerX
+                    val ay = if (cfg.abilityAnnouncerY == -1) height / 3 else cfg.abilityAnnouncerY
+                    if (mx in ax..(ax + aw) && my in ay..(ay + ah)) {
+                        return "ability_announcer"
+                    }
+                }
+                "Commission_Display" -> {
+                    val ctext = listOf(
+                        "Sludge slayer: 74.5% ",
+                        "Yog slayer: 25%",
+                        "Boss corleon slayer: DONE",
+                        "Amber Crystal Hunter: 0%"
+                    )
+                    val cscale = cfg.CommissionsDisplayScale
+                    val lineHeight = 10
+                    val cw = (ctext.maxOf { this.font.width(it) } * cscale).toInt()
+                    val ch = (ctext.size * lineHeight * cscale).toInt()
+                    val cx = if (cfg.CommissionsDisplayX == -1) (width - cw) / 2 else cfg.CommissionsDisplayX
+                    val cy = if (cfg.CommissionsDisplayY == -1) height / 3 else cfg.CommissionsDisplayY
+                    if (mx in cx..(cx + cw) && my in cy..(cy + ch)) {
+                        return "Commission_Display"
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    override fun keyPressed(event: KeyEvent): Boolean {
+        val target = draggingElement ?: elementAt(lastMouseX, lastMouseY)
+
+        if (target != null) {
+            if (event.hasShiftDown()) {
+                HudLayerManager.moveLayer(target, up = true)
+            } else if (event.hasControlDown()) {
+                HudLayerManager.moveLayer(target, up = false)
+            }
+        }
+
+        return super.keyPressed(event)
+    }
+
     override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
         val cfg = ModConfig.get()
         val mx = event.x().toInt()
         val my = event.y().toInt()
 
-        val mapSize = (100 * cfg.nucleusMapScale).toInt()
-        if (mx in cfg.nucleusMapX..(cfg.nucleusMapX + mapSize) && my in cfg.nucleusMapY..(cfg.nucleusMapY + mapSize)) {
-            draggingElement = "nucleus_map"
-            dragOffsetX = mx - cfg.nucleusMapX
-            dragOffsetY = my - cfg.nucleusMapY
-            return true
-        }
-
-        val text = "Maniac Miner Ready!"
-        val scale = cfg.abilityAnnouncerScale
-        val aw = (this.font.width(text) * scale).toInt()
-        val ah = (10 * scale).toInt()
-        val ax = if (cfg.abilityAnnouncerX == -1) (width - aw) / 2 else cfg.abilityAnnouncerX
-        val ay = if (cfg.abilityAnnouncerY == -1) height / 3 else cfg.abilityAnnouncerY
-        if (mx in ax..(ax + aw) && my in ay..(ay + ah)) {
-            draggingElement = "ability_announcer"
-            dragOffsetX = mx - ax
-            dragOffsetY = my - ay
-            cfg.abilityAnnouncerX = ax
-            cfg.abilityAnnouncerY = ay
-            return true
-        }
-
-        val ctext = listOf(
-            "Sludge slayer: 74.5% ",
-            "Yog slayer: 25%",
-            "Boss corleon slayer: DONE",
-            "Amber Crystal Hunter: 0%"
-        )
-        val cscale = cfg.CommissionsDisplayScale
-        val lineHeight = 10
-        val cw = (ctext.maxOf { this.font.width(it) } * cscale).toInt()
-        val ch = (ctext.size * lineHeight * cscale).toInt()
-        val cx = if (cfg.CommissionsDisplayX == -1) (width - cw) / 2 else cfg.CommissionsDisplayX
-        val cy = if (cfg.CommissionsDisplayY == -1) height / 3 else cfg.CommissionsDisplayY
-        if (mx in cx..(cx + cw) && my in cy..(cy + ch)) {
-            draggingElement = "Commission_Display"
-            dragOffsetX = mx - cx
-            dragOffsetY = my - cy
-            cfg.CommissionsDisplayX = cx
-            cfg.CommissionsDisplayY = cy
-            return true
+        for (name in HudLayerManager.hitOrder()) {
+            when (name) {
+                "nucleus_map" -> {
+                    val mapSize = (100 * cfg.nucleusMapScale).toInt()
+                    if (mx in cfg.nucleusMapX..(cfg.nucleusMapX + mapSize) && my in cfg.nucleusMapY..(cfg.nucleusMapY + mapSize)) {
+                            draggingElement = "nucleus_map"
+                            dragOffsetX = mx - cfg.nucleusMapX
+                            dragOffsetY = my - cfg.nucleusMapY
+                        return true
+                    }
+                }
+                "ability_announcer" -> {
+                    val text = "Maniac Miner Ready!"
+                    val scale = cfg.abilityAnnouncerScale
+                    val aw = (this.font.width(text) * scale).toInt()
+                    val ah = (10 * scale).toInt()
+                    val ax = if (cfg.abilityAnnouncerX == -1) (width - aw) / 2 else cfg.abilityAnnouncerX
+                    val ay = if (cfg.abilityAnnouncerY == -1) height / 3 else cfg.abilityAnnouncerY
+                    if (mx in ax..(ax + aw) && my in ay..(ay + ah)) {
+                            draggingElement = "ability_announcer"
+                            dragOffsetX = mx - ax
+                            dragOffsetY = my - ay
+                            cfg.abilityAnnouncerX = ax
+                            cfg.abilityAnnouncerY = ay
+                        return true
+                    }
+                }
+                "Commission_Display" -> {
+                    val ctext = listOf(
+                        "Sludge slayer: 74.5% ",
+                        "Yog slayer: 25%",
+                        "Boss corleon slayer: DONE",
+                        "Amber Crystal Hunter: 0%"
+                    )
+                    val cscale = cfg.CommissionsDisplayScale
+                    val lineHeight = 10
+                    val cw = (ctext.maxOf { this.font.width(it) } * cscale).toInt()
+                    val ch = (ctext.size * lineHeight * cscale).toInt()
+                    val cx = if (cfg.CommissionsDisplayX == -1) (width - cw) / 2 else cfg.CommissionsDisplayX
+                    val cy = if (cfg.CommissionsDisplayY == -1) height / 3 else cfg.CommissionsDisplayY
+                    if (mx in cx..(cx + cw) && my in cy..(cy + ch)) {
+                            draggingElement = "Commission_Display"
+                            dragOffsetX = mx - cx
+                            dragOffsetY = my - cy
+                            cfg.CommissionsDisplayX = cx
+                            cfg.CommissionsDisplayY = cy
+                        return true
+                    }
+                }
+            }
         }
 
         return super.mouseClicked(event, doubleClick)
