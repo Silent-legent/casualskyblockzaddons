@@ -6,9 +6,12 @@ import com.cbza.net.utility.TabListReader
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatMessageEvent
 import com.cbza.net.event.events.TickEvent
+import com.cbza.net.utility.rendering.Render2D
 
-import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.resources.Identifier
 
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
@@ -36,6 +39,9 @@ object NucleusMap {
             tick()
         }
     }
+
+    private val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")
+    private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "player_arrow")
 
     private const val NUCLEUS_CENTER_X = 512.0
     private const val NUCLEUS_CENTER_Z = 512.0
@@ -350,6 +356,53 @@ object NucleusMap {
             discoveredPois.putAll(snapshot.pois)
         }
     }
+
+    fun render(graphics: GuiGraphicsExtractor) {
+            if (!ModConfig.get().NucleusMap) return
+            if (!inCrystalHollows) return
+
+            val mc = Minecraft.getInstance()
+            val cfg = ModConfig.get()
+            val mapSize = (100 * cfg.nucleusMapScale).toInt()
+            val arrowWidth = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
+            val arrowHeight = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
+
+            val mapX = cfg.nucleusMapX
+            val mapY = cfg.nucleusMapY
+
+            Render2D.drawImage(graphics, textureId, mapX, mapY, mapSize, mapSize)
+
+            for ((name, coords) in discoveredPois) {
+                val color = poiColors[name] ?: continue
+                val size = ((poiSizes[name] ?: 6) * cfg.nucleusMapScale).toInt()
+                val poiPos = getPoiMapPosition(coords.first, coords.second, mapSize)
+                val px = mapX + poiPos.first
+                val py = mapY + poiPos.second
+                graphics.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, color)
+            }
+
+            for ((id, coords) in unknownMarkers) {
+                val poiPos = getPoiMapPosition(coords.first, coords.second, mapSize)
+                val px = mapX + poiPos.first
+                val py = mapY + poiPos.second
+                val size = (6 * cfg.nucleusMapScale).toInt()
+                graphics.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, 0xFF808080.toInt())
+            }
+
+            val pos = getPlayerMapPosition(mapSize)
+            if (pos != null) {
+                val dotX = mapX + pos.first
+                val dotY = mapY + pos.second
+                val yaw = mc.player?.yRot ?: 0f
+
+                graphics.pose().pushMatrix()
+                graphics.pose().translate(dotX.toFloat(), dotY.toFloat())
+                graphics.pose().rotate(Math.toRadians((yaw + 180.0)).toFloat())
+                graphics.pose().translate(-(arrowWidth / 2).toFloat(), -(arrowHeight / 2).toFloat())
+                Render2D.drawImage(graphics, arrowId, 0, 0, arrowWidth, arrowHeight)
+                graphics.pose().popMatrix()
+            }
+        }
 
     // Wipes all currently tracked map data back to a clean slate.
     fun reset() {

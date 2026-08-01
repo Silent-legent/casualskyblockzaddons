@@ -3,7 +3,7 @@ package com.cbza.net.config
 import com.cbza.net.feature.mining.general.CommissionsDisplay
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.utility.ColorCatalog
-import com.cbza.net.utility.Render2D
+import com.cbza.net.utility.rendering.Render2D
 
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
@@ -87,8 +87,6 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                     val x = cfg.CommissionsDisplayX
                     val lineHeight = 10
                     val nameColor = ColorCatalog.WHITE
-                    val percentColor = ColorCatalog.RED
-                    val doneColor = ColorCatalog.GREEN
 
                     drawEditorBox(
                         context,
@@ -113,7 +111,13 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
                         context.text(this.font, namePrefix, ux, y, nameColor, true)
                         val valueX = ux + this.font.width(namePrefix)
-                        val valueColor = if (value == "DONE") doneColor else percentColor
+                        val progress: Float = if (value == "DONE") {
+                            1f
+                        } else {
+                            val number = value.removeSuffix("%").toFloatOrNull() ?: 0f
+                            number / 100f
+                        }
+                        val valueColor = ColorCatalog.lerpColor(ColorCatalog.RED, ColorCatalog.GREEN, progress)
                         context.text(this.font, value, valueX, y, valueColor, true)
                     }
                     context.pose().popMatrix()
@@ -156,7 +160,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             }
         }
 
-        context.text(this.font, "Drag to move, scroll to resize. Press ESC to close and save.", 10, height - 40, 0xFFFFFFFF.toInt(), true)
+        context.text(this.font, "Drag to move, scroll to resize. Hover + Shift/Ctrl to reorder layers. ESC to close and save.", 10, height - 40, 0xFFFFFFFF.toInt(), true)
 
         super.extractRenderState(context, mouseX, mouseY, delta)
     }

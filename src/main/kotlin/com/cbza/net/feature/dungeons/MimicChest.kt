@@ -5,7 +5,7 @@ import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatMessageEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.event.events.WorldRenderEvent
-import com.cbza.net.utility.Render3D
+import com.cbza.net.utility.rendering.Render3D
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.RenderTypes

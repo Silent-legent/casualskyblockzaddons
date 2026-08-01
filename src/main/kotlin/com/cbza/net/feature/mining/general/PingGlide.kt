@@ -6,13 +6,13 @@ package com.cbza.net.feature.mining.general
 
 import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.BlockStrength
-import com.cbza.net.utility.PingTracker
+import com.cbza.net.utility.tracking.PingTracker
 import com.cbza.net.utility.TabListReader
-import com.cbza.net.utility.TpsTracker
+import com.cbza.net.utility.tracking.TpsTracker
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.event.events.WorldRenderEvent
-import com.cbza.net.utility.Render3D
+import com.cbza.net.utility.rendering.Render3D
 import com.mojang.blaze3d.vertex.PoseStack
 
 import net.minecraft.client.renderer.rendertype.RenderTypes

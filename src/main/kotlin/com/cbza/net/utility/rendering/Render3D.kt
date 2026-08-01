@@ -1,7 +1,6 @@
-package com.cbza.net.utility
+package com.cbza.net.utility.rendering
 
 import com.mojang.blaze3d.vertex.VertexConsumer
-
 import org.joml.Matrix4f
 
 object Render3D {

@@ -1,8 +1,4 @@
-    /*
-    * Code given to me by Revvilon Creator of PingOfsetMiner
-    */
-
-package com.cbza.net.utility
+package com.cbza.net.utility.tracking
 
 object PingTracker {
     @Volatile private var latestPing: Long? = null

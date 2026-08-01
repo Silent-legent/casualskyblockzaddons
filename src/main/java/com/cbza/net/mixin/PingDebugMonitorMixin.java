@@ -4,7 +4,7 @@
 
 package com.cbza.net.mixin;
 
-import com.cbza.net.utility.PingTracker;
+import com.cbza.net.utility.tracking.PingTracker;
 
 import net.minecraft.client.multiplayer.PingDebugMonitor;
 import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;

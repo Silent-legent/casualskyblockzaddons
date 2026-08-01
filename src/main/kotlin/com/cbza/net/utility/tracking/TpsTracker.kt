@@ -1,4 +1,4 @@
-package com.cbza.net.utility
+package com.cbza.net.utility.tracking
 
 // Estimates the server's current TPS (ticks per second. basically how well the
 // server is keeping up / how laggy it is), by timing how far apart game updates

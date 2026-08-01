@@ -1,4 +1,4 @@
-package com.cbza.net.utility
+package com.cbza.net.utility.rendering
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor

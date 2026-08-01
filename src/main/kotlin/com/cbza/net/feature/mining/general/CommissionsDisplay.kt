@@ -4,9 +4,8 @@ import com.cbza.net.config.HudEditorScreen
 import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.TabListReader
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.minecraft.client.Minecraft
-import net.minecraft.resources.Identifier
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
 object CommissionsDisplay {
@@ -20,20 +19,19 @@ object CommissionsDisplay {
 
     val commissionPattern = Regex("""(.+): (\d+(?:\.\d+)?%|DONE)""")
 
-    fun register() {
-        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "commissions")) { graphics, _ ->
+    fun render(graphics: GuiGraphicsExtractor) {
             val onMiningIsland = miningIslands.any { it.inIsland() }
             if (wasOnMiningIsland && !onMiningIsland) reset()
             wasOnMiningIsland = onMiningIsland
-            if (!onMiningIsland) return@addLast
+            if (!onMiningIsland) return
 
             val cfg = ModConfig.get()
-            if (!cfg.CommissionsDisplay) return@addLast
+            if (!cfg.CommissionsDisplay) return
 
-            if (Minecraft.getInstance().screen is HudEditorScreen) return@addLast
+            if (Minecraft.getInstance().screen is HudEditorScreen) return
 
             val lines = TabListReader.getCommissionLines()
-            if (lines.isEmpty()) return@addLast
+            if (lines.isEmpty()) return
 
             val mc = Minecraft.getInstance()
             val startX = cfg.CommissionsDisplayX
@@ -77,7 +75,6 @@ object CommissionsDisplay {
 
             graphics.pose().popMatrix()
         }
-    }
     fun reset() {
     }
 }
