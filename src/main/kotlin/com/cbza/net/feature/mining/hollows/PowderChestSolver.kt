@@ -2,8 +2,8 @@ package com.cbza.net.feature.mining.hollows
 
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
-import com.cbza.net.event.events.ChatMessageEvent
-import com.cbza.net.event.events.ParticleSpawnEvent
+import com.cbza.net.event.events.ChatEvent
+import com.cbza.net.event.events.ParticleEvent
 import com.cbza.net.event.events.WorldRenderEvent
 import com.cbza.net.utility.rendering.Render3D
 
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 object PowderChestSolver {
 	init {
-		EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+		EventBus.subscribe(ChatEvent::class.java) { event ->
 			val text = event.text
 			if (text.contains("You uncovered a treasure chest!") && !text.contains("[DEBUG]")) {
 				onChestSpawn()
@@ -28,7 +28,7 @@ object PowderChestSolver {
 				clearChests()
 			}
 		}
-		EventBus.subscribe(ParticleSpawnEvent::class.java) { event ->
+		EventBus.subscribe(ParticleEvent::class.java) { event ->
 			if (event.options.type == ParticleTypes.CRIT) {
 				handleParticle(event.x, event.y, event.z)
 			}

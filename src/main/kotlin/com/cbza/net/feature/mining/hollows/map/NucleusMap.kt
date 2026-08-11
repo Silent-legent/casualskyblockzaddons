@@ -4,7 +4,7 @@ import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.TabListReader
 import com.cbza.net.event.EventBus
-import com.cbza.net.event.events.ChatMessageEvent
+import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.rendering.Render2D
 
@@ -25,7 +25,7 @@ private val SERVER_ID_PATTERN = Regex("Sending to server (\\S+)")
 // and carries that knowledge over when the player switches servers.
 object NucleusMap {
     init {
-        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+        EventBus.subscribe(ChatEvent::class.java) { event ->
             val text = event.text
             if (text.contains("Sending to server")) {
                 val match = SERVER_ID_PATTERN.find(text)

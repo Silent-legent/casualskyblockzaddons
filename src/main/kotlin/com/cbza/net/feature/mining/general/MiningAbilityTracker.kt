@@ -2,7 +2,7 @@ package com.cbza.net.feature.mining.general
 
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
-import com.cbza.net.event.events.ChatMessageEvent
+import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.ServerJoinEvent
 import com.cbza.net.event.events.TickEvent
 
@@ -20,7 +20,7 @@ import kotlin.math.abs
 // figures out when it will be ready again, and shows a popup + sound when it is.
 object MiningAbilityTracker {
     init {
-        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+        EventBus.subscribe(ChatEvent::class.java) { event ->
             val text = event.text
             if (text.contains("You used your") && text.contains("Pickaxe Ability!")) {
                 onAbilityUsed(text)

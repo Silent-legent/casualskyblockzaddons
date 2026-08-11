@@ -3,7 +3,7 @@ package com.cbza.net.event.events
 import com.cbza.net.event.Event
 import net.minecraft.core.particles.ParticleOptions
 
-class ParticleSpawnEvent(
+class ParticleEvent(
     val options: ParticleOptions,
     val x: Double,
     val y: Double,

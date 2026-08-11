@@ -2,7 +2,7 @@ package com.cbza.net.feature.dungeons
 
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
-import com.cbza.net.event.events.ChatMessageEvent
+import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.event.events.WorldRenderEvent
 import com.cbza.net.utility.rendering.Render3D
@@ -23,7 +23,7 @@ object MimicChest {
         EventBus.subscribe(WorldRenderEvent::class.java) { event ->
             render(event)
         }
-        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+        EventBus.subscribe(ChatEvent::class.java) { event ->
             val text = event.text
             if (text.contains("The Catacombs")) {
                 clearChests()

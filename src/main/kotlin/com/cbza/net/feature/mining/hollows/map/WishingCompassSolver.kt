@@ -4,8 +4,8 @@ import com.cbza.net.config.ModConfig
 import com.cbza.net.feature.mining.hollows.map.NucleusMap.markOdawaUnreliable
 import com.cbza.net.utility.TabListReader
 import com.cbza.net.event.EventBus
-import com.cbza.net.event.events.ChatMessageEvent
-import com.cbza.net.event.events.ParticleSpawnEvent
+import com.cbza.net.event.events.ChatEvent
+import com.cbza.net.event.events.ParticleEvent
 
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
@@ -22,7 +22,7 @@ import kotlin.math.sqrt
 // spots, works out where the two directions cross to get an exact location.
 object WishingCompassSolver {
     init {
-        EventBus.subscribe(ChatMessageEvent::class.java) { event ->
+        EventBus.subscribe(ChatEvent::class.java) { event ->
             val text = event.text
             if (text.contains("Your Wishing Compass shattered into pieces!")) {
                 onCompassUsed()
@@ -31,7 +31,7 @@ object WishingCompassSolver {
                 onKingsScentGranted()
             }
         }
-        EventBus.subscribe(ParticleSpawnEvent::class.java) { event ->
+        EventBus.subscribe(ParticleEvent::class.java) { event ->
             if (event.options.type == ParticleTypes.HAPPY_VILLAGER) {
                 handleParticle(event.x, event.y, event.z)
             }

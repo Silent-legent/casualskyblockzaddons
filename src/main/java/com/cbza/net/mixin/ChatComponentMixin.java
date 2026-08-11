@@ -1,7 +1,7 @@
 package com.cbza.net.mixin;
 
 import com.cbza.net.event.EventBus;
-import com.cbza.net.event.events.ChatMessageEvent;
+import com.cbza.net.event.events.ChatEvent;
 
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.chat.GuiMessageSource;
@@ -19,6 +19,6 @@ public class ChatComponentMixin {
 
     @Inject(method = "addMessage", at = @At("HEAD"))
     private void onAddMessage(Component message, MessageSignature signature, GuiMessageSource source, GuiMessageTag tag, CallbackInfo ci) {
-        EventBus.INSTANCE.post(new ChatMessageEvent(message.getString()));
+        EventBus.INSTANCE.post(new ChatEvent(message.getString()));
     }
 }
