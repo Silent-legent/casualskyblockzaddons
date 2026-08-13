@@ -51,7 +51,7 @@ object PowderChestSolver {
 	private const val PARTICLE_WINDOW_MS = 60000L
 
 	private fun render(event: WorldRenderEvent) {
-		if (!ModConfig.get().PowderChestSolver) return
+		if (!ModConfig.get().powderChestSolver) return
 		val positions = getActiveChestPositions()
 		if (positions.isEmpty()) return
 
@@ -73,14 +73,14 @@ object PowderChestSolver {
 	}
 
 	fun onChestSpawn() {
-		if (!ModConfig.get().PowderChestSolver) return
+		if (!ModConfig.get().powderChestSolver) return
 		if (!SkyBlockIsland.CRYSTAL_HOLLOWS.inIsland()) return
 		expectingChest = true
 		expectingChestTime = System.currentTimeMillis()
 	}
 
 	fun handleParticle(x: Double, y: Double, z: Double) {
-		if (!ModConfig.get().PowderChestSolver) return
+		if (!ModConfig.get().powderChestSolver) return
 		if (!SkyBlockIsland.CRYSTAL_HOLLOWS.inIsland()) return
 		if (!expectingChest) return
 
@@ -92,7 +92,7 @@ object PowderChestSolver {
 
 		if (isRecentlyMining()) return // actively swinging - almost certainly a mining crit, not a chest hint
 
-		val adjustedY = y + ModConfig.get().PowderChestYOffset
+		val adjustedY = y + ModConfig.get().powderChestYOffset
 		val key = "${Math.round(x)},${Math.round(adjustedY)},${Math.round(z)}"
 		activeChests[key] = Vec3(x, adjustedY, z)
 		chestExpireTimes[key] = now + PARTICLE_POINT_LIFETIME_MS

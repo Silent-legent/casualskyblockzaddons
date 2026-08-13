@@ -34,10 +34,10 @@ import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockId.Companion.getSky
 // moment it's "safe" to move on to the next block without wasting the swing.
 object PingGlide {
     init {
-        EventBus.subscribe(TickEvent::class.java) {
+        EventBus.subscribe<TickEvent> {
             tick()
         }
-        EventBus.subscribe(WorldRenderEvent::class.java) { event ->
+        EventBus.subscribe<WorldRenderEvent> { event ->
             render(event)
         }
     }
@@ -63,7 +63,7 @@ object PingGlide {
     )
 
     private fun render(event: WorldRenderEvent) {
-        if (!ModConfig.get().PingGlide) return
+        if (!ModConfig.get().pingGlide) return
         if (!_isCurrentlyMining) return
         val blockPos = _currentBlockPos ?: return
 
@@ -150,7 +150,7 @@ object PingGlide {
     // Runs every game tick. Watches what block the player is aiming at and
     // whether they're actively mining it, and kicks off/cancels the timer as needed.
     fun tick() {
-        if (!ModConfig.get().PingGlide) return
+        if (!ModConfig.get().pingGlide) return
         if (!isEligibleIsland()) {
             _isCurrentlyMining = false
             return

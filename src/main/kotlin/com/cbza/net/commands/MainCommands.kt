@@ -11,35 +11,48 @@ object MainCommands {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(literal("csz")
                 .executes {
-                    val client = Minecraft.getInstance()
-                    client.execute {
-                        client.setScreen(ConfigScreen(client.screen))
-                    }
+                    openConfigScreen()
                     1
                 }
                 .then(literal("hud")
                     .executes {
-                        val client = Minecraft.getInstance()
-                        client.execute {
-                            client.setScreen(HudEditorScreen())
-                        }
+                        openHudEditor()
                         1
                     })
                 .then(literal("help")
                     .executes {
-                        val client = Minecraft.getInstance()
-                        val msg = net.minecraft.network.chat.Component.literal(
-                            "§c[§6CasualSkyblockZAddons§c]\n" +
-                                    "§fCommands:\n" +
-                                    "§e/csz §7- Open the mod settings screen.\n" +
-                                    "§e/csz hud §7- Open the HUD editor.\n" +
-                                    "§e/sharelocation <poi> §7- Share a discovered Crystal Hollows POI.\n" +
-                                    "§e/calculatetick <miningSpeed> <block §7- Calculates ticks-to-break for a block at a given Mining Speed, + speed needed for the next tick.\n" +
-                                    "§e/csz help §7- Show this list."
-                        )
-                        client.player?.sendSystemMessage(msg)
+                        sendHelpMessage()
                         1
-                    }))
+                    })
+            )
         }
+    }
+
+    private fun openConfigScreen() {
+        val client = Minecraft.getInstance()
+        client.execute {
+            client.setScreen(ConfigScreen(client.screen))
+        }
+    }
+
+    private fun openHudEditor() {
+        val client = Minecraft.getInstance()
+        client.execute {
+            client.setScreen(HudEditorScreen())
+        }
+    }
+
+    private fun sendHelpMessage() {
+        val client = Minecraft.getInstance()
+        val msg = net.minecraft.network.chat.Component.literal(
+            "§c[§6CasualSkyblockZAddons§c]\n" +
+                    "§fCommands:\n" +
+                    "§e/csz §7- Open the mod settings screen.\n" +
+                    "§e/csz hud §7- Open the HUD editor.\n" +
+                    "§e/sharelocation <poi> §7- Share a discovered Crystal Hollows POI.\n" +
+                    "§e/calculatetick <miningSpeed> <block §7- Calculates ticks-to-break for a block at a given Mining Speed, + speed needed for the next tick.\n" +
+                    "§e/csz help §7- Show this list."
+        )
+        client.player?.sendSystemMessage(msg)
     }
 }

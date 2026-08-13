@@ -29,11 +29,15 @@ public class LevelRendererMixin {
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
         Vec3 camPos = camera.position();
 
-        Matrix4f viewMatrix = new Matrix4f(mc.gameRenderer.getMainCamera().getViewRotationMatrix(new Matrix4f()));
+        Matrix4f viewMatrix = new Matrix4f(camera.getViewRotationMatrix(new Matrix4f()));
         PoseStack poseStack = new PoseStack();
         poseStack.last().pose().set(viewMatrix);
         var matrix = poseStack.last().pose();
 
+        // 1. Fire event so features can submit draw calls
         EventBus.INSTANCE.post(new WorldRenderEvent(bufferSource, matrix, camPos));
+
+        // 2. Flush the buffer so queued feature render calls actually draw!
+        bufferSource.endBatch();
     }
 }

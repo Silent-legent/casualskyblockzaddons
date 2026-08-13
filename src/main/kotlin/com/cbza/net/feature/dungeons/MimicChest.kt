@@ -17,15 +17,14 @@ import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
 object MimicChest {
     init {
-        EventBus.subscribe(TickEvent::class.java) {
+        EventBus.subscribe<TickEvent> {
             tick()
         }
-        EventBus.subscribe(WorldRenderEvent::class.java) { event ->
+        EventBus.subscribe<WorldRenderEvent> { event ->
             render(event)
         }
-        EventBus.subscribe(ChatEvent::class.java) { event ->
-            val text = event.text
-            if (text.contains("The Catacombs")) {
+        EventBus.subscribe<ChatEvent> { event ->
+            if (event.text.contains("The Catacombs")) {
                 clearChests()
             }
         }
@@ -37,7 +36,7 @@ object MimicChest {
     private var clearChestsDelay = 0
 
     private fun render(event: WorldRenderEvent) {
-        if (!ModConfig.get().MimicChest) return
+        if (!ModConfig.get().mimicChest) return
         val positions = getMimicChestPositions()
         if (positions.isEmpty()) return
 

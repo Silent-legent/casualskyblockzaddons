@@ -6,6 +6,7 @@ import com.cbza.net.feature.slayers.slayerutil.SlayerBossXp
 import com.cbza.net.feature.slayers.slayerutil.SlayerCost
 import com.cbza.net.feature.slayers.slayerutil.SlayerType
 import com.cbza.net.utility.TextFormat.formatCoins
+import com.cbza.net.utility.TextFormat.formatWithDots
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.LongArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -110,8 +111,8 @@ object SlayerCommands {
             Component.literal(
                 "§c[§6CasualSkyblockZAddons§c]\n" +
                         "§fSlayer §e${slayer.displayName} §7(§eT$tierInput§7)\n" +
-                        "§fXP to next lvl: §a$xpToNextLevel\n" +
-                        "§fBosses left: §a$bossesLeft\n" +
+                        "§fXP to next lvl: §a${formatWithDots(xpToNextLevel)}\n" +
+                        "§fBosses left: §a${formatWithDots(bossesLeft ?: 0L)}\n" +
                         "§fSpawn cost: §a${formatCoins(totalCost ?: 0L)}"
             )
         )

@@ -1,19 +1,20 @@
 package com.cbza.net.config
 
+import java.util.Collections
+
 object HudLayerManager {
     fun hitOrder(): List<String> = ModConfig.get().hudLayerOrder.reversed()
 
     fun moveLayer(name: String, up: Boolean) {
-            val cfg = ModConfig.get()
-            val list = cfg.hudLayerOrder
-            val index = list.indexOf(name)
-            val newIndex = if (up) index + 1 else index - 1
+        val list = ModConfig.get().hudLayerOrder
+        val index = list.indexOf(name)
+        if (index == -1) return
 
-            if (newIndex in list.indices) {
-                val temp = list[index]
+        val newIndex = if (up) index + 1 else index - 1
 
-                list[index] = list[newIndex]
-                list[newIndex] = temp
-            }
+        if (newIndex in list.indices) {
+            Collections.swap(list, index, newIndex)
+            ModConfig.save() // Save changes when reordering!
         }
     }
+}

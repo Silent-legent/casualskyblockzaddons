@@ -2,11 +2,13 @@ package com.cbza.net.event
 
 object EventBus {
 
-    // For each event type (like ChatMessageEvent), store a list of functions to call.
     private val listeners = mutableMapOf<Class<out Event>, MutableList<(Event) -> Unit>>()
 
-    // Register interest in an event type. Example usage:
-    // EventBus.subscribe(ChatMessageEvent::class.java) { event -> ... }
+    // Generic Kotlin helper - no more ::class.java needed!
+    inline fun <reified T : Event> subscribe(noinline listener: (T) -> Unit) {
+        subscribe(T::class.java, listener)
+    }
+
     fun <T : Event> subscribe(eventType: Class<T>, listener: (T) -> Unit) {
         val list = listeners.getOrPut(eventType) { mutableListOf() }
 
@@ -14,10 +16,11 @@ object EventBus {
         list.add(listener as (Event) -> Unit)
     }
 
-    // Called when something happens. Notifies every listener registered for this event's type.
     fun post(event: Event) {
         val list = listeners[event.javaClass] ?: return
-        for (listener in list) {
+
+        // Copy list to safely loop even if subscriptions change during execution
+        for (listener in ArrayList(list)) {
             listener(event)
         }
     }

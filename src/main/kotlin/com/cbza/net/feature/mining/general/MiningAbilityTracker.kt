@@ -20,19 +20,18 @@ import kotlin.math.abs
 // figures out when it will be ready again, and shows a popup + sound when it is.
 object MiningAbilityTracker {
     init {
-        EventBus.subscribe(ChatEvent::class.java) { event ->
-            val text = event.text
-            if (text.contains("You used your") && text.contains("Pickaxe Ability!")) {
-                onAbilityUsed(text)
+        EventBus.subscribe<ChatEvent> { event ->
+            if (event.text.contains("You used your") && event.text.contains("Pickaxe Ability!")) {
+                onAbilityUsed(event.text)
             }
-            if (text.contains("is now available!")) {
-                onAbilityReady(text)
+            if (event.text.contains("is now available!")) {
+                onAbilityReady(event.text)
             }
         }
-        EventBus.subscribe(TickEvent::class.java) {
+        EventBus.subscribe<TickEvent> {
             tick()
         }
-        EventBus.subscribe(ServerJoinEvent::class.java) {
+        EventBus.subscribe<ServerJoinEvent> {
             onServerJoin()
         }
     }
@@ -82,7 +81,7 @@ object MiningAbilityTracker {
 
     // Called when chat suggests an ability was just activated. Starts tracking it.
     fun onAbilityUsed(chatMessage: String) {
-        if (!ModConfig.get().MiningAbilityAnnouncer) return
+        if (!ModConfig.get().miningAbilityAnnouncer) return
         if (System.currentTimeMillis() - lastServerJoinTime < STARTUP_GRACE_MS) return
         val match = abilityNames.firstOrNull { chatMessage.contains(it) } ?: return
         activeAbilityName = match
@@ -95,7 +94,7 @@ object MiningAbilityTracker {
 
     // Called when chat suggests the tracked ability is ready again (fallback if the tab-list check below doesn't catch it first).
     fun onAbilityReady(chatMessage: String) {
-        if (!ModConfig.get().MiningAbilityAnnouncer) return
+        if (!ModConfig.get().miningAbilityAnnouncer) return
         if (System.currentTimeMillis() - lastServerJoinTime < STARTUP_GRACE_MS) return
         if (!waitingForReady) return
         if (activeAbilityName.isEmpty()) return
@@ -115,7 +114,7 @@ object MiningAbilityTracker {
         if (wasOnMiningIsland && !onMiningIsland) reset()
         wasOnMiningIsland = onMiningIsland
         if (!onMiningIsland) return
-        if (!ModConfig.get().MiningAbilityAnnouncer) return
+        if (!ModConfig.get().miningAbilityAnnouncer) return
         if (!waitingForReady) return
 
         // Try to read the cooldown from the tab list, requiring two consistent

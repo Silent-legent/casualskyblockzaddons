@@ -3,7 +3,6 @@ package com.cbza.net.feature.slayers
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.feature.slayers.slayerutil.SlayerType
-import net.minecraft.client.Minecraft
 
 object SlayerXpTracker {
 

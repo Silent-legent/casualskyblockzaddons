@@ -15,6 +15,6 @@ public class ClientTickMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
-        EventBus.INSTANCE.post(new TickEvent());
+        EventBus.INSTANCE.post(TickEvent.INSTANCE);
     }
 }

@@ -63,7 +63,7 @@ object NucleusMap {
 
     val poiColors = mapOf(
         "Jungle Temple"       to ColorCatalog.PURPLE,
-        "Mines of Divan"      to ColorCatalog.Yellow,
+        "Mines of Divan"      to ColorCatalog.YELLOW,
         "King Yolkar"         to ColorCatalog.ORANGE,
         "Goblin Queen's Den"  to ColorCatalog.GREEN,
         "Lost Precursor City" to ColorCatalog.WHITE,
@@ -151,7 +151,7 @@ object NucleusMap {
     // Called when someone (in chat) shares a set of coordinates. Tries to match
     // them to a named POI, or otherwise stores them as an unknown marker.
     fun onCoordsShared(text: String) {
-        if (!ModConfig.get().NucleusMap) return
+        if (!ModConfig.get().nucleusMap) return
         if (!inCrystalHollows) return
 
         val match = coordRegex.find(text) ?: return
@@ -189,7 +189,7 @@ object NucleusMap {
     // scans for POI-confirming NPCs, estimates POI positions by sampling the
     // player's own position, and cleans up markers that are no longer needed.
     fun tick() {
-        if (!ModConfig.get().NucleusMap) return
+        if (!ModConfig.get().nucleusMap) return
 
         val mc = Minecraft.getInstance()
         val now = System.currentTimeMillis()
@@ -358,7 +358,7 @@ object NucleusMap {
     }
 
     fun render(graphics: GuiGraphicsExtractor) {
-            if (!ModConfig.get().NucleusMap) return
+            if (!ModConfig.get().nucleusMap) return
             if (!inCrystalHollows) return
 
             val mc = Minecraft.getInstance()

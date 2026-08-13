@@ -26,7 +26,7 @@ object CommissionsDisplay {
             if (!onMiningIsland) return
 
             val cfg = ModConfig.get()
-            if (!cfg.CommissionsDisplay) return
+            if (!cfg.commissionsDisplay) return
 
             if (Minecraft.getInstance().screen is HudEditorScreen) return
 
@@ -34,9 +34,9 @@ object CommissionsDisplay {
             if (lines.isEmpty()) return
 
             val mc = Minecraft.getInstance()
-            val startX = cfg.CommissionsDisplayX
-            val startY = cfg.CommissionsDisplayY
-            val scale = cfg.CommissionsDisplayScale
+            val startX = cfg.commissionsDisplayX
+            val startY = cfg.commissionsDisplayY
+            val scale = cfg.commissionsDisplayScale
             val lineHeight = 10
             val nameColor = ColorCatalog.WHITE
 

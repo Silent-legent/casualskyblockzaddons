@@ -7,9 +7,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 
 object HudLayers {
     private val renderers: Map<String, (GuiGraphicsExtractor) -> Unit> = mapOf(
-        "ability_announcer"  to { g -> MiningAbilityTracker.render(g) },
-        "Commission_Display" to { g -> CommissionsDisplay.render(g) },
-        "nucleus_map"        to { g -> NucleusMap.render(g) }
+        "ability_announcer"  to MiningAbilityTracker::render,
+        "commission_display" to CommissionsDisplay::render,
+        "nucleus_map"        to NucleusMap::render
     )
 
     fun renderAll(graphics: GuiGraphicsExtractor) {

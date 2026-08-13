@@ -10,8 +10,8 @@ import java.util.HashMap
 
 class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzAddons")) {
 
-	private val categories = ArrayList<ConfigCategory>()
-	private val collapsed = HashMap<String, Boolean>()
+	private val categories = mutableListOf<ConfigCategory>()
+	private val collapsed = mutableMapOf<String, Boolean>()
 
 	// hover-delay tooltip tracking
 	private var hoveredKey: String? = null
@@ -43,48 +43,41 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		val general = ConfigCategory("General")
 			.toggle(
 				"Rarity Backgrounds",
-				{ cfg.showRarityBackgrounds },
-				{ value -> cfg.showRarityBackgrounds = value },
+				cfg::showRarityBackgrounds,
 				"Colors item backgrounds based on their rarity."
 			)
 
 		val dungeons = ConfigCategory("Dungeons")
 			.toggle(
 				"Mimic Chest",
-				{ cfg.MimicChest},
-				{ value -> cfg.MimicChest = value },
+				cfg::mimicChest,
 				"Outlines the mimic chest inside Dungeons."
 			)
 
 		val mining = ConfigCategory("Mining")
 			.toggle(
 				"Ability Announcer",
-				{ cfg.MiningAbilityAnnouncer },
-				{ value -> cfg.MiningAbilityAnnouncer = value },
+				cfg::miningAbilityAnnouncer,
 				"Shows a popup and sound when your pickaxe ability is ready."
 			)
 			.toggle(
 				"Ping Glide",
-				{ cfg.PingGlide },
-				{ value -> cfg.PingGlide = value },
+				cfg::pingGlide,
 				"Outlines your block and shows when it's safe to move without losing progress"
 			)
 			.toggle(
 				"Chest Solver",
-				{ cfg.PowderChestSolver },
-				{ value -> cfg.PowderChestSolver = value },
+				cfg::powderChestSolver,
 				"Highlights the exact point to look while opening PowderChests."
 			)
 			.toggle(
 				"Nucleus Map",
-				{ cfg.NucleusMap },
-				{ value -> cfg.NucleusMap = value },
+				cfg::nucleusMap,
 				"Shows a mini-map of Crystal Hollows."
 			)
 			.toggle(
 				"Commission Display",
-				{cfg.CommissionsDisplay},
-				{value -> cfg.CommissionsDisplay = value },
+				cfg::commissionsDisplay,
 				"Show your curent commissions and there progression."
 			)
 
@@ -98,7 +91,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 	}
 
 	private fun getButtonText(entry: ConfigCategory.ToggleEntry): Component {
-		val value = entry.getter.asBoolean
+		val value = entry.getter()
 		val suffix = if (value) " [ON]" else " [OFF]"
 		return Component.literal(entry.label + suffix)
 	}
@@ -126,8 +119,8 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 					val button = Button.builder(
 						getButtonText(entry)
 					) { btn ->
-						val newValue = !entry.getter.asBoolean
-						entry.setter.accept(newValue)
+						val newValue = !entry.getter()
+						entry.setter(newValue)
 						ModConfig.save()
 						btn.message = getButtonText(entry)
 					}.bounds(x, y, COLUMN_WIDTH, ROW_HEIGHT - 2).build()
@@ -155,7 +148,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 				for (row in category.entries.indices) {
 					val entry = category.entries[row]
 					val y = TOP_MARGIN + 20 + row * (ROW_HEIGHT + 4)
-					val isEnabled = entry.getter.asBoolean
+					val isEnabled = entry.getter()
 					if (isEnabled) {
 						renderColoredButtonBox(context, x, y, COLUMN_WIDTH, ROW_HEIGHT - 2, COLOR_ENABLED_BOX, COLOR_ENABLED_BORDER)
 					}

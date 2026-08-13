@@ -1,13 +1,16 @@
 package com.cbza.net.utility.tracking
 
-// Estimates the server's current TPS (ticks per second. basically how well the
-// server is keeping up / how laggy it is), by timing how far apart game updates
-// arrive and smoothing that out over recent samples.
+import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.ServerJoinEvent
+
+/**
+ * Tracks and calculates real-time server TPS (Ticks Per Second) using a ring buffer
+ * of packet time deltas.
+ */
 object TpsTracker {
 
-    // Ring buffer of recent tick deltas (ms), used to smooth the TPS reading
     private const val SAMPLE_COUNT = 20
-    private const val MIN_DELTA_MS = 100L
+    private const val MIN_DELTA_MS = 100L // Ignores duplicate/burst packets
 
     private val samples = DoubleArray(SAMPLE_COUNT)
     private var sampleIndex = 0
@@ -17,8 +20,15 @@ object TpsTracker {
 
     @Volatile private var latestTps: Double? = null
 
-    // Called on every game update. Measures the time since the last update and
-    // uses it to refresh the smoothed TPS estimate.
+    init {
+        // Automatically reset stale sample data whenever changing servers or lobbies
+        EventBus.subscribe<ServerJoinEvent> { reset() }
+    }
+
+    /**
+     * Called whenever a packet updating world time arrives from the server.
+     * Assumes a standard packet interval of 20 server ticks.
+     */
     @Synchronized
     fun onTimeUpdate() {
         val now = System.currentTimeMillis()
@@ -26,7 +36,7 @@ object TpsTracker {
         if (prevTime != 0L) {
             val delta = now - prevTime
 
-            // Skip suspiciously fast updates (duplicate/burst events)
+            // Skip burst/duplicate packets without updating prevTime so the next interval measures correctly
             if (delta < MIN_DELTA_MS) {
                 return
             }
@@ -35,14 +45,24 @@ object TpsTracker {
             sampleIndex = (sampleIndex + 1) % SAMPLE_COUNT
             if (samplesFilled < SAMPLE_COUNT) samplesFilled++
 
-            val avgDelta = samples.take(samplesFilled).average()
+            // Zero-allocation sum
+            var sum = 0.0
+            for (i in 0 until samplesFilled) {
+                sum += samples[i]
+            }
+
+            val avgDelta = sum / samplesFilled
+
+            // 20 ticks * 1000 ms / avgDelta ms = 20000.0 / avgDelta
             latestTps = (20000.0 / avgDelta).coerceIn(0.0, 20.0)
         }
 
         prevTime = now
     }
 
-    /** Call this on (re)join/world-change so stale data doesn't pollute the next reading */
+    /**
+     * Clears all recorded samples. Call on world transition/warp.
+     */
     @Synchronized
     fun reset() {
         samples.fill(0.0)
@@ -52,6 +72,8 @@ object TpsTracker {
         latestTps = null
     }
 
-    /** Returns null if no valid samples have been collected yet */
+    /**
+     * Returns the smoothed server TPS, or null if insufficient packets have arrived.
+     */
     fun getAverageTps(): Double? = latestTps
 }

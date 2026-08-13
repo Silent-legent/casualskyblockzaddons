@@ -86,7 +86,7 @@ object WishingCompassSolver {
     // Called for every particle spawned by the compass. Collects them into a
     // "trail" that we'll later use to figure out the pointing direction.
     fun handleParticle(x: Double, y: Double, z: Double) {
-        if (!ModConfig.get().NucleusMap) return
+        if (!ModConfig.get().nucleusMap) return
         if (!NucleusMap.inCrystalHollows) return
 
         val now = System.currentTimeMillis()
@@ -180,7 +180,7 @@ object WishingCompassSolver {
 
     // Called when the player picks up the "King's Scent" buff, which changes which POI a compass targets.
     fun onKingsScentGranted() {
-        if (!ModConfig.get().NucleusMap) return
+        if (!ModConfig.get().nucleusMap) return
         if (!NucleusMap.inCrystalHollows) return
 
         kingsScentExpiresAt = System.currentTimeMillis() + KINGS_CENT_DURATION_MS
