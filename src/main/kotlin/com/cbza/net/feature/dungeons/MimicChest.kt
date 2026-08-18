@@ -4,7 +4,7 @@ import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.TickEvent
-import com.cbza.net.event.events.WorldRenderEvent
+import com.cbza.net.event.events.RenderEvent
 import com.cbza.net.utility.rendering.Render3D
 
 import net.minecraft.client.Minecraft
@@ -20,7 +20,7 @@ object MimicChest {
         EventBus.subscribe<TickEvent> {
             tick()
         }
-        EventBus.subscribe<WorldRenderEvent> { event ->
+        EventBus.subscribe<RenderEvent> { event ->
             render(event)
         }
         EventBus.subscribe<ChatEvent> { event ->
@@ -35,7 +35,7 @@ object MimicChest {
     private var tickCounter = 0
     private var clearChestsDelay = 0
 
-    private fun render(event: WorldRenderEvent) {
+    private fun render(event: RenderEvent) {
         if (!ModConfig.get().mimicChest) return
         val positions = getMimicChestPositions()
         if (positions.isEmpty()) return

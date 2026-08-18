@@ -17,13 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ChatComponent.class)
 public class ChatComponentMixin {
 
-    @Inject(method = "addMessage", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "addMessage", at = @At("HEAD"))
     private void onAddMessage(Component message, MessageSignature signature, GuiMessageSource source, GuiMessageTag tag, CallbackInfo ci) {
-        ChatEvent event = new ChatEvent(message);
-        EventBus.INSTANCE.post(event);
-
-        if (event.isCancelled()) {
-            ci.cancel(); // Stops Minecraft from adding the message to chat
-        }
+        EventBus.INSTANCE.post(new ChatEvent(message));
     }
 }

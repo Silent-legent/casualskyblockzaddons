@@ -11,7 +11,7 @@ import com.cbza.net.utility.TabListReader
 import com.cbza.net.utility.tracking.TpsTracker
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.TickEvent
-import com.cbza.net.event.events.WorldRenderEvent
+import com.cbza.net.event.events.RenderEvent
 import com.cbza.net.utility.rendering.Render3D
 import com.mojang.blaze3d.vertex.PoseStack
 
@@ -37,7 +37,7 @@ object PingGlide {
         EventBus.subscribe<TickEvent> {
             tick()
         }
-        EventBus.subscribe<WorldRenderEvent> { event ->
+        EventBus.subscribe<RenderEvent> { event ->
             render(event)
         }
     }
@@ -62,7 +62,7 @@ object PingGlide {
         SkyBlockIsland.THE_END
     )
 
-    private fun render(event: WorldRenderEvent) {
+    private fun render(event: RenderEvent) {
         if (!ModConfig.get().pingGlide) return
         if (!_isCurrentlyMining) return
         val blockPos = _currentBlockPos ?: return

@@ -1,7 +1,7 @@
 package com.cbza.net.mixin;
 
 import com.cbza.net.event.EventBus;
-import com.cbza.net.event.events.WorldRenderEvent;
+import com.cbza.net.event.events.RenderEvent;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Camera;
@@ -35,7 +35,7 @@ public class LevelRendererMixin {
         var matrix = poseStack.last().pose();
 
         // 1. Fire event so features can submit draw calls
-        EventBus.INSTANCE.post(new WorldRenderEvent(bufferSource, matrix, camPos));
+        EventBus.INSTANCE.post(new RenderEvent(bufferSource, matrix, camPos));
 
         // 2. Flush the buffer so queued feature render calls actually draw!
         bufferSource.endBatch();

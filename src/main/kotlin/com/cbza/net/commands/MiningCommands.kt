@@ -25,9 +25,7 @@ object MiningCommands {
                         val poiName = StringArgumentType.getString(ctx, "poi")
                         shareLocations(poiName)
                         1
-                    }
-                )
-            )
+                    }))
 
             // /calculatetick <miningSpeed> <block>
             dispatcher.register(literal("calculatetick")
@@ -44,10 +42,7 @@ object MiningCommands {
 
                             calculateTick(miningSpeed, blockKey)
                             1
-                        }
-                    )
-                )
-            )
+                        })))
         }
     }
 

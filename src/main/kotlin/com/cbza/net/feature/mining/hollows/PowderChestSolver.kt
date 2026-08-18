@@ -4,7 +4,7 @@ import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.ParticleEvent
-import com.cbza.net.event.events.WorldRenderEvent
+import com.cbza.net.event.events.RenderEvent
 import com.cbza.net.utility.rendering.Render3D
 
 import net.minecraft.util.ARGB
@@ -33,7 +33,7 @@ object PowderChestSolver {
 				handleParticle(event.x, event.y, event.z)
 			}
 		}
-		EventBus.subscribe(WorldRenderEvent::class.java) { event ->
+		EventBus.subscribe(RenderEvent::class.java) { event ->
 			render(event)
 		}
 	}
@@ -50,7 +50,7 @@ object PowderChestSolver {
 	private const val PARTICLE_POINT_LIFETIME_MS = 250L
 	private const val PARTICLE_WINDOW_MS = 60000L
 
-	private fun render(event: WorldRenderEvent) {
+	private fun render(event: RenderEvent) {
 		if (!ModConfig.get().powderChestSolver) return
 		val positions = getActiveChestPositions()
 		if (positions.isEmpty()) return

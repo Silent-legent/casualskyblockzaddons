@@ -9,21 +9,24 @@ import net.minecraft.client.Minecraft
 object MainCommands {
     fun register() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            dispatcher.register(literal("csz")
+            dispatcher.register(
+                literal("csz")
                 .executes {
                     openConfigScreen()
                     1
                 }
-                .then(literal("hud")
-                    .executes {
-                        openHudEditor()
-                        1
-                    })
-                .then(literal("help")
-                    .executes {
-                        sendHelpMessage()
-                        1
-                    })
+                .then(
+                    literal("hud")
+                        .executes {
+                            openHudEditor()
+                            1
+                        })
+                .then(
+                    literal("help")
+                        .executes {
+                            sendHelpMessage()
+                            1
+                        })
             )
         }
     }

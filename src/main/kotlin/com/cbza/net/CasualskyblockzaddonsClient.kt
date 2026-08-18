@@ -2,6 +2,7 @@ package com.cbza.net
 
 import com.cbza.net.commands.MainCommands
 import com.cbza.net.commands.MiningCommands
+import com.cbza.net.commands.ShortCommands
 import com.cbza.net.commands.SlayerCommands
 import com.cbza.net.config.HudEditorScreen
 import com.cbza.net.config.HudLayers
@@ -37,6 +38,7 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 
 		MainCommands.register()
 		MiningCommands.register()
+		ShortCommands.register()
 		SlayerCommands.register()
 
 		ClientPlayConnectionEvents.JOIN.register { _, _, _ ->

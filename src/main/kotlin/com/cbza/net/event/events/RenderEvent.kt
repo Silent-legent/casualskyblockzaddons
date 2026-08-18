@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 
-class WorldRenderEvent (
+class RenderEvent (
     val bufferSource: MultiBufferSource.BufferSource,
     val matrix : Matrix4f,
     val camPos: Vec3
