@@ -21,7 +21,7 @@ public class RarityBackgroundMixin {
             at = @At("HEAD")
     )
     private void drawRarityBackgroundWithOwner(@Nullable LivingEntity owner, ItemStack itemStack, int x, int y, int seed, CallbackInfo ci) {
-        int color = RarityBackground.INSTANCE.getRarityColor(itemStack);
+        int color = RarityBackground.INSTANCE.getRarityColor(itemStack, x, y);
         if (color != -1) {
             ((GuiGraphicsExtractor) (Object) this).fill(x, y, x + 16, y + 16, color);
         }
@@ -32,7 +32,7 @@ public class RarityBackgroundMixin {
             at = @At("HEAD")
     )
     private void drawRarityBackgroundWithSeed(ItemStack itemStack, int x, int y, int seed, CallbackInfo ci) {
-        int color = RarityBackground.INSTANCE.getRarityColor(itemStack);
+        int color = RarityBackground.INSTANCE.getRarityColor(itemStack, x, y);
         if (color != -1) {
             ((GuiGraphicsExtractor) (Object) this).fill(x, y, x + 16, y + 16, color);
         }
@@ -43,7 +43,7 @@ public class RarityBackgroundMixin {
             at = @At("HEAD")
     )
     private void drawRarityBackgroundFake(ItemStack itemStack, int x, int y, int seed, CallbackInfo ci) {
-        int color = RarityBackground.INSTANCE.getRarityColor(itemStack);
+        int color = RarityBackground.INSTANCE.getRarityColor(itemStack, x, y);
         if (color != -1) {
             ((GuiGraphicsExtractor) (Object) this).fill(RenderPipelines.GUI, x, y, x + 16, y + 16, color);
         }
