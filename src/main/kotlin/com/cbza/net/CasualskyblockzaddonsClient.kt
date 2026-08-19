@@ -1,5 +1,6 @@
 package com.cbza.net
 
+import com.cbza.net.Info.currentVersion
 import com.cbza.net.commands.MainCommands
 import com.cbza.net.commands.MiningCommands
 import com.cbza.net.commands.ShortCommands
@@ -35,6 +36,7 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		PingGlide
 		MimicChest
 		SlayerXpTracker
+		currentVersion
 
 		MainCommands.register()
 		MiningCommands.register()

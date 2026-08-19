@@ -54,8 +54,10 @@ object SlayerCommands {
         if (slayer == null) {
             client.player?.sendSystemMessage(
                 Component.literal(
-                    "§c[§6CasualSkyblockZAddons§c] §fUnknown slayertype '§e$bossInput§f'.\n" +
-                            "§7Valid options: §e${SlayerType.entries.joinToString(", ") { it.apiId }}"
+                    "§f══════════════§7\n" +
+                            "§c[§6CasualSkyblockZAddons§c] §fUnknown slayertype '§e$bossInput§f'.\n" +
+                            "§7Valid options: §e${SlayerType.entries.joinToString(", ") { it.apiId }}" +
+                            "§f══════════════§7"
                 )
             )
             return 1

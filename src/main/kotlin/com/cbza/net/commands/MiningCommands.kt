@@ -93,11 +93,13 @@ object MiningCommands {
 
         client.player?.sendSystemMessage(
             Component.literal(
-                "§c[§6CasualSkyblockZAddons§c]\n" +
+                "§f══════════════§7\n" +
+                        "§c[§6CasualSkyblockZAddons§c]\n" +
                         "§fTick calculation for §e$blockKey\n" +
                         "§f@ §e$miningSpeed §fMining Speed:\n" +
                         "§fBreaks in §a$ticks ticks §7(§a${ms}ms§7)\n" +
-                        nextTickLine
+                        "$nextTickLine\n" +
+                        "§f══════════════§7"
             )
         )
     }

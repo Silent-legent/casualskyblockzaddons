@@ -25,7 +25,6 @@ public class Cosmetics {
     // Flip off to disable the feature entirely. Hook this up to your own config toggle later.
     public static boolean enabled = true;
 
-    // TODO: replace with the raw GitHub link to your hosted names.json
     private static final String NAMES_URL = "https://raw.githubusercontent.com/Silent-legent/casualskyblockzaddons/refs/heads/main/names.json";
 
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
