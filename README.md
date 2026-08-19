@@ -32,6 +32,9 @@
 ### ⚔️ Slayer;
 * **Slayerxp calc:** Calculates XP needed, bosses remaining, and spawn cost to reach the target level. (Skip currentXp if you already killed one boss.)
 
+### 🤏🏻 Short;
+* **Short commands;** U are able to do /dn, cn, garden, galatea,... without typing /warp infront.
+
 ---
 
 ## ⌨️ Commands
