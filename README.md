@@ -16,16 +16,21 @@
 
 ---
 
-## Features List
+## Interesting Features List
 
 ### 🎨 General;
 * **Rarity Backgrounds:** Automatically highlights the background of inventory slots based on item rarity.
 
-### ⛏️Mining;
+### 💀 Dungeon:
+* **Mimic Higlight:** Outlines the mimic chest inside Dungeons.
+
+### ⛏️ Mining;
 * **Ping Glide:** Highlights the exact millisecond it is safe to transition blocks based on your ping, preventing lost mining progress.
-* **Chest Solver:** Highlights the precise interaction points for instantly solving Powder Chest lockpicks.
 * **Nucleus Map:** Renders a clean, real-time mini-map overlay of the Crystal Hollows to keep you oriented.
-* **Ability Announcer:** Displays a custom on-screen popup and plays an audio cue the second your pickaxe ability comes off cooldown.
+* ** Commission Display:** Show your curent commissions and there progression.
+
+### ⚔️ Slayer;
+* **Slayerxp calc:** Calculates XP needed, bosses remaining, and spawn cost to reach the target level. (Skip currentXp if you already killed one boss.)
 
 ---
 
@@ -35,18 +40,14 @@
 | :--- | :--- |
 | `/csz` | Opens the interactive configuration screen. |
 | `/csz hud` | Opens the drag-and-drop HUD layout editor. |
-| `/csz help` | Prints the mod command registry in chat. |
-| `/sharelocation <poi>` | Broadcasts discovered Crystal Hollows POI coordinates to your lobby. |
+| `/csz help` | Prints helpfull commands. |
 
 ---
 
 ## Credits
 
 * **luckkytigger;** Project owner.
-* **Eclipse-5214;** Creator of stella; Thank u so much for all the support/help along the way.
-https://github.com/Eclipse-5214/stella
-* **Saotzuri;** Creator of **SBO**; Thank u so Much for recoding my mod in korl when i started out.
-https://github.com/SkyblockOverhaul/SBO
-* **Revvilon;** Creator oF **PingOffsetMiner**: Thank u so much for helping with ping detection. [Ping ofset miner is higely inspired by him!]
-https://github.com/Revvilon/PingOffsetMiner
+* [**Eclipse-5214;**](https://github.com/Eclipse-5214/stella) Creator of stella; Thank u so much for all the support/help along the way.
+* [**Saotzuri;**](https://github.com/SkyblockOverhaul/SBO) Creator of **SBO**; Thank u so Much for recoding my mod in korl when i started out.
+* [**Revvilon;**](https://github.com/Revvilon/PingOffsetMiner) Creator oF **PingOffsetMiner**: Thank u so much for helping with ping detection. [Ping ofset miner is higely inspired by him!]
 * **Artificial Intelligence;** For making it much easier to get into coding/learning, we stil have a long way to go.
