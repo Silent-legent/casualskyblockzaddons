@@ -8,6 +8,9 @@ import java.nio.file.Path
 
 class ModConfig {
 
+	// --- Info ---
+	var firstTimeUsing = false
+
 	// --- Toggles ---
 	var showRarityBackgrounds = true
 	var powderChestSolver = true

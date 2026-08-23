@@ -1,6 +1,7 @@
 package com.cbza.net
 
 import com.cbza.net.Info.currentVersion
+import com.cbza.net.Info.FirstLogin
 import com.cbza.net.commands.MainCommands
 import com.cbza.net.commands.MiningCommands
 import com.cbza.net.commands.ShortCommands
@@ -37,6 +38,7 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		MimicChest
 		SlayerXpTracker
 		currentVersion
+		FirstLogin
 
 		MainCommands.register()
 		MiningCommands.register()
