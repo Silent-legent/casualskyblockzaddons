@@ -53,6 +53,7 @@ object InventoryHudOverlay {
         graphics.pose().translate(x.toFloat(), y.toFloat())
         graphics.pose().scale(scale, scale)
 
+        // todo: add option to change background to dif color * Isue for a future update.
         graphics.fill(0, 0, COLUMS * SLOT_SIZE + MARGIN, ROWS * SLOT_SIZE + MARGIN, ColorCatalog.TRANSLUCENT_BLACK)
 
         for (row in 0 until ROWS) {

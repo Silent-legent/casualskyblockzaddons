@@ -78,9 +78,16 @@ object PingGlide {
 
         val fillBuffer = event.bufferSource.getBuffer(RenderTypes.debugQuads())
         shape.forAllBoxes { x1, y1, z1, x2, y2, z2 ->
-            Render3D.drawBox(fillBuffer, event.matrix,
-                dx + (x1 + x2) / 2, dy + (y1 + y2) / 2, dz + (z1 + z2) / 2,
-                (x2 - x1) / 1.9, (y2 - y1) / 1.9, (z2 - z1) / 1.9, // fix this
+            val centerX = dx + (x1 + x2) / 2
+            val centerY = dy + (y1 + y2) / 2
+            val centerZ = dz + (z1 + z2) / 2
+            val halfX = (x2 - x1) / 1.99
+            val halfY = (y2 - y1) / 1.99
+            val halfZ = (z2 - z1) / 1.99
+
+            Render3D.drawFilledBox(fillBuffer, event.matrix,
+                (centerX - halfX).toFloat(), (centerY - halfY).toFloat(), (centerZ - halfZ).toFloat(),
+                (centerX + halfX).toFloat(), (centerY + halfY).toFloat(), (centerZ + halfZ).toFloat(),
                 fillColor)
         }
         event.bufferSource.endBatch(RenderTypes.debugQuads())
