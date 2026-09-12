@@ -20,7 +20,7 @@ object ColorCatalog {
     const val DARK_GREEN = 0xFF008000.toInt()
     const val DARK_RED = 0xFF800000.toInt()
 
-    // 38% Translucent (0x60 Alpha)
+    // 38% Translucent
     const val TRANSLUCENT_DARK_RED = 0x60AA0000.toInt()
     const val TRANSLUCENT_LIGHT_RED = 0x60FF5555.toInt()
     const val TRANSLUCENT_CYAN = 0x6055FFFF.toInt()
@@ -30,6 +30,7 @@ object ColorCatalog {
     const val TRANSLUCENT_LIGHT_BLUE = 0x605555FF.toInt()
     const val TRANSLUCENT_LIGHT_GREEN = 0x6055FF55.toInt()
     const val TRANSLUCENT_WHITE = 0x60FFFFFF.toInt()
+    const val TRANSLUCENT_BLACK = 0x60000000.toInt()
 
     /**
      * Interpolates smoothly between two ARGB colors (including alpha channel).

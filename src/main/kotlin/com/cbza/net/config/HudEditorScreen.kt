@@ -1,9 +1,16 @@
 package com.cbza.net.config
 
+import com.cbza.net.feature.general.InventoryHudOverlay
+import com.cbza.net.feature.general.InventoryHudOverlay.COLUMS
+import com.cbza.net.feature.general.InventoryHudOverlay.ROWS
+import com.cbza.net.feature.general.InventoryHudOverlay.SLOT_SIZE
+import com.cbza.net.feature.general.InventoryHudOverlay.MARGIN
+
 import com.cbza.net.feature.mining.general.CommissionsDisplay
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.rendering.Render2D
+import net.minecraft.client.Minecraft
 
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
@@ -16,6 +23,8 @@ import net.minecraft.util.ARGB
 
 class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
+    val mc = Minecraft.getInstance()
+
     private data class HudBounds(val x: Int, val y: Int, val w: Int, val h: Int) {
         fun contains(mx: Int, my: Int): Boolean = mx in x..(x + w) && my in y..(y + h)
     }
@@ -23,6 +32,15 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
     private fun getBounds(name: String): HudBounds? {
         val cfg = ModConfig.get()
         return when (name) {
+            // --- Gnereal ---
+            "player_inventory" -> {
+                val scale = cfg.playerInventoryDisplayScale
+                val inventorysizeWidth = ((COLUMS * SLOT_SIZE + MARGIN) * scale).toInt()
+                val inventorySizeHight = ((ROWS * SLOT_SIZE + MARGIN) * scale).toInt()
+                val (x, y) = InventoryHudOverlay.getDefaultPosition()
+                HudBounds(x, y, inventorysizeWidth, inventorySizeHight)
+            }
+            // --- Mining ---
             "nucleus_map" -> {
                 val mapSize = (100 * cfg.nucleusMapScale).toInt()
                 HudBounds(cfg.nucleusMapX, cfg.nucleusMapY, mapSize, mapSize)
@@ -71,16 +89,27 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         super.init()
         val resetButton = Button.builder(Component.literal("Reset Positions")) {
             val cfg = ModConfig.get()
-            cfg.hudLayerOrder = mutableListOf("commission_display", "ability_announcer", "nucleus_map")
-            cfg.abilityAnnouncerX = -1
-            cfg.abilityAnnouncerY = -1
-            cfg.abilityAnnouncerScale = 3.5f
+
+            cfg.hudLayerOrder = mutableListOf("commission_display", "ability_announcer", "nucleus_map", "player_inventory")
+
+            // --- General ---
+            cfg.playerInventoryDisplayX = -1
+            cfg.playerInventoryDisplayY = -1
+            cfg.playerInventoryDisplayScale = 1.0f
+
+            // --- Mining ---
             cfg.nucleusMapX = 0
             cfg.nucleusMapY = 0
             cfg.nucleusMapScale = 1.0f
+
+            cfg.abilityAnnouncerX = -1
+            cfg.abilityAnnouncerY = -1
+            cfg.abilityAnnouncerScale = 3.5f
+
             cfg.commissionsDisplayX = 0
             cfg.commissionsDisplayY = 100
             cfg.commissionsDisplayScale = 1.0f
+
             ModConfig.save()
         }.bounds(width / 2 - 50, height - 30, 100, 20).build()
         addRenderableWidget(resetButton)
@@ -98,6 +127,69 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             val bounds = getBounds(name) ?: continue
 
             when (name) {
+                // --- General ---
+                "player_inventory" -> {
+                    if (cfg.PlayerInventory) {
+                        val player = Minecraft.getInstance().player ?: continue
+                        val scale = cfg.playerInventoryDisplayScale
+
+                        drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
+
+                        context.pose().pushMatrix()
+                        context.pose().translate(bounds.x.toFloat(), bounds.y.toFloat())
+                        context.pose().scale(scale, scale)
+
+                        context.fill(0, 0, COLUMS * SLOT_SIZE + MARGIN, ROWS * SLOT_SIZE + MARGIN, ColorCatalog.TRANSLUCENT_BLACK)
+
+                        for (row in 0 until ROWS) {
+                            for (col in 0 until COLUMS) {
+                                val slotIndex = 9 + (row * COLUMS) + col
+                                val stack = player.inventory.getItem(slotIndex)
+
+                                val slotX = col * SLOT_SIZE + MARGIN
+                                val slotY = row * SLOT_SIZE + MARGIN
+
+                                context.item(stack, slotX, slotY, 0)
+                                context.itemDecorations(this.font, stack, slotX, slotY)
+                            }
+                        }
+
+                        context.pose().popMatrix()
+                    }
+                }
+                // --- General ---
+                // Inventory Display alr rendered.
+
+                // --- Mining ---
+                "nucleus_map" -> {
+                    if (cfg.nucleusMap) {
+                        drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
+
+                        Render2D.drawImage(context, textureId, bounds.x, bounds.y, bounds.w, bounds.h)
+
+                        // Fake POI dots using real colors and real sizes scaled with the map
+                        val fakePoiOrder = listOf("Jungle Temple", "Mines of Divan", "Goblin Queen's Den")
+                        val fakeOffsets = listOf(Pair(0.25, 0.25), Pair(0.75, 0.25), Pair(0.25, 0.75))
+                        for (i in fakePoiOrder.indices) {
+                            val poiName = fakePoiOrder[i]
+                            val color = NucleusMap.poiColors[poiName] ?: continue
+                            val size = ((NucleusMap.poiSizes[poiName] ?: 6) * cfg.nucleusMapScale).toInt()
+                            val (offX, offY) = fakeOffsets[i]
+                            val px = bounds.x + (bounds.w * offX).toInt()
+                            val py = bounds.y + (bounds.h * offY).toInt()
+                            context.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, color)
+                        }
+
+                        val centerX = bounds.x + bounds.w / 2
+                        val centerY = bounds.y + bounds.h / 2
+                        val arrowSize = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
+                        context.pose().pushMatrix()
+                        context.pose().translate(centerX.toFloat(), centerY.toFloat())
+                        context.pose().translate(-(arrowSize / 2).toFloat(), -(arrowSize / 2).toFloat())
+                        Render2D.drawImage(context, arrowId, 0, 0, arrowSize, arrowSize)
+                        context.pose().popMatrix()
+                    }
+                }
                 "ability_announcer" -> {
                     if (cfg.miningAbilityAnnouncer) {
                         val text = "Maniac Miner Ready!"
@@ -153,35 +245,6 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                         context.pose().popMatrix()
                     }
                 }
-                "nucleus_map" -> {
-                    if (cfg.nucleusMap) {
-                        drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
-
-                        Render2D.drawImage(context, textureId, bounds.x, bounds.y, bounds.w, bounds.h)
-
-                        // Fake POI dots using real colors and real sizes scaled with the map
-                        val fakePoiOrder = listOf("Jungle Temple", "Mines of Divan", "Goblin Queen's Den")
-                        val fakeOffsets = listOf(Pair(0.25, 0.25), Pair(0.75, 0.25), Pair(0.25, 0.75))
-                        for (i in fakePoiOrder.indices) {
-                            val poiName = fakePoiOrder[i]
-                            val color = NucleusMap.poiColors[poiName] ?: continue
-                            val size = ((NucleusMap.poiSizes[poiName] ?: 6) * cfg.nucleusMapScale).toInt()
-                            val (offX, offY) = fakeOffsets[i]
-                            val px = bounds.x + (bounds.w * offX).toInt()
-                            val py = bounds.y + (bounds.h * offY).toInt()
-                            context.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, color)
-                        }
-
-                        val centerX = bounds.x + bounds.w / 2
-                        val centerY = bounds.y + bounds.h / 2
-                        val arrowSize = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
-                        context.pose().pushMatrix()
-                        context.pose().translate(centerX.toFloat(), centerY.toFloat())
-                        context.pose().translate(-(arrowSize / 2).toFloat(), -(arrowSize / 2).toFloat())
-                        Render2D.drawImage(context, arrowId, 0, 0, arrowSize, arrowSize)
-                        context.pose().popMatrix()
-                    }
-                }
             }
         }
 
@@ -229,10 +292,12 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                 dragOffsetX = mx - bounds.x
                 dragOffsetY = my - bounds.y
 
-                // Save initial position if uninitialized
                 when (name) {
+                    "player_inventory" -> { cfg.playerInventoryDisplayX = bounds.x; cfg.playerInventoryDisplayY = bounds.y }
+                    "nucleus_map" -> { cfg.nucleusMapX = bounds.x; cfg.nucleusMapY = bounds.y }
                     "ability_announcer" -> { cfg.abilityAnnouncerX = bounds.x; cfg.abilityAnnouncerY = bounds.y }
                     "commission_display" -> { cfg.commissionsDisplayX = bounds.x; cfg.commissionsDisplayY = bounds.y }
+
                 }
                 return true
             }
@@ -245,6 +310,10 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         val mx = event.x().toInt()
         val my = event.y().toInt()
         when (draggingElement) {
+            "player_inventory" -> {
+                cfg.playerInventoryDisplayX = mx - dragOffsetX
+                cfg.playerInventoryDisplayY = my - dragOffsetY
+            }
             "nucleus_map" -> {
                 cfg.nucleusMapX = mx - dragOffsetX
                 cfg.nucleusMapY = my - dragOffsetY
@@ -278,6 +347,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             "nucleus_map" -> cfg.nucleusMapScale = (cfg.nucleusMapScale + delta).coerceIn(0.3f, 3.0f)
             "ability_announcer" -> cfg.abilityAnnouncerScale = (cfg.abilityAnnouncerScale + delta).coerceIn(1.0f, 6.0f)
             "commission_display" -> cfg.commissionsDisplayScale = (cfg.commissionsDisplayScale + delta).coerceIn(1.0f, 6.0f)
+            "player_inventory" -> cfg.playerInventoryDisplayScale = (cfg.playerInventoryDisplayScale + delta).coerceIn(0.5f, 6.0f)
         }
         return true
     }

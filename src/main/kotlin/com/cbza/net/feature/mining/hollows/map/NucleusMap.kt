@@ -20,9 +20,6 @@ import kotlin.math.sqrt
 
 private val SERVER_ID_PATTERN = Regex("Sending to server (\\S+)")
 
-// Builds a live map of the Crystal Hollows: tracks where each named point of
-// interest (POI) is located, remembers unknown/unconfirmed marker positions,
-// and carries that knowledge over when the player switches servers.
 object NucleusMap {
     init {
         EventBus.subscribe(ChatEvent::class.java) { event ->
@@ -55,10 +52,8 @@ object NucleusMap {
     private const val AREA_CHECK_INTERVAL_MS = 2000L
     private var lastArea = ""
 
-    // POIs someone else shared coordinates for, but we haven't personally confirmed yet.
     private val sharedUnconfirmedPois = mutableSetOf<String>()
 
-    // POIs we're fully confident about the location of (found via NPC or compass solve).
     private val confirmedPois = mutableSetOf<String>()
 
     val poiColors = mapOf(
@@ -81,19 +76,15 @@ object NucleusMap {
         "Odawa"               to 8
     )
 
-    // The best-known (x, z) position for each POI found so far.
     val discoveredPois = mutableMapOf<String, Pair<Double, Double>>()
 
-    // Rough position guesses for a POI, collected over time and averaged for accuracy.
     private val poiPositionSamples = mutableMapOf<String, MutableList<Pair<Double, Double>>>()
 
-    // Markers for POIs we can't identify yet (no name, just a rough position).
     val unknownMarkers = mutableMapOf<String, Pair<Double, Double>>()
     private var unknownIdCounter = 0
 
     private val coordRegex = Regex("x:\\s*(-?\\d+).*?y:\\s*(-?\\d+).*?z:\\s*(-?\\d+)")
 
-    // Special NPCs that, when spotted, confirm a nearby POI's exact location.
     private val poiIndicatorEntities: Map<String, String> = mapOf(
         "Kalhuiki Door Guardian" to "Jungle Temple",
         "Keeper of Diamond"      to "Mines of Divan",
@@ -106,7 +97,6 @@ object NucleusMap {
         "Odawa"                  to "Odawa"
     )
 
-    // How far off each NPC stands from the actual POI location, so we can correct for it.
     private val poiNpcOffsets: Map<String, Pair<Double, Double>> = mapOf(
         "Kalhuiki Door Guardian" to Pair(0.0, 0.0),
         "Keeper of Diamond"      to Pair(33.0, -3.0),
@@ -119,7 +109,6 @@ object NucleusMap {
         "Odawa"                  to Pair(0.0, 0.0)
     )
 
-    // Similar correction offsets, but for locations solved using the in-game compass tool.
     private val poiCompassOffsets: Map<String, Pair<Double, Double>> = mapOf(
         "Jungle Temple"       to Pair(-16.0, -23.0),
         "Mines of Divan"      to Pair(0.0, 0.0),
@@ -130,8 +119,6 @@ object NucleusMap {
         "Odawa"               to Pair(-4.0, -16.0)
     )
 
-    // Looks at nearby entities for one of the "indicator" NPCs above, and if found,
-    // uses it to pin down that POI's exact location.
     private fun scanForPoiEntities(level: ClientLevel) {
         for (entity in level.entitiesForRendering()) {
             val name = entity.customName?.string ?: continue
@@ -148,8 +135,6 @@ object NucleusMap {
         }
     }
 
-    // Called when someone (in chat) shares a set of coordinates. Tries to match
-    // them to a named POI, or otherwise stores them as an unknown marker.
     fun onCoordsShared(text: String) {
         if (!ModConfig.get().nucleusMap) return
         if (!inCrystalHollows) return
@@ -170,7 +155,6 @@ object NucleusMap {
 
         if (discoveredPois.size >= poiColors.size) return
 
-        // Skip it if it's basically on top of a marker we already have.
         val tooClose = unknownMarkers.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE } ||
                 discoveredPois.values.any { distance(it.first, it.second, x, z) < UNKNOWN_REMOVE_DISTANCE }
         if (tooClose) return
@@ -185,9 +169,6 @@ object NucleusMap {
         return sqrt(dx * dx + dz * dz)
     }
 
-    // Runs every game tick. Periodically re-checks the player's location/server,
-    // scans for POI-confirming NPCs, estimates POI positions by sampling the
-    // player's own position, and cleans up markers that are no longer needed.
     fun tick() {
         if (!ModConfig.get().nucleusMap) return
 
@@ -218,8 +199,6 @@ object NucleusMap {
                 scanForPoiEntities(level)
             }
 
-            // If we're standing inside a named area but don't have a confirmed
-            // location for it yet, take a position sample and average them for a rough guess.
             val matchedPoi = poiColors.keys.firstOrNull { area.contains(it) }
             if (matchedPoi != null && !confirmedPois.contains(matchedPoi)) {
                 val player = mc.player
@@ -234,13 +213,11 @@ object NucleusMap {
                 }
             }
 
-            // Once every POI has been found, unknown markers are no longer useful.
             if (discoveredPois.size >= poiColors.size) {
                 unknownMarkers.clear()
             }
         }
 
-        // Remove unknown markers once the player walks close enough to them (no longer useful/unknown).
         val player = mc.player
         if (player != null && unknownMarkers.isNotEmpty()) {
             val toRemove = unknownMarkers.entries.filter {
@@ -249,8 +226,6 @@ object NucleusMap {
             toRemove.forEach { unknownMarkers.remove(it) }
         }
 
-        // Double-check POIs someone else reported: if the player walks there and
-        // it turns out not confirmed, drop it since it may have been inaccurate.
         if (player != null && sharedUnconfirmedPois.isNotEmpty()) {
             val checked = mutableListOf<String>()
             for (name in sharedUnconfirmedPois) {
@@ -267,7 +242,6 @@ object NucleusMap {
         }
     }
 
-    // Called when a POI's location has been worked out using the compass tool.
     fun registerCompassSolvedPoi(poi: String, x: Double, z: Double) {
         if (confirmedPois.contains(poi)) return // NPC (or an earlier compass solve) already confirmed this one
         val offset = poiCompassOffsets[poi] ?: Pair(0.0, 0.0)
@@ -276,7 +250,6 @@ object NucleusMap {
         poiPositionSamples.remove(poi)
     }
 
-    // Converts the player's real in-world position into an (x, y) pixel position on the map image.
     fun getPlayerMapPosition(mapSize: Int): Pair<Int, Int>? {
         val mc = Minecraft.getInstance()
         val player = mc.player ?: return null
@@ -293,7 +266,6 @@ object NucleusMap {
         )
     }
 
-    // Same conversion as above, but for a given POI's world position instead of the player's.
     fun getPoiMapPosition(x: Double, z: Double, mapSize: Int): Pair<Int, Int> {
         val relX = (x - (NUCLEUS_CENTER_X - NUCLEUS_SIZE / 2)) / NUCLEUS_SIZE
         val relZ = (z - (NUCLEUS_CENTER_Z - NUCLEUS_SIZE / 2)) / NUCLEUS_SIZE
@@ -311,15 +283,12 @@ object NucleusMap {
         return x < NUCLEUS_CENTER_X && z < NUCLEUS_CENTER_Z
     }
 
-    // A saved copy of everything we knew about a server's POIs, so it can be
-    // restored if the player returns to that same server later.
     data class ServerSnapshot(val pois: Map<String, Pair<Double, Double>>, val timestamp: Long)
 
     private val serverSnapshots = mutableMapOf<String, ServerSnapshot>()
     private var currentServerId: String? = null
     private const val SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000L // 30 minutes
 
-    // Tracks servers where the "Odawa" POI is known to not have spawned (so we don't keep expecting it there).
     private val odawaNotSpawnedServers = mutableMapOf<String, Long>()
 
     fun isOdawaNotSpawned(): Boolean {
@@ -334,8 +303,6 @@ object NucleusMap {
         return true
     }
 
-    // Called when the player switches to a different server. Saves the current
-    // server's discovered POIs for later, then restores any saved data for the new one.
     fun onServerSwitch(newServerId: String) {
         val oldId = currentServerId
         if (oldId != null && inCrystalHollows && discoveredPois.isNotEmpty()) {
@@ -346,7 +313,6 @@ object NucleusMap {
 
         reset()
 
-        // Clean out old saved data that's expired.
         val now = System.currentTimeMillis()
         serverSnapshots.entries.removeIf { now - it.value.timestamp > SNAPSHOT_EXPIRY_MS }
         odawaNotSpawnedServers.entries.removeIf { now - it.value > SNAPSHOT_EXPIRY_MS }
@@ -404,7 +370,6 @@ object NucleusMap {
             }
         }
 
-    // Wipes all currently tracked map data back to a clean slate.
     fun reset() {
         inCrystalHollows = false
         discoveredPois.clear()

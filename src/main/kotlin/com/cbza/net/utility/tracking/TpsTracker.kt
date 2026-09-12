@@ -3,10 +3,6 @@ package com.cbza.net.utility.tracking
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ServerJoinEvent
 
-/**
- * Tracks and calculates real-time server TPS (Ticks Per Second) using a ring buffer
- * of packet time deltas.
- */
 object TpsTracker {
 
     private const val SAMPLE_COUNT = 20
@@ -60,9 +56,6 @@ object TpsTracker {
         prevTime = now
     }
 
-    /**
-     * Clears all recorded samples. Call on world transition/warp.
-     */
     @Synchronized
     fun reset() {
         samples.fill(0.0)
@@ -72,8 +65,5 @@ object TpsTracker {
         latestTps = null
     }
 
-    /**
-     * Returns the smoothed server TPS, or null if insufficient packets have arrived.
-     */
     fun getAverageTps(): Double? = latestTps
 }

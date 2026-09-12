@@ -31,9 +31,7 @@ object SlayerCommands {
                         }
                         .then(argument("level", IntegerArgumentType.integer(1))
                             .then(argument("tier", IntegerArgumentType.integer(1))
-                                // no currentXp typed — fall back to tracked value
                                 .executes { ctx -> runSlayerCommand(ctx, typedXp = null) }
-                                // currentXp typed — use it directly
                                 .then(argument("currentXp", LongArgumentType.longArg(1))
                                     .executes { ctx ->
                                         val typedXp = LongArgumentType.getLong(ctx, "currentXp")
@@ -63,7 +61,6 @@ object SlayerCommands {
             return 1
         }
 
-        // resolve currentXp: typed value first, tracked value as fallback
         val currentXp = typedXp ?: SlayerXpTracker.getCurrentXp(slayer)
         if (currentXp == null) {
             client.player?.sendSystemMessage(

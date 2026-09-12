@@ -1,8 +1,3 @@
-    /*
-    * Originaly from Stella; https://github.com/Eclipse-5214/stella
-    * Permission to use from Eclipse-5214
-    */
-
 package com.cbza.net.mixin;
 
 import com.cbza.net.external.stella.customname.Cosmetics;

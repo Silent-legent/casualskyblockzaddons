@@ -29,9 +29,6 @@ import tech.thatgravyboat.skyblockapi.api.area.mining.MiningBlock
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockId.Companion.getSkyBlockId
 
-// Figures out, based on the block being mined and the player's ping/mining speed,
-// how long it will actually take to break it. so the player knows the exact
-// moment it's "safe" to move on to the next block without wasting the swing.
 object PingGlide {
     init {
         EventBus.subscribe<TickEvent> {
@@ -83,7 +80,7 @@ object PingGlide {
         shape.forAllBoxes { x1, y1, z1, x2, y2, z2 ->
             Render3D.drawBox(fillBuffer, event.matrix,
                 dx + (x1 + x2) / 2, dy + (y1 + y2) / 2, dz + (z1 + z2) / 2,
-                (x2 - x1) / 1.9, (y2 - y1) / 1.9, (z2 - z1) / 1.9,
+                (x2 - x1) / 1.9, (y2 - y1) / 1.9, (z2 - z1) / 1.9, // fix this
                 fillColor)
         }
         event.bufferSource.endBatch(RenderTypes.debugQuads())
@@ -95,10 +92,8 @@ object PingGlide {
         event.bufferSource.endBatch(RenderTypes.lines())
     }
 
-    // Only run this feature on islands where mining actually happens.
     private fun isEligibleIsland(): Boolean = eligibleIslands.any { it.inIsland() }
 
-    // Checks whether the player is holding a pickaxe or one of the drills.
     fun isHoldingMiningTool(): Boolean {
         val heldItem = Minecraft.getInstance().player?.mainHandItem
         val isPickaxe = heldItem?.`is`(ItemTags.PICKAXES) == true
@@ -108,9 +103,6 @@ object PingGlide {
         return isPickaxe || isDrill
     }
 
-    // Called when the player starts mining a new block. Works out how long the
-    // block will take to break (using mining speed + server lag/ping) and stores
-    // that so the rest of the code knows when it's safe to move on.
     private fun startMiningTimer(pos: BlockPos) {
         val mc = Minecraft.getInstance()
         val blockMatch = MiningBlock.currentlyActiveBlocks.firstOrNull {
@@ -119,7 +111,6 @@ object PingGlide {
         val blockKey = blockMatch.name
         val miningSpeed = TabListReader.getMiningSpeed()
         if (miningSpeed == null) {
-            // Can't calculate anything without mining speed. warn the player (but not too often).
             val now = System.currentTimeMillis()
             if (now - lastMiningSpeedWarn > WARN_INTERVAL_MS) {
                 lastMiningSpeedWarn = now
@@ -147,8 +138,6 @@ object PingGlide {
     fun isCurrentlyMining(): Boolean = _isCurrentlyMining
     fun getCurrentBlockPos(): BlockPos? = _currentBlockPos
 
-    // Runs every game tick. Watches what block the player is aiming at and
-    // whether they're actively mining it, and kicks off/cancels the timer as needed.
     fun tick() {
         if (!ModConfig.get().pingGlide) return
         if (!isEligibleIsland()) {
@@ -164,7 +153,6 @@ object PingGlide {
         val targetPos = hit?.blockPos
 
         if (isBreakingBlock()) {
-            // Player is holding down attack on a block. start timing it if it's a new target.
             if (targetPos != null && lastTargetedPos != targetPos) {
                 val blockMatch = MiningBlock.currentlyActiveBlocks.firstOrNull {
                     it.blocks.contains(mc.level?.getBlockState(targetPos)?.block)
@@ -178,17 +166,14 @@ object PingGlide {
             }
             lastTargetedPos = targetPos?.immutable()
         } else {
-            // Not mining anything right now.
             lastTargetedPos = null
             _isCurrentlyMining = false
         }
 
-        // Safety cutoff: if way more time has passed than the block should've taken, stop tracking it.
         if (_isCurrentlyMining && System.currentTimeMillis() >= (currentMineStartTime + (currentTotalMs ?: Long.MAX_VALUE) + 500)) {
             _isCurrentlyMining = false
         }
 
-        // If the game tells us the block actually broke, stop tracking it right away.
         val broken = MiningBlock.lastBrokenBlock
         if (broken != null && broken != lastSeenBlock) {
             lastSeenBlock = broken
@@ -198,24 +183,20 @@ object PingGlide {
         }
     }
 
-    // True while the player is holding down the attack button while aiming at a block.
     private fun isBreakingBlock(): Boolean {
         val mc = Minecraft.getInstance()
         return mc.options.keyAttack.isDown && mc.hitResult is BlockHitResult
     }
 
-    // Gets the player's current ping (delay to the server), or a manually set fallback value.
     fun getPing(): Int {
         return PingTracker.getPing()?.toInt() ?: ModConfig.get().manualPing
     }
 
-    // How long the player has been mining the current block, in milliseconds.
     fun getElapsedMs(): Long {
         if (!_isCurrentlyMining) return 0L
         return System.currentTimeMillis() - currentMineStartTime
     }
 
-    // Whether enough time has passed that it's now safe to move on to the next block.
     fun isSafeToMove(): Boolean {
         val safe = currentSafeToMoveMs ?: return false
         return getElapsedMs() >= safe

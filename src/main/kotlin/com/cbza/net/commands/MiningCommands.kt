@@ -14,7 +14,6 @@ object MiningCommands {
     fun register() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
 
-            // /sharelocation <poi>
             dispatcher.register(literal("sharelocation")
                 .then(argument("poi", StringArgumentType.greedyString())
                     .suggests { _, builder ->
@@ -27,7 +26,6 @@ object MiningCommands {
                         1
                     }))
 
-            // /calculatetick <miningSpeed> <block>
             dispatcher.register(literal("calculatetick")
                 .then(argument("miningSpeed", IntegerArgumentType.integer(1))
                     .then(argument("block", StringArgumentType.word())

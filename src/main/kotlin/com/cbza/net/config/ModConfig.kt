@@ -3,15 +3,19 @@ package com.cbza.net.config
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.client.Minecraft
 import java.nio.file.Files
 import java.nio.file.Path
 
 class ModConfig {
 
+	val mc = Minecraft.getInstance()
+
 	// --- Info ---
 	var firstTimeUsing = false
 
 	// --- Toggles ---
+	var PlayerInventory = true
 	var showRarityBackgrounds = true
 	var powderChestSolver = true
 	var miningAbilityAnnouncer = true
@@ -28,20 +32,24 @@ class ModConfig {
 	var hudLayerOrder: MutableList<String> = mutableListOf(
 		"ability_announcer",
 		"commission_display",
-		"nucleus_map"
+		"nucleus_map",
+		"player_inventory",
 	)
 
 	var abilityAnnouncerX = -1
 	var abilityAnnouncerY = -1
 	var abilityAnnouncerScale = 3.5f
 
-	var nucleusMapX = 10
-	var nucleusMapY = 10
+	var nucleusMapX = 0
+	var nucleusMapY = 0
 	var nucleusMapScale = 1.0f
 
 	var commissionsDisplayX = 0
 	var commissionsDisplayY = 100
 	var commissionsDisplayScale = 1.0f
+	var playerInventoryDisplayX = -1
+	var playerInventoryDisplayY = -1
+	var playerInventoryDisplayScale = 1.0f
 
 	companion object {
 		private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()

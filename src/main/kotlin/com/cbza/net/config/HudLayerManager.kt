@@ -14,7 +14,7 @@ object HudLayerManager {
 
         if (newIndex in list.indices) {
             Collections.swap(list, index, newIndex)
-            ModConfig.save() // Save changes when reordering!
+            ModConfig.save()
         }
     }
 }

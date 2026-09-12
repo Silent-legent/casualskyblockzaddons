@@ -12,8 +12,21 @@ object BlockStrength {
      * Hardness values for Hypixel Skyblock ores, gemstones, and custom blocks.
      */
     val strengths = mapOf(
-        "RUBY" to 2300,
+        // --- Block ---
+        "OBSIDIAN" to 445,
+
+        // --- Dwarven / Mineshaft ---
+        "LOW_TIER_MITHRIL" to 500,
+        "MID_TIER_MITHRIL" to 800,
+        "HIGH_TIER_MITHRIL" to 1500,
+        "TITANIUM" to 2000,
         "AMBER" to 3000,
+        "TUNGSTEN" to 5600,
+        "UMBER" to 5600,
+        "GLACITE" to 6000,
+
+        // --- Gemstone ---
+        "RUBY" to 2300,
         "SAPPHIRE" to 3000,
         "JADE" to 3000,
         "AMETHYST" to 3000,
@@ -24,15 +37,9 @@ object BlockStrength {
         "AQUAMARINE" to 5200,
         "CITRINE" to 5200,
         "PERIDOT" to 5200,
-        "GLACITE" to 6000,
-        "TUNGSTEN" to 5600,
-        "UMBER" to 5600,
-        "TITANIUM" to 2000,
-        "OBSIDIAN" to 445,
-        "LOW_TIER_MITHRIL" to 500,
-        "MID_TIER_MITHRIL" to 800,
-        "HIGH_TIER_MITHRIL" to 1500
-    )
+
+
+        )
 
     /**
      * Calculates breaking duration in ticks for a given block key and mining speed.

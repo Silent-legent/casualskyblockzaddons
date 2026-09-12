@@ -9,16 +9,16 @@ import tech.thatgravyboat.skyblockapi.helpers.McClient
 object ShortCommands {
     fun register() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            // dungeons
+            // --- dungeons ---
             registerWarp(dispatcher, "dh", "dh", "dn")
-            // farming
+            // --- farming ---
             registerWarp(dispatcher, "garden", "garden")
-            // foraging
+            // --- foraging ---
             registerWarp(dispatcher, "galatea", "galatea")
             registerWarp(dispatcher, "torrhus", "torrhus")
-            // combat
+            // --- combat ---
             registerWarp(dispatcher, "isle", "isle")
-            // mining
+            // --- mining ---
             registerWarp(dispatcher, "mines", "mines", "dwarven")
             registerWarp(dispatcher, "camp", "camp")
             registerWarp(dispatcher, "nucleus", "cn", "nuc")

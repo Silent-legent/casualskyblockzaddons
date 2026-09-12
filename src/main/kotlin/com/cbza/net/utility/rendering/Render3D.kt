@@ -5,14 +5,8 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.AABB
 import org.joml.Matrix4f
 
-/**
- * 3D rendering utilities for drawing wireframes, bounding boxes, and filled region overlays.
- */
 object Render3D {
 
-    /**
-     * Draws a 12-line wireframe box (24 vertices) using explicit coordinate bounds.
-     */
     fun drawOutlinedBox(
         buffer: VertexConsumer,
         matrix: Matrix4f,
@@ -44,9 +38,6 @@ object Render3D {
         line(minX, minY, maxZ, minX, maxY, maxZ)
     }
 
-    /**
-     * Draws a 6-face filled box using Quads (24 vertices) using explicit coordinate bounds.
-     */
     fun drawFilledBox(
         buffer: VertexConsumer,
         matrix: Matrix4f,
@@ -74,9 +65,6 @@ object Render3D {
         quad(maxX, maxY, minZ, maxX, maxY, maxZ, maxX, minY, maxZ, maxX, minY, minZ) // East
     }
 
-    /**
-     * Draws a double-sided filled box using Quads (48 vertices) using explicit bounds.
-     */
     fun drawDoubleSidedFilledBox(
         buffer: VertexConsumer,
         matrix: Matrix4f,

@@ -24,7 +24,6 @@ public class PlayerInteractMixin {
         BlockPos pos = hitResult.getBlockPos();
         Direction direction = hitResult.getDirection();
 
-        // Pass pos, direction, hand, and default isCancelled to false
         BlockInteractEvent event = new BlockInteractEvent(pos, direction, hand, false);
         EventBus.INSTANCE.post(event);
 

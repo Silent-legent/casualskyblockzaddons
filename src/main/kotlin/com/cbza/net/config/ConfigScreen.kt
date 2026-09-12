@@ -13,7 +13,6 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 	private val categories = mutableListOf<ConfigCategory>()
 	private val collapsed = mutableMapOf<String, Boolean>()
 
-	// hover-delay tooltip tracking
 	private var hoveredKey: String? = null
 	private var hoverStartTime: Long = 0L
 
@@ -45,6 +44,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 				"Rarity Backgrounds",
 				cfg::showRarityBackgrounds,
 				"Colors item backgrounds based on their rarity."
+			)
+			.toggle(
+				"Inventory overlay",
+				cfg::PlayerInventory,
+				"Overlays your inventory's content outside the inventory."
 			)
 
 		val dungeons = ConfigCategory("Dungeons")
@@ -171,10 +175,8 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 			hoverStartTime = System.currentTimeMillis()
 		}
 
-		// draw all real widgets (buttons, etc) FIRST
 		super.extractRenderState(context, mouseX, mouseY, delta)
 
-		// THEN draw our description box, on its own top layer, so it always renders above everything else
 		if (currentHoverKey != null && currentHoverDescription != null) {
 			val elapsed = System.currentTimeMillis() - hoverStartTime
 			if (elapsed >= HOVER_DELAY_MS) {

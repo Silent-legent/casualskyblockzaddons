@@ -34,10 +34,8 @@ public class LevelRendererMixin {
         poseStack.last().pose().set(viewMatrix);
         var matrix = poseStack.last().pose();
 
-        // 1. Fire event so features can submit draw calls
         EventBus.INSTANCE.post(new RenderEvent(bufferSource, matrix, camPos));
 
-        // 2. Flush the buffer so queued feature render calls actually draw!
         bufferSource.endBatch();
     }
 }

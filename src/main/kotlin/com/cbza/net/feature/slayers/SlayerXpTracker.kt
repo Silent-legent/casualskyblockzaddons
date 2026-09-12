@@ -6,7 +6,6 @@ import com.cbza.net.feature.slayers.slayerutil.SlayerType
 
 object SlayerXpTracker {
 
-    // in-memory only for now — resets on game restart. Saving to disk is a separate task for later.
     private val currentXpBySlayer = mutableMapOf<SlayerType, Long>()
 
     init {
