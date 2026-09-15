@@ -8,5 +8,5 @@ import org.joml.Matrix4f
 class RenderEvent (
     val bufferSource: MultiBufferSource.BufferSource,
     val matrix : Matrix4f,
-    val camPos: Vec3
+    val camPos: Vec3,
 ) : Event

@@ -28,7 +28,7 @@ object CommissionsDisplay {
             val cfg = ModConfig.get()
             if (!cfg.commissionsDisplay) return
 
-            if (Minecraft.getInstance().screen is HudEditorScreen) return
+            if (Minecraft.getInstance().gui.screen() is HudEditorScreen) return
 
             val lines = TabListReader.getCommissionLines()
             if (lines.isEmpty()) return

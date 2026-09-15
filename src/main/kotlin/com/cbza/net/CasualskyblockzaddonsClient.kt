@@ -51,7 +51,7 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		}
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "main_hud")) { graphics, _ ->
-			if (Minecraft.getInstance().screen is HudEditorScreen) return@addLast
+			if (Minecraft.getInstance().gui.screen() is HudEditorScreen) return@addLast
 			HudLayers.renderAll(graphics)
 		}
 	}
