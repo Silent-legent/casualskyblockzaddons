@@ -22,6 +22,7 @@ import com.cbza.net.feature.slayers.SlayerXpTracker
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 
