@@ -40,17 +40,17 @@ object MimicChest {
         val positions = getMimicChestPositions()
         if (positions.isEmpty()) return
 
-        val buffer = event.bufferSource.getBuffer(RenderTypes.debugFilledBox())
         val color = ARGB.colorFromFloat(1.0f, 1.0f, 0.0f, 0.0f)
         val camPos = event.camPos
 
-        for (targetPos in positions) {
-            val dx = targetPos.x + 0.5 - camPos.x
-            val dy = targetPos.y + 0.5 - camPos.y
-            val dz = targetPos.z + 0.5 - camPos.z
-            Render3D.drawBoxDoubleSided(buffer, event.matrix, dx, dy, dz, 0.5, 0.5, 0.5, color)
+        event.collector.submitCustomGeometry(event.poseStack, RenderTypes.debugFilledBox()) { pose, buffer ->
+            for (targetPos in positions) {
+                val dx = targetPos.x + 0.5 - camPos.x
+                val dy = targetPos.y + 0.5 - camPos.y
+                val dz = targetPos.z + 0.5 - camPos.z
+                Render3D.drawBoxDoubleSided(buffer, pose.pose(), dx, dy, dz, 0.5, 0.5, 0.5, color)
+            }
         }
-        event.bufferSource.endBatch(RenderTypes.debugFilledBox())
     }
 
     fun getMimicChestPositions(): List<BlockPos> {
