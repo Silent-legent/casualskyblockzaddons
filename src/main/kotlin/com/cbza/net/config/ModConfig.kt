@@ -81,6 +81,14 @@ class ModConfig {
 			} else {
 				ModConfig()
 			}
+
+			val defaults = ModConfig().hudLayerOrder
+			for (layer in defaults) {
+				if (!config.hudLayerOrder.contains(layer)) {
+					config.hudLayerOrder.add(layer)
+				}
+			}
+
 			instance = config
 			return config
 		}

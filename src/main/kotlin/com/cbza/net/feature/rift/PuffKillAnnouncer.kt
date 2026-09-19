@@ -2,7 +2,9 @@ package com.cbza.net.feature.rift
 
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
+import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.SoundPlayedEvent
+import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.ColorCatalog
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
@@ -18,6 +20,14 @@ object PuffKillAnnouncer {
                 onPuffDying()
             }
         }
+        EventBus.subscribe<ChatEvent> { event ->
+            if (event.text.contains("BUFF! A vending machine splashed you with Gravity I!")) {
+                hasGravityI()
+            }
+        }
+        EventBus.subscribe<TickEvent> {
+            tick()
+        }
     }
 
     var inRift = false
@@ -31,33 +41,34 @@ object PuffKillAnnouncer {
     const val POPUP_COOLDOWN_MS = 25000L
 
 
-        fun onPuffDying() {
-         if (!ModConfig.get().puffKillAnnouncer) return
-            inRift = SkyBlockIsland.THE_RIFT.inIsland()
-            onMountainTop = SkyBlockAreas.THE_MOUNTAINTOP.inArea()
+    fun onPuffDying() {
+        if (!ModConfig.get().puffKillAnnouncer) return
+        inRift = SkyBlockIsland.THE_RIFT.inIsland()
+        onMountainTop = SkyBlockAreas.THE_MOUNTAINTOP.inArea()
 
-            if (!inRift || !onMountainTop)
-                return
+        if (!inRift || !onMountainTop)
+            return
 
-            showPopup("Kill Puffs!")
+        showPopup("Kill Puffs!")
+    }
+
+    fun showPopup(message: String) {
+        val now = System.currentTimeMillis()
+        if (now - lastPopupTime < POPUP_COOLDOWN_MS) return
+
+        popupMessage = message
+        lastPopupTime = now
+        popupExpireTime = now + POPUP_DURATION_MS
+
+        val mc = Minecraft.getInstance()
+        mc.execute {
+            mc.player?.playSound(
+                SoundEvents.NOTE_BLOCK_PLING.value(),
+                1.0f,
+                2.0f
+            )
         }
-
-        fun showPopup(message: String) {
-            val now = System.currentTimeMillis()
-            if (message == popupMessage && now - lastPopupTime < POPUP_COOLDOWN_MS) return
-            popupMessage = message
-            lastPopupTime = now
-            popupExpireTime = now + POPUP_DURATION_MS
-
-            val mc = Minecraft.getInstance()
-            mc.execute {
-                mc.player?.playSound(
-                    SoundEvents.NOTE_BLOCK_PLING.value(),
-                    1.0f,
-                    2.0f
-                )
-            }
-        }
+    }
 
     fun getActivePopup(): String? {
         val msg = popupMessage ?: return null
@@ -68,23 +79,80 @@ object PuffKillAnnouncer {
         return msg
     }
 
-        fun render(graphics: GuiGraphicsExtractor) {
-            val cfg = ModConfig.get()
-            if (!cfg.puffKillAnnouncer) return
+    var gravityTime = 0
 
-            val popup = getActivePopup() ?: return
-            val mc = Minecraft.getInstance()
-            val startX = cfg.puffKillAnnouncerX
-            val startY = cfg.puffKillAnnouncerY
-            val scale = cfg.puffKillAnnouncerScale
+    fun hasGravityI() {
+        gravityTime = 611
+    }
 
-            graphics.pose().pushMatrix()
-            graphics.pose().scale(scale, scale)
+    var tickCounter = 0
 
-            val ux = (startX / scale).toInt()
-            val uy = (startY / scale).toInt()
+    fun tick() {
+            tickCounter++
+            if (tickCounter >= 20) {
+                tickCounter = 0
 
-            val color = ColorCatalog.RED
-            graphics.text(mc.font, popup, ux, uy, color, true)
+                if (gravityTime > 0) {
+                    gravityTime--
+                    if (gravityTime == 60) sendMINwarning()
+                    if (gravityTime in 1..10) sendCountdownMessage(gravityTime)
+                    if (gravityTime == 0) sendExpiredMessage()
+            }
         }
+        return
+    }
+
+    fun sendMINwarning() {
+        val client = Minecraft.getInstance()
+        val msg = net.minecraft.network.chat.Component.literal(
+            "§c[§6CasualSkyblockZAddons§c]\n" +
+                    "§5Gravity I§c §fexpires in 1min!"
+        )
+        client.player?.sendSystemMessage(msg)
+    }
+
+    fun sendCountdownMessage(seconds: Int) {
+        val client = Minecraft.getInstance()
+        val mc = Minecraft.getInstance()
+        val msg = net.minecraft.network.chat.Component.literal(
+            "§5Gravity I§c §fexpires in ${seconds}sec!"
+        )
+        client.player?.sendSystemMessage(msg)
+        mc.execute {
+            mc.player?.playSound(
+                SoundEvents.NOTE_BLOCK_PLING.value(),
+                1.0f,
+                2.0f,
+            )
+        }
+    }
+
+    fun sendExpiredMessage() {
+        val client = Minecraft.getInstance()
+        val msg = net.minecraft.network.chat.Component.literal(
+            "§5Gravity I§c §fhas expired!"
+        )
+        client.player?.sendSystemMessage(msg)
+
+    }
+
+    fun render(graphics: GuiGraphicsExtractor) {
+        val cfg = ModConfig.get()
+        if (!cfg.puffKillAnnouncer) return
+
+        val popup = getActivePopup() ?: return
+        val mc = Minecraft.getInstance()
+        val startX = cfg.puffKillAnnouncerX
+        val startY = cfg.puffKillAnnouncerY
+        val scale = cfg.puffKillAnnouncerScale
+
+        graphics.pose().pushMatrix()
+        graphics.pose().scale(scale, scale)
+
+        val ux = (startX / scale).toInt()
+        val uy = (startY / scale).toInt()
+
+        val color = ColorCatalog.RED
+        graphics.text(mc.font, popup, ux, uy, color, true)
+    }
 }
