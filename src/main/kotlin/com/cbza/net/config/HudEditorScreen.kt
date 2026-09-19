@@ -69,6 +69,16 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                 val y = if (cfg.commissionsDisplayY == -1) height / 3 else cfg.commissionsDisplayY
                 HudBounds(x, y, w, h)
             }
+            // --- Rift ---
+            "puff_kill_announcer" -> {
+                val text = "Kill Puffs!"
+                val scale = cfg.puffKillAnnouncerScale
+                val w = (this.font.width(text) * scale).toInt()
+                val h = (10 * scale).toInt()
+                val x = if (cfg.puffKillAnnouncerX == -1) (width - w) / 2 else cfg.puffKillAnnouncerX
+                val y = if (cfg.puffKillAnnouncerY == -1) height / 3 else cfg.puffKillAnnouncerY
+                HudBounds(x, y, w, h)
+            }
             else -> null
         }
     }
@@ -90,7 +100,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         val resetButton = Button.builder(Component.literal("Reset Positions")) {
             val cfg = ModConfig.get()
 
-            cfg.hudLayerOrder = mutableListOf("commission_display", "ability_announcer", "nucleus_map", "player_inventory")
+            cfg.hudLayerOrder = mutableListOf("commission_display", "puff_kill_announcer", "ability_announcer", "nucleus_map", "player_inventory")
 
             // --- General ---
             cfg.playerInventoryDisplayX = -1
@@ -109,6 +119,11 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             cfg.commissionsDisplayX = 0
             cfg.commissionsDisplayY = 100
             cfg.commissionsDisplayScale = 1.0f
+
+            // --- Rift ---
+            cfg.puffKillAnnouncerX = -1
+            cfg.puffKillAnnouncerY = -1
+            cfg.puffKillAnnouncerScale = 3.5f
 
             ModConfig.save()
         }.bounds(width / 2 - 50, height - 30, 100, 20).build()
@@ -157,7 +172,6 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                         context.pose().popMatrix()
                     }
                 }
-                // --- General ---
                 // Inventory Display alr rendered.
 
                 // --- Mining ---
@@ -245,6 +259,20 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                         context.pose().popMatrix()
                     }
                 }
+                // --- Rift ---
+                "puff_kill_announcer" -> {
+                    if (cfg.puffKillAnnouncer) {
+                        val text = "Kill Puff!"
+                        val scale = cfg.puffKillAnnouncerScale
+
+                        drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
+
+                        context.pose().pushMatrix()
+                        context.pose().scale(scale, scale)
+                        context.text(this.font, text, (bounds.x / scale).toInt(), (bounds.y / scale).toInt(), ARGB.opaque(ColorCatalog.RED), true)
+                        context.pose().popMatrix()
+                    }
+                }
             }
         }
 
@@ -296,6 +324,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                     "player_inventory" -> { cfg.playerInventoryDisplayX = bounds.x; cfg.playerInventoryDisplayY = bounds.y }
                     "nucleus_map" -> { cfg.nucleusMapX = bounds.x; cfg.nucleusMapY = bounds.y }
                     "ability_announcer" -> { cfg.abilityAnnouncerX = bounds.x; cfg.abilityAnnouncerY = bounds.y }
+                    "puff_kill_announcer" -> { cfg.puffKillAnnouncerX = bounds.x; cfg.puffKillAnnouncerY = bounds.y }
                     "commission_display" -> { cfg.commissionsDisplayX = bounds.x; cfg.commissionsDisplayY = bounds.y }
 
                 }
@@ -322,6 +351,10 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                 cfg.abilityAnnouncerX = mx - dragOffsetX
                 cfg.abilityAnnouncerY = my - dragOffsetY
             }
+            "puff_kill_announcer" -> {
+                cfg.puffKillAnnouncerX = mx - dragOffsetX
+                cfg.puffKillAnnouncerY = my - dragOffsetY
+            }
             "commission_display" -> {
                 cfg.commissionsDisplayX = mx - dragOffsetX
                 cfg.commissionsDisplayY = my - dragOffsetY
@@ -346,6 +379,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         when (target) {
             "nucleus_map" -> cfg.nucleusMapScale = (cfg.nucleusMapScale + delta).coerceIn(0.3f, 3.0f)
             "ability_announcer" -> cfg.abilityAnnouncerScale = (cfg.abilityAnnouncerScale + delta).coerceIn(1.0f, 6.0f)
+            "puff_kill_announcer" -> cfg.puffKillAnnouncerScale = (cfg.puffKillAnnouncerScale + delta).coerceIn(1.0f, 6.0f)
             "commission_display" -> cfg.commissionsDisplayScale = (cfg.commissionsDisplayScale + delta).coerceIn(1.0f, 6.0f)
             "player_inventory" -> cfg.playerInventoryDisplayScale = (cfg.playerInventoryDisplayScale + delta).coerceIn(0.5f, 6.0f)
         }

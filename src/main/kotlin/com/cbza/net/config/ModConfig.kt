@@ -12,14 +12,19 @@ class ModConfig {
 	var firstTimeUsing = false
 
 	// --- Toggles ---
-	var PlayerInventory = false
+	//  General
 	var showRarityBackgrounds = true
-	var powderChestSolver = true
-	var miningAbilityAnnouncer = true
+	var PlayerInventory = false
+	//  Mining
 	var nucleusMap = true
-	var pingGlide = true
+	var miningAbilityAnnouncer = true
 	var commissionsDisplay = true
+	var pingGlide = true
+	var powderChestSolver = true
+	//  Dungeons
 	var mimicChest = true
+	//  Rift
+	var puffKillAnnouncer = false
 
 	// --- Settings ---
 	var powderChestYOffset = 0.0
@@ -28,6 +33,7 @@ class ModConfig {
 	// --- HUD Positioning ---
 	var hudLayerOrder: MutableList<String> = mutableListOf(
 		"ability_announcer",
+		"puff_kill_announcer",
 		"commission_display",
 		"nucleus_map",
 		"player_inventory",
@@ -36,6 +42,10 @@ class ModConfig {
 	var abilityAnnouncerX = -1
 	var abilityAnnouncerY = -1
 	var abilityAnnouncerScale = 3.5f
+
+	var puffKillAnnouncerX = -1
+	var puffKillAnnouncerY = -1
+	var puffKillAnnouncerScale = 1f
 
 	var nucleusMapX = 0
 	var nucleusMapY = 0

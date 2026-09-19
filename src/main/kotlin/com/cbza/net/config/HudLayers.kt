@@ -4,11 +4,13 @@ import com.cbza.net.feature.general.InventoryHudOverlay
 import com.cbza.net.feature.mining.general.CommissionsDisplay
 import com.cbza.net.feature.mining.general.MiningAbilityTracker
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
+import com.cbza.net.feature.rift.PuffKillAnnouncer
 import net.minecraft.client.gui.GuiGraphicsExtractor
 
 object HudLayers {
     private val renderers: Map<String, (GuiGraphicsExtractor) -> Unit> = mapOf(
         "ability_announcer"  to MiningAbilityTracker::render,
+        "puff_kill_announcer" to PuffKillAnnouncer::render,
         "commission_display" to CommissionsDisplay::render,
         "nucleus_map"        to NucleusMap::render,
         "player_inventory" to InventoryHudOverlay::render
