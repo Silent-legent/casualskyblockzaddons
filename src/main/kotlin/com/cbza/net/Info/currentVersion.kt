@@ -22,8 +22,8 @@ object currentVersion {
     var updateMessageSent = false
 
     val gameVersion = "26.1.2"
-    val currentVersionNumber = 6
-    val currentVersionName = "1.0.4"
+    val currentVersionNumber = 7
+    val currentVersionName = "1.1.0"
 
     val latestVersion = "https://raw.githubusercontent.com/Silent-legent/casualskyblockzaddons/refs/heads/main/Version"
 
@@ -48,14 +48,14 @@ object currentVersion {
                 val data = GSON.fromJson(response.body(), VersionInfo::class.java)
                 val versioncheck = currentVersionNumber - data.latestVersionNumber
 
-                // If versioncheck is 0 or positive, your version is up to date or newer -> skip
                 if (versioncheck >= 0) return@thenAccept
 
                 updateMessageSent = true
 
                 Thread.sleep(2500)
 
-                // If we get here, an update exists! Safely send the message on the main thread.
+
+                // todo: add github/modrinth download link.
                 val client = Minecraft.getInstance()
                 client.execute {
                     client.player?.sendSystemMessage(
