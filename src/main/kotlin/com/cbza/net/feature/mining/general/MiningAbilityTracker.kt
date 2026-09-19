@@ -5,12 +5,12 @@ import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.ServerJoinEvent
 import com.cbza.net.event.events.TickEvent
+import com.cbza.net.utility.ColorCatalog
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.util.ARGB
 
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
@@ -207,7 +207,7 @@ object MiningAbilityTracker {
         val textWidth = mc.font.width(popup)
         val x = if (cfg.abilityAnnouncerX == -1) ((screenWidth - textWidth * scale) / 2).toInt() else cfg.abilityAnnouncerX
         val y = if (cfg.abilityAnnouncerY == -1) screenHeight / 3 else cfg.abilityAnnouncerY
-        val color = ARGB.opaque(0x55FF55)
+        val color = ColorCatalog.GREEN
         graphics.pose().pushMatrix()
         graphics.pose().scale(scale, scale)
         graphics.text(mc.font, popup, (x / scale).toInt(), (y / scale).toInt(), color, true)

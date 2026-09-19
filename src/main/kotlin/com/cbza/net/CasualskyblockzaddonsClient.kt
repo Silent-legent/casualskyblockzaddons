@@ -10,6 +10,7 @@ import com.cbza.net.config.HudEditorScreen
 import com.cbza.net.config.HudLayers
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ServerJoinEvent
+import com.cbza.net.event.events.compat.SkyblockApiBridge
 import com.cbza.net.external.stella.customname.Cosmetics
 import com.cbza.net.feature.dungeons.MimicChest
 import com.cbza.net.feature.mining.general.MiningAbilityTracker
@@ -17,6 +18,7 @@ import com.cbza.net.feature.mining.general.PingGlide
 import com.cbza.net.feature.mining.hollows.PowderChestSolver
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.feature.mining.hollows.map.WishingCompassSolver
+import com.cbza.net.feature.rift.PuffKillAnnouncer
 import com.cbza.net.feature.slayers.SlayerXpTracker
 
 import net.fabricmc.api.ClientModInitializer
@@ -31,12 +33,15 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		Cosmetics.init()
 
 		// Evaluated at startup to register EventBus subscribers
+		SkyblockApiBridge
+
 		PowderChestSolver
 		NucleusMap
 		MiningAbilityTracker
 		WishingCompassSolver
 		PingGlide
 		MimicChest
+		PuffKillAnnouncer
 		SlayerXpTracker
 		currentVersion
 		FirstLogin

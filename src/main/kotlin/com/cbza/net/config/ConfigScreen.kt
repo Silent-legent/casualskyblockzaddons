@@ -81,10 +81,17 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 				cfg::commissionsDisplay,
 				"Show your curent commissions and there progression."
 			)
+		val rift = ConfigCategory("Rift")
+			.toggle(
+				"Puff Kill Announcer",
+				cfg::puffKillAnnouncer,
+				"Shows when to kill your puffs."
+			)
 
 		categories.add(general)
 		categories.add(dungeons)
 		categories.add(mining)
+		categories.add(rift)
 
 		for (cat in categories) {
 			collapsed[cat.name] = false
