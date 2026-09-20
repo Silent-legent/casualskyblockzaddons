@@ -12,16 +12,28 @@ object ShortCommands {
             // --- dungeons ---
             registerWarp(dispatcher, "dh", "dh", "dn")
             // --- farming ---
+            registerWarp(dispatcher, "barn", "barn")
             registerWarp(dispatcher, "garden", "garden")
             // --- foraging ---
-            registerWarp(dispatcher, "galatea", "galatea")
+            registerWarp(dispatcher, "park", "park")
+            registerWarp(dispatcher, "galatea", "galatea", "moonglade")
             registerWarp(dispatcher, "torrhus", "torrhus")
             // --- combat ---
-            registerWarp(dispatcher, "isle", "isle")
+            registerWarp(dispatcher, "spider", "spider", "spiders")
+            registerWarp(dispatcher, "end", "end")
+            registerWarp(dispatcher, "isle", "isle", "nether")
             // --- mining ---
+            registerWarp(dispatcher, "gold", "gold")
+            registerWarp(dispatcher, "deep", "deep", "cavern", "caverns")
             registerWarp(dispatcher, "mines", "mines", "dwarven")
             registerWarp(dispatcher, "camp", "camp")
             registerWarp(dispatcher, "nucleus", "cn", "nuc")
+            // --- Fishing ---
+            registerWarp(dispatcher, "atoll", "lotus", "atoll")
+            // --- Extra ---
+            registerWarp(dispatcher, "tower", "tower")
+            registerWarp(dispatcher, "rift", "rift")
+            registerWarp(dispatcher, "jerry", "jerry", "workshop")
         }
     }
 

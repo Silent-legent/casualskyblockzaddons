@@ -88,18 +88,19 @@ object PuffKillAnnouncer {
     var tickCounter = 0
 
     fun tick() {
-            tickCounter++
-            if (tickCounter >= 20) {
-                tickCounter = 0
+        tickCounter++
+        if (tickCounter >= 20) {
+            tickCounter = 0
 
-                if (gravityTime > 0) {
-                    gravityTime--
-                    if (gravityTime == 60) sendMINwarning()
-                    if (gravityTime in 1..10) sendCountdownMessage(gravityTime)
-                    if (gravityTime == 0) sendExpiredMessage()
+            val inCorrectArea = SkyBlockIsland.THE_RIFT.inIsland() && SkyBlockAreas.THE_MOUNTAINTOP.inArea()
+
+            if (gravityTime > 0 && inCorrectArea) {
+                gravityTime--
+                if (gravityTime == 60) sendMINwarning()
+                if (gravityTime in 1..10) sendCountdownMessage(gravityTime)
+                if (gravityTime == 0) sendExpiredMessage()
             }
         }
-        return
     }
 
     fun sendMINwarning() {

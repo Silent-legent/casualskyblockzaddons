@@ -130,13 +130,23 @@ object MainCommands {
                     "§c[§6CasualSkyblockZAddons§c]\n" +
                     "§fShort Commands:\n" +
                     "§e/dh, dn§7- Warps u to the Dungeon Hub.\n" +
+                    "§e/barn§7- Warps u to the Barn.\n" +
                     "§e/garden§7- Warps u to the Garden.\n" +
-                    "§e/galatea§7- Warps u to the Galatea.\n" +
+                    "§e/park§7- Warps u to the Park.\n" +
+                    "§e/galatea, /moonglade§7- Warps u to the Galatea.\n" +
                     "§e/torrhus§7- Warps u to the Torrhus Canyon.\n" +
-                    "§e/isle§7- Warps u to the Crimson Isle.\n" +
+                    "§e/spider, /spiders§7- Warps u to the Spiders Den.\n" +
+                    "§e/end§7- Warps u to the End.\n" +
+                    "§e/isle, /nether§7- Warps u to the Crimson Isle.\n" +
+                    "§e/lotus, /atoll§7- Warps u to the Lotus Atoll.\n" +
+                    "§e/gold§7- Warps u to the Gold Mines.\n" +
+                    "§e/deep, /cavern, /caverns§7- Warps u to the Deep Caverns.\n" +
                     "§e/mines, dwarven§7- Warps u to the Dwarven Mines.\n" +
                     "§e/camp§7- Warps u to the Dwarven Base Camp.\n"+
                     "§e/cn, nuc§7- Warps u to the Crystal Nucleus.\n" +
+                    "§e/tower§7- Warps u to the Rift Tower.\n" +
+                    "§e/rift§7- Warps u to the Rift.\n" +
+                    "§e/jerry, /workshop§7- Warps u to the Jerry's Workshop.\n" +
                     "§f══════════════§7"
         )
         client.player?.sendSystemMessage(msg)
