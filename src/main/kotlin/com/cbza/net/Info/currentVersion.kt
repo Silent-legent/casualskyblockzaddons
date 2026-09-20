@@ -21,7 +21,7 @@ object currentVersion {
 
     var updateMessageSent = false
 
-    val gameVersion = "26.1.2"
+    // val gameVersion = "26.2" todo: put in output message!
     val currentVersionNumber = 7
     val currentVersionName = "1.1.0"
 
