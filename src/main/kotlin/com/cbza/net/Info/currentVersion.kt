@@ -21,7 +21,7 @@ object currentVersion {
 
     var updateMessageSent = false
 
-    // val gameVersion = "26.1.2" todo: add to message.
+    // val gameVersion = "26.2" todo: put in output message!
     val currentVersionNumber = 7
     val currentVersionName = "1.1.0"
 
@@ -54,8 +54,6 @@ object currentVersion {
 
                 Thread.sleep(2500)
 
-
-                // todo: add github/modrinth download link.
                 val client = Minecraft.getInstance()
                 client.execute {
                     client.player?.sendSystemMessage(

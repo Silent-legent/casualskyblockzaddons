@@ -5,9 +5,6 @@ import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 
-import java.util.ArrayList
-import java.util.HashMap
-
 class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzAddons")) {
 
 	private val categories = mutableListOf<ConfigCategory>()
