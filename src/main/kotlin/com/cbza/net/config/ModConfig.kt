@@ -15,6 +15,8 @@ class ModConfig {
 	//  General
 	var showRarityBackgrounds = true
 	var PlayerInventory = false
+	var hideActionBarStats = true
+
 	//  Mining
 	var nucleusMap = true
 	var miningAbilityAnnouncer = true
@@ -66,6 +68,7 @@ class ModConfig {
 		@Volatile
 		private var instance: ModConfig? = null
 
+		@JvmStatic
 		fun get(): ModConfig {
 			return instance ?: load()
 		}

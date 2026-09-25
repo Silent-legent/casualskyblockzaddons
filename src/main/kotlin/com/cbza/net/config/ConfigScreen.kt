@@ -50,6 +50,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 				cfg::PlayerInventory,
 				"Overlays your inventory's content outside the inventory."
 			)
+			.toggle(
+				"Action Bar stats",
+				cfg::hideActionBarStats,
+				"Removes the stats in your action bar."
+			)
 
 		val dungeons = ConfigCategory("Dungeons")
 			.toggle(

@@ -3,6 +3,7 @@
 	"package": "com.cbza.net.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"ActionBarStatsMixin",
 		"ChatComponentMixin",
 		"ClientPacketListenerMixin",
 		"ClientTickMixin",
