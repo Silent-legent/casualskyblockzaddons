@@ -2,7 +2,8 @@
 
 <div align="center">
   
-  # CasualSkyblockZAddons [CSZA]
+  
+**CasualSkyblockZAddons [CSZA]**
   
   [![Discord](https://img.shields.io/badge/Discord-Discord_Server-blue?style=flat&logo=discord&logoColor=white)](https://discord.gg/GvEu34hzcz)
   [![Releases](https://img.shields.io/badge/Releases-Download_Latest-purple?style=flat)](https://github.com/Silent-legent/casualskyblockzaddons/releases)
