@@ -3,12 +3,15 @@ package com.cbza.net.config
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 
 class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzAddons")) {
 
 	private val categories = mutableListOf<ConfigCategory>()
 	private val collapsed = mutableMapOf<String, Boolean>()
+	// test
+	private val openCategories = mutableSetOf<Int>()
 
 	private var hoveredKey: String? = null
 	private var hoverStartTime: Long = 0L
@@ -27,9 +30,38 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		private const val DESC_TEXT_COLOR: Int = 0xFFFFFFFF.toInt()
 		private const val DESC_PADDING = 4
 		private const val DESC_MAX_WIDTH = 150
+
+		// test
+		private const val BUTTON_X = 10
+		private const val BUTTON_Y = 150
+		private const val BUTTON_WIDTH = 60
+		private const val BUTTON_HEIGHT = 11
+		private const val BUTTON_GAP = 5
+
+
 	}
 
-	init {
+	private fun buttonX(col: Int): Int = BUTTON_X + col * (BUTTON_WIDTH + BUTTON_GAP)
+
+	override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
+		val clickX = event.x.toInt()
+		val clickY = event.y.toInt()
+
+		for (col in categories.indices) {
+			if (clickX in buttonX(col)..(buttonX(col) + BUTTON_WIDTH) && clickY in BUTTON_Y..(BUTTON_Y + BUTTON_HEIGHT)) {
+				if (openCategories.contains(col)) {
+					openCategories.remove(col)
+				} else {
+					openCategories.add(col)
+				}
+				return true
+			}
+		}
+		return super.mouseClicked(event, doubleClick)
+	}
+	// end of test
+
+    init {
 		buildCategories()
 	}
 
@@ -101,6 +133,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		for (cat in categories) {
 			collapsed[cat.name] = false
 		}
+		openCategories.addAll(categories.indices)
 	}
 
 	private fun getButtonText(entry: ConfigCategory.ToggleEntry): Component {
@@ -185,6 +218,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		}
 
 		super.extractRenderState(context, mouseX, mouseY, delta)
+
+		for (col in categories.indices) {
+
+			TEMPCategoryButton.draw(context, (categories[col].name), buttonX(col), BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, col in openCategories, mouseX, mouseY)
+		}
 
 		if (currentHoverKey != null && currentHoverDescription != null) {
 			val elapsed = System.currentTimeMillis() - hoverStartTime
