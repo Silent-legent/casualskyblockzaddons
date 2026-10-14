@@ -1,5 +1,7 @@
 package com.cbza.net.config
 
+import com.cbza.net.config.TEMPCategoryPanel.TITLE_HEIGHT
+import com.cbza.net.config.TEMPCategoryPanel.rowY
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
@@ -11,9 +13,12 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 	private val categories = mutableListOf<ConfigCategory>()
 	private val collapsed = mutableMapOf<String, Boolean>()
 	// test
+	private val panels = mutableListOf<PanelState>()
 	private val openCategories = mutableSetOf<Int>()
+	// end of test
 
 	private var hoveredKey: String? = null
+
 	private var hoverStartTime: Long = 0L
 
 	companion object {
@@ -38,6 +43,10 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		private const val BUTTON_HEIGHT = 11
 		private const val BUTTON_GAP = 5
 
+		private const val PANEL_X = 5
+		private const val PANEL_Y = 200
+		private const val PANEL_WIDTH = 100
+
 
 	}
 
@@ -47,6 +56,25 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		val clickX = event.x.toInt()
 		val clickY = event.y.toInt()
 
+			for (col in categories.indices) {
+				if (col !in openCategories) continue
+				val panel = panels[col]
+				if (clickX in panel.x..(panel.x + PANEL_WIDTH) && clickY in panel.y..(panel.y + TITLE_HEIGHT)) {
+						panel.folded = !panel.folded
+						return true
+				}
+				if (!panel.folded) {
+					for (row in categories[col].entries.indices) {
+						val top = rowY(panel.y, row)
+						if (clickX in panel.x..(panel.x + PANEL_WIDTH) && clickY in top..(top + ROW_HEIGHT)) {
+							val entry = categories[col].entries[row]
+							entry.setter(!entry.getter())
+							ModConfig.save()
+							return true
+						}
+					}
+				}
+			}
 		for (col in categories.indices) {
 			if (clickX in buttonX(col)..(buttonX(col) + BUTTON_WIDTH) && clickY in BUTTON_Y..(BUTTON_Y + BUTTON_HEIGHT)) {
 				if (openCategories.contains(col)) {
@@ -129,6 +157,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		categories.add(dungeons)
 		categories.add(mining)
 		categories.add(rift)
+
+		for (col in categories.indices) {
+			panels.add(PanelState(x = PANEL_X + col * (PANEL_WIDTH + 20), PANEL_Y))
+
+		}
 
 		for (cat in categories) {
 			collapsed[cat.name] = false
@@ -219,10 +252,15 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 
 		super.extractRenderState(context, mouseX, mouseY, delta)
 
+		// test
 		for (col in categories.indices) {
-
 			TEMPCategoryButton.draw(context, (categories[col].name), buttonX(col), BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, col in openCategories, mouseX, mouseY)
+			if (col in openCategories) {
+				val panel = panels[col]
+				TEMPCategoryPanel.draw(context, categories[col], panel.x, panel.y, PANEL_WIDTH, panel.folded, mouseX, mouseY)
+			}
 		}
+		// end of test
 
 		if (currentHoverKey != null && currentHoverDescription != null) {
 			val elapsed = System.currentTimeMillis() - hoverStartTime
@@ -278,3 +316,4 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 
 	override fun isPauseScreen(): Boolean = false
 }
+class PanelState(var x: Int, var y: Int, var folded: Boolean = false)
