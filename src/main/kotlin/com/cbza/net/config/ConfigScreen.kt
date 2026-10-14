@@ -3,6 +3,7 @@ package com.cbza.net.config
 import com.cbza.net.config.TEMPCategoryPanel.TITLE_HEIGHT
 import com.cbza.net.config.TEMPCategoryPanel.rowY
 import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
@@ -10,19 +11,24 @@ import net.minecraft.network.chat.Component
 class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzAddons")) {
 
 	private val categories = mutableListOf<ConfigCategory>()
-	private val openCategories = mutableSetOf<Int>()
+	private val collapsed = mutableMapOf<String, Boolean>()
+	// test
 	private val panels = mutableListOf<PanelState>()
-	private val drawOrder = mutableListOf<Int>()
+	private val openCategories = mutableSetOf<Int>()
+	// end of test
 
 	private var hoveredKey: String? = null
+
 	private var hoverStartTime: Long = 0L
-	private var draggingPanel: Int? = null
-	private var grabOffsetX = 0
-	private var grabOffsetY = 0
-	private var dragMoved: Boolean = false
 
 	companion object {
-		private const val ROW_HEIGHT = 10
+		private const val COLUMN_WIDTH = 100
+		private const val ROW_HEIGHT = 14
+		private const val COLUMN_GAP = 10
+		private const val TOP_MARGIN = 10
+		private const val LEFT_MARGIN = 10
+		private const val COLOR_ENABLED_BOX: Int = 0xFF32CD32.toInt()
+		private const val COLOR_ENABLED_BORDER: Int = 0xFF1E8C1E.toInt()
 		private const val HOVER_DELAY_MS = 1000L
 		private const val DESC_BG_COLOR: Int = 0xE0101010.toInt()
 		private const val DESC_BORDER_COLOR: Int = 0xFF555555.toInt()
@@ -30,29 +36,33 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		private const val DESC_PADDING = 4
 		private const val DESC_MAX_WIDTH = 150
 
+		// test
+		private const val BUTTON_X = 10
+		private const val BUTTON_Y = 150
+		private const val BUTTON_WIDTH = 60
+		private const val BUTTON_HEIGHT = 11
+		private const val BUTTON_GAP = 5
+
 		private const val PANEL_X = 5
-		private const val PANEL_Y = 10
-		private const val PANEL_WIDTH = 80
-		private const val PANEL_GAP = 5
+		private const val PANEL_Y = 200
+		private const val PANEL_WIDTH = 100
+
 
 	}
+
+	private fun buttonX(col: Int): Int = BUTTON_X + col * (BUTTON_WIDTH + BUTTON_GAP)
 
 	override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
 		val clickX = event.x.toInt()
 		val clickY = event.y.toInt()
 
-		for (col in drawOrder.reversed()) {
-			if (col !in openCategories) continue
-			val panel = panels[col]
-			if (clickX in panel.x..(panel.x + PANEL_WIDTH) && clickY in panel.y..(panel.y + TITLE_HEIGHT)) {
-				drawOrder.remove(col)
-				draggingPanel = col
-				grabOffsetX = clickX - panel.x
-				grabOffsetY = clickY - panel.y
-				dragMoved = false
-				drawOrder.add(col)
-				return true
-			}
+			for (col in categories.indices) {
+				if (col !in openCategories) continue
+				val panel = panels[col]
+				if (clickX in panel.x..(panel.x + PANEL_WIDTH) && clickY in panel.y..(panel.y + TITLE_HEIGHT)) {
+						panel.folded = !panel.folded
+						return true
+				}
 				if (!panel.folded) {
 					for (row in categories[col].entries.indices) {
 						val top = rowY(panel.y, row)
@@ -65,39 +75,21 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 					}
 				}
 			}
+		for (col in categories.indices) {
+			if (clickX in buttonX(col)..(buttonX(col) + BUTTON_WIDTH) && clickY in BUTTON_Y..(BUTTON_Y + BUTTON_HEIGHT)) {
+				if (openCategories.contains(col)) {
+					openCategories.remove(col)
+				} else {
+					openCategories.add(col)
+				}
+				return true
+			}
+		}
 		return super.mouseClicked(event, doubleClick)
 	}
+	// end of test
 
-	override fun mouseDragged(event: MouseButtonEvent, dx: Double, dy: Double): Boolean {
-		val index = draggingPanel ?: return super.mouseDragged(event, dx, dy)
-
-		val wantedX = event.x.toInt() - grabOffsetX
-		val wantedY = event.y.toInt() - grabOffsetY
-		val maxX = (width - PANEL_WIDTH).coerceAtLeast(0)
-		val maxY = (height - TITLE_HEIGHT).coerceAtLeast(0)
-
-			panels[index].x = wantedX.coerceIn(0, maxX)
-			panels[index].y = wantedY.coerceIn(0, maxY)
-			dragMoved = true
-			return true
-	}
-
-	override fun mouseReleased(event: MouseButtonEvent): Boolean {
-		val index = draggingPanel ?: return super.mouseReleased(event)
-		val panel = panels[index]
-
-			if (!dragMoved) {
-				panel.folded = !panel.folded
-			}
-
-		ModConfig.get().panelOrder = drawOrder.map { categories[it].name }.toMutableList()
-		ModConfig.save()
-		draggingPanel = null
-
-		return true
-	}
-
-	init {
+    init {
 		buildCategories()
 	}
 
@@ -167,53 +159,87 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		categories.add(rift)
 
 		for (col in categories.indices) {
-			val defaultX = PANEL_X + col * (PANEL_WIDTH + 5)
-			val state = cfg.panels.getOrPut(categories[col].name) { PanelState(defaultX, PANEL_Y) }
-			panels.add(state)
+			panels.add(PanelState(x = PANEL_X + col * (PANEL_WIDTH + 20), PANEL_Y))
+
 		}
-		drawOrder.addAll(categories.indices)
-		drawOrder.sortBy { cfg.panelOrder.indexOf(categories[it].name) }
+
+		for (cat in categories) {
+			collapsed[cat.name] = false
+		}
 		openCategories.addAll(categories.indices)
 	}
 
-	private fun panelAt(x: Int, y: Int): Int? {
+	private fun getButtonText(entry: ConfigCategory.ToggleEntry): Component {
+		val value = entry.getter()
+		val suffix = if (value) " [ON]" else " [OFF]"
+		return Component.literal(entry.label + suffix)
+	}
 
-		for (col in drawOrder.reversed()) {
-			if (col !in openCategories) continue
-				val panel = panels[col]
-				val panelHeight = if (panel.folded) TITLE_HEIGHT  else TITLE_HEIGHT + categories[col].entries.size * ROW_HEIGHT
-				if (x in panel.x..(panel.x + PANEL_WIDTH) && y in panel.y..(panel.y + panelHeight)) return col
+	override fun init() {
+		super.init()
+		for (col in categories.indices) {
+			val category = categories[col]
+			val x = LEFT_MARGIN + col * (COLUMN_WIDTH + COLUMN_GAP)
+			val isCollapsed = collapsed.getOrDefault(category.name, false)
+			val catName = category.name
+
+			val header = Button.builder(
+				Component.literal(category.name)
+			) { _ ->
+				collapsed[catName] = !collapsed.getOrDefault(catName, false)
+				rebuildWidgets()
+			}.bounds(x, TOP_MARGIN, COLUMN_WIDTH, ROW_HEIGHT - 2).build()
+			addRenderableWidget(header)
+
+			if (!isCollapsed) {
+				for (row in category.entries.indices) {
+					val entry = category.entries[row]
+					val y = TOP_MARGIN + 20 + row * (ROW_HEIGHT + 4)
+					val button = Button.builder(
+						getButtonText(entry)
+					) { btn ->
+						val newValue = !entry.getter()
+						entry.setter(newValue)
+						ModConfig.save()
+						btn.message = getButtonText(entry)
+					}.bounds(x, y, COLUMN_WIDTH, ROW_HEIGHT - 2).build()
+
+					addRenderableWidget(button)
+				}
+			}
 		}
-		return null
 	}
 
 	override fun extractRenderState(context: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
 		context.fillGradient(0, 0, width, height, 0x60101010, 0x60151515)
-
-		val hoveredPanel = panelAt(mouseX, mouseY)
 
 		var currentHoverKey: String? = null
 		var currentHoverDescription: String? = null
 		var currentHoverX = 0
 		var currentHoverY = 0
 
-		for (col in drawOrder) {
+		for (col in categories.indices) {
 			val category = categories[col]
-			val panel = panels[col]
+			val x = LEFT_MARGIN + col * (COLUMN_WIDTH + COLUMN_GAP)
+			val isCollapsed = collapsed.getOrDefault(category.name, false)
 
-			if (col !in openCategories || panel.folded || col != hoveredPanel) continue
+			if (!isCollapsed) {
+				for (row in category.entries.indices) {
+					val entry = category.entries[row]
+					val y = TOP_MARGIN + 20 + row * (ROW_HEIGHT + 4)
+					val isEnabled = entry.getter()
+					if (isEnabled) {
+						renderColoredButtonBox(context, x, y, COLUMN_WIDTH, ROW_HEIGHT - 2, COLOR_ENABLED_BOX, COLOR_ENABLED_BORDER)
+					}
 
-			for (row in categories[col].entries.indices) {
-				val top = rowY(panel.y, row)
-
-				if (mouseX in panel.x..(panel.x + PANEL_WIDTH) && mouseY in top..(top + ROW_HEIGHT)) {
-					val entry = categories[col].entries[row]
-
-					if (entry.description.isNotEmpty()) {
+					if (entry.description.isNotEmpty() &&
+						mouseX in x..(x + COLUMN_WIDTH) &&
+						mouseY in y..(y + ROW_HEIGHT)
+					) {
 						currentHoverKey = category.name + ":" + entry.label
 						currentHoverDescription = entry.description
-						currentHoverX = panel.x + PANEL_WIDTH + 5
-						currentHoverY = top
+						currentHoverX = x + 110
+						currentHoverY = y + ROW_HEIGHT + -15
 					}
 				}
 			}
@@ -226,10 +252,15 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 
 		super.extractRenderState(context, mouseX, mouseY, delta)
 
-		for (col in drawOrder ) {
+		// test
+		for (col in categories.indices) {
+			TEMPCategoryButton.draw(context, (categories[col].name), buttonX(col), BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, col in openCategories, mouseX, mouseY)
+			if (col in openCategories) {
 				val panel = panels[col]
-				TEMPCategoryPanel.draw(context, categories[col], panel.x, panel.y, PANEL_WIDTH, panel.folded, mouseX, mouseY, col == hoveredPanel)
+				TEMPCategoryPanel.draw(context, categories[col], panel.x, panel.y, PANEL_WIDTH, panel.folded, mouseX, mouseY)
+			}
 		}
+		// end of test
 
 		if (currentHoverKey != null && currentHoverDescription != null) {
 			val elapsed = System.currentTimeMillis() - hoverStartTime
@@ -271,6 +302,18 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		}
 	}
 
+	private fun renderColoredButtonBox(context: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int, fillColor: Int, borderColor: Int) {
+		val outerX = x - 1
+		val outerY = y - 1
+		val outerX2 = x + width + 1
+		val outerY2 = y + height + 1
+		context.fillGradient(outerX, outerY, outerX2, outerY2, fillColor, fillColor)
+		context.fill(outerX - 1, outerY - 1, outerX2 + 1, outerY, borderColor)
+		context.fill(outerX - 1, outerY2, outerX2 + 1, outerY2 + 1, borderColor)
+		context.fill(outerX - 1, outerY, outerX, outerY2, borderColor)
+		context.fill(outerX2, outerY, outerX2 + 1, outerY2, borderColor)
+	}
+
 	override fun isPauseScreen(): Boolean = false
 }
-class PanelState(var x: Int = 0, var y: Int = 0, var folded: Boolean = false)
+class PanelState(var x: Int, var y: Int, var folded: Boolean = false)
