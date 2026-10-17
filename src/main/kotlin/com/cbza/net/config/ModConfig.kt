@@ -32,6 +32,10 @@ class ModConfig {
 	var powderChestYOffset = 0.0
 	var manualPing = 0
 
+	// --- Config UI ---
+	var panels: MutableMap<String, PanelState> = mutableMapOf()
+	var panelOrder: MutableList<String> = mutableListOf()
+
 	// --- HUD Positioning ---
 	var hudLayerOrder: MutableList<String> = mutableListOf(
 		"ability_announcer",

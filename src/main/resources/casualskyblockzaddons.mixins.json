@@ -8,7 +8,7 @@
 		"ClientPacketListenerMixin",
 		"ClientTickMixin",
 		"LevelRendererMixin",
-        "MixinFont",
+		"MixinFont",
 		"ParticleEngineMixin",
 		"PingDebugMonitorMixin",
 		"PlayerInteractMixin",
