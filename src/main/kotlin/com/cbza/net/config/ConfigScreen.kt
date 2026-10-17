@@ -33,7 +33,6 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		private const val PANEL_X = 5
 		private const val PANEL_Y = 10
 		private const val PANEL_WIDTH = 80
-		private const val PANEL_GAP = 5
 
 	}
 
