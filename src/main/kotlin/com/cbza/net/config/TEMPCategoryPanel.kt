@@ -7,10 +7,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import java.awt.Color
 
 object TEMPCategoryPanel {
-    const val TITLE_HEIGHT = 14
-    private const val ROW_HEIGHT = 14
+    const val TITLE_HEIGHT = 12
+    private const val ROW_HEIGHT = 10
 
-    fun rowY(panelY: Int, row: Int): Int = panelY + 14 + row * ROW_HEIGHT
+    fun rowY(panelY: Int, row: Int): Int = panelY + TITLE_HEIGHT + row * ROW_HEIGHT
 
     fun draw(ctx: GuiGraphicsExtractor,category: ConfigCategory,x: Int, y: Int, width: Int, folded: Boolean, mouseX: Int, mouseY: Int) {
 
