@@ -167,7 +167,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		categories.add(rift)
 
 		for (col in categories.indices) {
-			val defaultX = PANEL_X + col * (PANEL_WIDTH + 20)
+			val defaultX = PANEL_X + col * (PANEL_WIDTH + 5)
 			val state = cfg.panels.getOrPut(categories[col].name) { PanelState(defaultX, PANEL_Y) }
 			panels.add(state)
 		}
