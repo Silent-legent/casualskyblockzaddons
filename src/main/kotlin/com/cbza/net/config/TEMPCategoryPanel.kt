@@ -12,9 +12,9 @@ object TEMPCategoryPanel {
 
     fun rowY(panelY: Int, row: Int): Int = panelY + TITLE_HEIGHT + row * ROW_HEIGHT
 
-    fun draw(ctx: GuiGraphicsExtractor,category: ConfigCategory,x: Int, y: Int, width: Int, folded: Boolean, mouseX: Int, mouseY: Int) {
+    fun draw(ctx: GuiGraphicsExtractor,category: ConfigCategory,x: Int, y: Int, width: Int, folded: Boolean, mouseX: Int, mouseY: Int, active: Boolean) {
 
-        val titleHovered = mouseX in x..(x + width) && mouseY in y..(y + TITLE_HEIGHT)
+        val titleHovered = active && mouseX in x..(x + width) && mouseY in y..(y + TITLE_HEIGHT)
         val titleColor = if (titleHovered) ColorCatalog.UNSELECTED_HOVER1 else ColorCatalog.UNSELECTED1
 
         TEMPRender2D.drawRect(ctx, x, y, width, TITLE_HEIGHT, Color(titleColor, true))
@@ -25,7 +25,7 @@ object TEMPCategoryPanel {
                 val top = rowY(y, row)
                 val enabled = entry.getter()
 
-                val hovered = mouseX in x..(x + width) && mouseY in top..(top + ROW_HEIGHT)
+                val hovered = active && mouseX in x..(x + width) && mouseY in top..(top + ROW_HEIGHT)
                 val color = when {
                     enabled && hovered -> ColorCatalog.SELECTED_HOVER1
                     enabled -> ColorCatalog.SELECTED1
