@@ -15,7 +15,7 @@ object InventoryHudOverlay {
 
     private fun isInGameUi(): Boolean {
         val mc = Minecraft.getInstance()
-        return mc.level != null && (mc.screen == null || mc.screen is ChatScreen)
+        return mc.level != null && (mc.gui.screen() == null || mc.gui.screen() is ChatScreen)
     }
 
     fun getDefaultPosition(): Pair<Int, Int> {

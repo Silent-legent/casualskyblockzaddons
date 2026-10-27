@@ -4,13 +4,11 @@ import com.cbza.net.event.EventBus;
 import com.cbza.net.event.events.RenderEvent;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.world.phys.Vec3;
 
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,22 +18,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class LevelRendererMixin {
 
     @Inject(
-            method = "renderLevel",
-            at = @At("RETURN")
+            method = "submitFeatures",
+            at = @At("TAIL")
     )
-    private void onRenderWorld(CallbackInfo ci) {
-        Minecraft mc = Minecraft.getInstance();
-        Camera camera = mc.gameRenderer.getMainCamera();
-        MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        Vec3 camPos = camera.position();
-
-        Matrix4f viewMatrix = new Matrix4f(camera.getViewRotationMatrix(new Matrix4f()));
+    private void onSubmitFeatures(
+            LevelRenderState levelRenderState,
+            SubmitNodeCollector submitNodeCollector,
+            boolean renderOutline,
+            CallbackInfo ci
+    ) {
+        Vec3 camPos = levelRenderState.cameraRenderState.pos;
         PoseStack poseStack = new PoseStack();
-        poseStack.last().pose().set(viewMatrix);
-        var matrix = poseStack.last().pose();
 
-        EventBus.INSTANCE.post(new RenderEvent(bufferSource, matrix, camPos));
-
-        bufferSource.endBatch();
+        EventBus.INSTANCE.post(new RenderEvent(submitNodeCollector, poseStack, camPos));
     }
 }

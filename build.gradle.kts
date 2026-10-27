@@ -52,6 +52,7 @@ val loaderVersion: String = project.property("loader_version") as String
 val fabricApiVersion: String = project.property("fabric_api_version") as String
 val clothConfigVersion: String = project.property("cloth_config_version") as String
 
+// https://github.com/SkyblockAPI/SkyblockAPI
 dependencies {
 	minecraft("com.mojang:minecraft:$minecraftVersion")
 	implementation("net.fabricmc:fabric-loader:$loaderVersion")
@@ -59,11 +60,11 @@ dependencies {
 	implementation("me.shedaniel.cloth:cloth-config-fabric:$clothConfigVersion")
 	implementation(kotlin("stdlib-jdk8"))
 	implementation("tech.thatgravyboat:skyblock-api:4.2.9") {
-		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.1") }
+		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
 		exclude(group = "me.djtheredstoner")
 	}
 	include("tech.thatgravyboat:skyblock-api:4.2.9") {
-		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.1") }
+		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
 		exclude(group = "me.djtheredstoner")
 	}
 }

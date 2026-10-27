@@ -5,6 +5,7 @@ import com.cbza.net.config.HudEditorScreen
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.screens.Screen
 
 object MainCommands {
     fun register() {
@@ -55,14 +56,14 @@ object MainCommands {
     private fun openConfigScreen() {
         val client = Minecraft.getInstance()
         client.execute {
-            client.setScreen(ConfigScreen(client.screen))
+            client.gui.setScreen(ConfigScreen(client.gui.screen()))
         }
     }
 
     private fun openHudEditor() {
         val client = Minecraft.getInstance()
         client.execute {
-            client.setScreen(HudEditorScreen())
+            client.gui.setScreen(HudEditorScreen())
         }
     }
 

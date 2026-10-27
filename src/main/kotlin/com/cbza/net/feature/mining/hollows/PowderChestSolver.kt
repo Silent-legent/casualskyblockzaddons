@@ -55,16 +55,16 @@ object PowderChestSolver {
 		val positions = getActiveChestPositions()
 		if (positions.isEmpty()) return
 
-		val buffer = event.bufferSource.getBuffer(RenderTypes.debugFilledBox())
 		val color = ARGB.colorFromFloat(1.0f, 0.0f, 1.0f, 0.0f)
 		val camPos = event.camPos
 
-		for (targetPos in positions) {
-			Render3D.drawBox(buffer, event.matrix,
-				targetPos.x - camPos.x, targetPos.y - camPos.y, targetPos.z - camPos.z,
-				0.05, 0.05, 0.05, color)
+		event.collector.submitCustomGeometry(event.poseStack, RenderTypes.debugFilledBox()) { pose, buffer ->
+			for (targetPos in positions) {
+				Render3D.drawBox(buffer, pose.pose(),
+					targetPos.x - camPos.x, targetPos.y - camPos.y, targetPos.z - camPos.z,
+					0.05, 0.05, 0.05, color)
+			}
 		}
-		event.bufferSource.endBatch(RenderTypes.debugFilledBox())
 	}
 
 	private fun isRecentlyMining(): Boolean {
