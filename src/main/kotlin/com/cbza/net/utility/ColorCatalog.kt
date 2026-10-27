@@ -9,6 +9,15 @@ object ColorCatalog {
     const val SELECTED_HOVER1 = 0xFF1E3A30.toInt()
     const val LINECOLOR1 = 0xFF1D9E75.toInt()
 
+    // Mod themes
+    // --- Main ---
+    const val UNSELECTED1 = 0xFF1A1A1A.toInt()
+    const val SELECTED1 = 0xFF162E26.toInt()
+    const val UNSELECTED_HOVER1 = 0xFF2A2A2A.toInt()
+    const val SELECTED_HOVER1 = 0xFF1E3A30.toInt()
+    const val LINECOLOR1 = 0xFF1D9E75.toInt()
+
+
     // Solid
     const val BLACK = 0xFF000000.toInt()
     const val WHITE = 0xFFFFFFFF.toInt()

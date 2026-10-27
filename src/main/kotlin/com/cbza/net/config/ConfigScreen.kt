@@ -1,6 +1,5 @@
 package com.cbza.net.config
 
-import com.cbza.net.config.TEMPCategoryPanel.TITLE_HEIGHT
 import com.cbza.net.config.TEMPCategoryPanel.rowY
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
@@ -22,7 +21,6 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 	private var dragMoved: Boolean = false
 
 	companion object {
-		private const val ROW_HEIGHT = 10
 		private const val HOVER_DELAY_MS = 1000L
 		private const val DESC_BG_COLOR: Int = 0xE0101010.toInt()
 		private const val DESC_BORDER_COLOR: Int = 0xFF555555.toInt()
@@ -34,6 +32,11 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		private const val PANEL_Y = 10
 		private const val PANEL_WIDTH = 80
 
+		private fun panelWidth(panel: PanelState): Int = (80 * panel.scale).toInt()
+
+		private fun rowHeight(panel: PanelState): Int = (10 * panel.scale).toInt()
+
+		private fun titleHeight(panel: PanelState): Int = (12 * panel.scale).toInt()
 	}
 
 	override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
@@ -43,7 +46,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		for (col in drawOrder.reversed()) {
 			if (col !in openCategories) continue
 			val panel = panels[col]
-			if (clickX in panel.x..(panel.x + PANEL_WIDTH) && clickY in panel.y..(panel.y + TITLE_HEIGHT)) {
+			if (clickX in panel.x..(panel.x + panelWidth(panel)) && clickY in panel.y..(panel.y + titleHeight(panel))) {
 				drawOrder.remove(col)
 				draggingPanel = col
 				grabOffsetX = clickX - panel.x
@@ -54,8 +57,8 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 			}
 			if (!panel.folded) {
 				for (row in categories[col].entries.indices) {
-					val top = rowY(panel.y, row)
-					if (clickX in panel.x..(panel.x + PANEL_WIDTH) && clickY in top..(top + ROW_HEIGHT)) {
+					val top = rowY(panel.y, row, titleHeight(panel), rowHeight(panel))
+					if (clickX in panel.x..(panel.x + panelWidth(panel)) && clickY in top..(top + rowHeight(panel))) {
 						val entry = categories[col].entries[row]
 						entry.setter(!entry.getter())
 						ModConfig.save()
@@ -69,14 +72,15 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 
 	override fun mouseDragged(event: MouseButtonEvent, dx: Double, dy: Double): Boolean {
 		val index = draggingPanel ?: return super.mouseDragged(event, dx, dy)
+		val panel = panels[index]
 
 		val wantedX = event.x.toInt() - grabOffsetX
 		val wantedY = event.y.toInt() - grabOffsetY
-		val maxX = (width - PANEL_WIDTH).coerceAtLeast(0)
-		val maxY = (height - TITLE_HEIGHT).coerceAtLeast(0)
+		val maxX = (width - panelWidth(panel)).coerceAtLeast(0)
+		val maxY = (height - titleHeight(panel)).coerceAtLeast(0)
 
-		panels[index].x = wantedX.coerceIn(0, maxX)
-		panels[index].y = wantedY.coerceIn(0, maxY)
+		panel.x = wantedX.coerceIn(0, maxX)
+		panel.y = wantedY.coerceIn(0, maxY)
 		dragMoved = true
 		return true
 	}
@@ -93,6 +97,20 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		ModConfig.save()
 		draggingPanel = null
 
+		return true
+	}
+
+	override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
+		val delta = scrollY.toFloat() * 0.1f
+
+		val index = panelAt(mouseX.toInt(), mouseY.toInt())
+			?: return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)
+
+		val panel = panels[index]
+
+		panel.scale = (panel.scale + delta).coerceIn(0.3f, 3.0f)
+
+		ModConfig.save()
 		return true
 	}
 
@@ -166,7 +184,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		categories.add(rift)
 
 		for (col in categories.indices) {
-			val defaultX = PANEL_X + col * (PANEL_WIDTH + 20)
+			val defaultX = PANEL_X + col * (PANEL_WIDTH + 5)
 			val state = cfg.panels.getOrPut(categories[col].name) { PanelState(defaultX, PANEL_Y) }
 			panels.add(state)
 		}
@@ -180,8 +198,8 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		for (col in drawOrder.reversed()) {
 			if (col !in openCategories) continue
 			val panel = panels[col]
-			val panelHeight = if (panel.folded) TITLE_HEIGHT  else TITLE_HEIGHT + categories[col].entries.size * ROW_HEIGHT
-			if (x in panel.x..(panel.x + PANEL_WIDTH) && y in panel.y..(panel.y + panelHeight)) return col
+			val panelHeight = if (panel.folded) titleHeight(panel)  else titleHeight(panel) + categories[col].entries.size * rowHeight(panel)
+			if (x in panel.x..(panel.x + panelWidth(panel)) && y in panel.y..(panel.y + panelHeight)) return col
 		}
 		return null
 	}
@@ -203,15 +221,15 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 			if (col !in openCategories || panel.folded || col != hoveredPanel) continue
 
 			for (row in categories[col].entries.indices) {
-				val top = rowY(panel.y, row)
+				val top = rowY(panel.y, row, titleHeight(panel), rowHeight(panel))
 
-				if (mouseX in panel.x..(panel.x + PANEL_WIDTH) && mouseY in top..(top + ROW_HEIGHT)) {
+				if (mouseX in panel.x..(panel.x + panelWidth(panel)) && mouseY in top..(top + rowHeight(panel))) {
 					val entry = categories[col].entries[row]
 
 					if (entry.description.isNotEmpty()) {
 						currentHoverKey = category.name + ":" + entry.label
 						currentHoverDescription = entry.description
-						currentHoverX = panel.x + PANEL_WIDTH + 5
+						currentHoverX = panel.x + panelWidth(panel) + 5
 						currentHoverY = top
 					}
 				}
@@ -227,7 +245,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 
 		for (col in drawOrder ) {
 			val panel = panels[col]
-			TEMPCategoryPanel.draw(context, categories[col], panel.x, panel.y, PANEL_WIDTH, panel.folded, mouseX, mouseY, col == hoveredPanel)
+			TEMPCategoryPanel.draw(context, categories[col], panel.x, panel.y, panelWidth(panel), titleHeight(panel), rowHeight(panel) , panel.folded, mouseX, mouseY, col == hoveredPanel)
 		}
 
 		if (currentHoverKey != null && currentHoverDescription != null) {
@@ -272,4 +290,4 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 
 	override fun isPauseScreen(): Boolean = false
 }
-class PanelState(var x: Int = 0, var y: Int = 0, var folded: Boolean = false)
+class PanelState(var x: Int = 0, var y: Int = 0, var folded: Boolean = false, var scale: Float = 1f)
