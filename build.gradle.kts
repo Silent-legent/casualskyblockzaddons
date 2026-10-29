@@ -59,12 +59,12 @@ dependencies {
 	implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
 	implementation("me.shedaniel.cloth:cloth-config-fabric:$clothConfigVersion")
 	implementation(kotlin("stdlib-jdk8"))
-	implementation("tech.thatgravyboat:skyblock-api:4.2.9") {
-		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
+	implementation("tech.thatgravyboat:skyblock-api:4.2.43") {
+		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.3") }
 		exclude(group = "me.djtheredstoner")
 	}
-	include("tech.thatgravyboat:skyblock-api:4.2.9") {
-		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
+	include("tech.thatgravyboat:skyblock-api:4.2.43") {
+		capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.3") }
 		exclude(group = "me.djtheredstoner")
 	}
 }
