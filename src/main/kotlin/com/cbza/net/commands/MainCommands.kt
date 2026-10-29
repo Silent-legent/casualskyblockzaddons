@@ -55,14 +55,22 @@ object MainCommands {
     private fun openConfigScreen() {
         val client = Minecraft.getInstance()
         client.execute {
+            //? if >=26.2 {
+            /*client.gui.setScreen(ConfigScreen(client.gui.screen()))
+            *///?} else {
             client.setScreen(ConfigScreen(client.screen))
+            //?}
         }
     }
 
     private fun openHudEditor() {
         val client = Minecraft.getInstance()
         client.execute {
+            //? if >=26.2 {
+            /*client.gui.setScreen(HudEditorScreen())
+            *///?} else {
             client.setScreen(HudEditorScreen())
+            //?}
         }
     }
 

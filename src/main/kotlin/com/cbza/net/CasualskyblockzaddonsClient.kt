@@ -55,7 +55,11 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		}
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "main_hud")) { graphics, _ ->
+//? if >=26.2 {
+			/*if (Minecraft.getInstance().gui is HudEditorScreen) return@addLast
+            *///?} else {
 			if (Minecraft.getInstance().screen is HudEditorScreen) return@addLast
+//?}
 			HudLayers.renderAll(graphics)
 		}
 	}

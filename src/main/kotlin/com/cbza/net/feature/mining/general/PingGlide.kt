@@ -16,7 +16,9 @@ import com.cbza.net.utility.rendering.Render3D
 import com.mojang.blaze3d.vertex.PoseStack
 
 import net.minecraft.client.renderer.rendertype.RenderTypes
+//? if <26.2 {
 import net.minecraft.client.renderer.ShapeRenderer
+//?}
 import net.minecraft.util.ARGB
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.client.Minecraft
@@ -76,6 +78,28 @@ object PingGlide {
         val dy = blockPos.y - camPos.y
         val dz = blockPos.z - camPos.z
 
+        //? if >=26.2 {
+        /*event.collector.submitCustomGeometry(event.poseStack, RenderTypes.debugQuads()) { pose, buffer ->
+            shape.forAllBoxes { x1, y1, z1, x2, y2, z2 ->
+                val centerX = dx + (x1 + x2) / 2
+                val centerY = dy + (y1 + y2) / 2
+                val centerZ = dz + (z1 + z2) / 2
+                val halfX = (x2 - x1) / 1.99
+                val halfY = (y2 - y1) / 1.99
+                val halfZ = (z2 - z1) / 1.99
+
+                Render3D.drawFilledBox(buffer, pose.pose(),
+                    (centerX - halfX).toFloat(), (centerY - halfY).toFloat(), (centerZ - halfZ).toFloat(),
+                    (centerX + halfX).toFloat(), (centerY + halfY).toFloat(), (centerZ + halfZ).toFloat(),
+                    fillColor)
+            }
+        }
+
+        val outlinePose = PoseStack()
+        outlinePose.last().pose().set(event.poseStack.last().pose())
+        outlinePose.translate(dx, dy, dz)
+        event.collector.submitShapeOutline(outlinePose, shape, RenderTypes.lines(), outlineColor, 10.0f, false)
+        *///?} else {
         val fillBuffer = event.bufferSource.getBuffer(RenderTypes.debugQuads())
         shape.forAllBoxes { x1, y1, z1, x2, y2, z2 ->
             val centerX = dx + (x1 + x2) / 2
@@ -97,6 +121,7 @@ object PingGlide {
         val lineBuffer = event.bufferSource.getBuffer(RenderTypes.lines())
         ShapeRenderer.renderShape(outlinePoseStack, lineBuffer, shape, dx, dy, dz, outlineColor, 10.0f)
         event.bufferSource.endBatch(RenderTypes.lines())
+        //?}
     }
 
     private fun isEligibleIsland(): Boolean = eligibleIslands.any { it.inIsland() }
