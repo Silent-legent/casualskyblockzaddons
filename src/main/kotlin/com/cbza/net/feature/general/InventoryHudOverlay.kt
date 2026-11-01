@@ -16,8 +16,8 @@ object InventoryHudOverlay {
     private fun isInGameUi(): Boolean {
         val mc = Minecraft.getInstance()
         //? if >=26.2 {
-        /*return mc.level != null && (mc.gui.screen() == null || mc.gui.screen() is ChatScreen)
-        *///?} else {
+        //return mc.level != null && (mc.gui.screen() == null || mc.gui.screen() is ChatScreen)
+        //?} else {
         return mc.level != null && (mc.screen == null || mc.screen is ChatScreen)
         //?}
     }

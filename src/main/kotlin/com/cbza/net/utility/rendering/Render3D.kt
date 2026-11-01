@@ -1,158 +1,102 @@
 package com.cbza.net.utility.rendering
 
-import com.mojang.blaze3d.vertex.VertexConsumer
+import com.cbza.net.api.astrum.Astrum
+import com.cbza.net.api.zenith.camera
+import com.cbza.net.api.zenith.client
 import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
-import org.joml.Matrix4f
+import net.minecraft.world.phys.Vec3
+import net.minecraft.world.phys.shapes.CollisionContext
+import java.awt.Color
+import kotlin.text.toFloat
+import kotlin.text.toInt
 
 object Render3D {
 
-    fun drawOutlinedBox(
-        buffer: VertexConsumer,
-        matrix: Matrix4f,
-        minX: Float, minY: Float, minZ: Float,
-        maxX: Float, maxY: Float, maxZ: Float,
-        color: Int
-    ) {
-        fun line(ax: Float, ay: Float, az: Float, bx: Float, by: Float, bz: Float) {
-            buffer.addVertex(matrix, ax, ay, az).setColor(color)
-            buffer.addVertex(matrix, bx, by, bz).setColor(color)
+    fun outlineBlock(pos: BlockPos, color: Color, lineWidth: Float = 1f, depth: Boolean = true, state: BlockState? = null) {
+        val level = client.level ?: return
+        val finalState = state ?:level.getBlockState(pos)
+        val shape = finalState.getShape(level, pos, CollisionContext.empty())
+
+        if (shape.isEmpty) {
+            drawBox(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), 1.0, 1.0, color, depth, lineWidth)
+            return
         }
 
-        // Bottom Face
-        line(minX, minY, minZ, maxX, minY, minZ)
-        line(maxX, minY, minZ, maxX, minY, maxZ)
-        line(maxX, minY, maxZ, minX, minY, maxZ)
-        line(minX, minY, maxZ, minX, minY, minZ)
-
-        // Top Face
-        line(minX, maxY, minZ, maxX, maxY, minZ)
-        line(maxX, maxY, minZ, maxX, maxY, maxZ)
-        line(maxX, maxY, maxZ, minX, maxY, maxZ)
-        line(minX, maxY, maxZ, minX, maxY, minZ)
-
-        // Vertical Pillars
-        line(minX, minY, minZ, minX, maxY, minZ)
-        line(maxX, minY, minZ, maxX, maxY, minZ)
-        line(maxX, minY, maxZ, maxX, maxY, maxZ)
-        line(minX, minY, maxZ, minX, maxY, maxZ)
+        Astrum.queueVoxelOutline(shape, Vec3.atLowerCornerOf(pos), color, depth, lineWidth)
     }
 
-    fun drawFilledBox(
-        buffer: VertexConsumer,
-        matrix: Matrix4f,
-        minX: Float, minY: Float, minZ: Float,
-        maxX: Float, maxY: Float, maxZ: Float,
-        color: Int
-    ) {
-        fun quad(
-            ax: Float, ay: Float, az: Float,
-            bx: Float, by: Float, bz: Float,
-            cx: Float, cy: Float, cz: Float,
-            dx: Float, dy: Float, dz: Float
-        ) {
-            buffer.addVertex(matrix, ax, ay, az).setColor(color)
-            buffer.addVertex(matrix, bx, by, bz).setColor(color)
-            buffer.addVertex(matrix, cx, cy, cz).setColor(color)
-            buffer.addVertex(matrix, dx, dy, dz).setColor(color)
+    fun fillBlock(pos: BlockPos, color: Color, depth: Boolean = true, state: BlockState? = null) {
+        val level = client.level ?: return
+        val finalState = state ?: level.getBlockState(pos)
+        val shape = finalState.getShape(level, pos, CollisionContext.empty())
+
+        if (shape.isEmpty) {
+            drawFilledBox(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), 1.0, 1.0, color, depth)
+            return
         }
 
-        quad(minX, minY, minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY, maxZ) // Bottom
-        quad(minX, maxY, maxZ, maxX, maxY, maxZ, maxX, maxY, minZ, minX, maxY, minZ) // Top
-        quad(minX, maxY, minZ, maxX, maxY, minZ, maxX, minY, minZ, minX, minY, minZ) // North
-        quad(minX, minY, maxZ, maxX, minY, maxZ, maxX, maxY, maxZ, minX, maxY, maxZ) // South
-        quad(minX, minY, minZ, minX, minY, maxZ, minX, maxY, maxZ, minX, maxY, minZ) // West
-        quad(maxX, maxY, minZ, maxX, maxY, maxZ, maxX, minY, maxZ, maxX, minY, minZ) // East
+        Astrum.queueVoxelFill(shape, Vec3.atLowerCornerOf(pos), color, depth)
     }
 
-    fun drawDoubleSidedFilledBox(
-        buffer: VertexConsumer,
-        matrix: Matrix4f,
-        minX: Float, minY: Float, minZ: Float,
-        maxX: Float, maxY: Float, maxZ: Float,
-        color: Int
-    ) {
-        fun doubleQuad(
-            ax: Float, ay: Float, az: Float,
-            bx: Float, by: Float, bz: Float,
-            cx: Float, cy: Float, cz: Float,
-            dx: Float, dy: Float, dz: Float
-        ) {
-            buffer.addVertex(matrix, ax, ay, az).setColor(color)
-            buffer.addVertex(matrix, bx, by, bz).setColor(color)
-            buffer.addVertex(matrix, cx, cy, cz).setColor(color)
-            buffer.addVertex(matrix, dx, dy, dz).setColor(color)
+    fun drawBox(x: Double, y: Double, z: Double, width: Double, height: Double, color: Color, depth: Boolean = true, lineWidth: Float = 1f) {
+        val hw = width / 2.0
+        val aabb = AABB(x + 0.5 - hw, y, z + 0.5 - hw, x + 0.5 + hw, y + height, z + 0.5 + hw)
+        Astrum.queueBox(aabb, color, filled = false, depth = depth, lineWidth = lineWidth)
+    }
 
-            buffer.addVertex(matrix, dx, dy, dz).setColor(color)
-            buffer.addVertex(matrix, cx, cy, cz).setColor(color)
-            buffer.addVertex(matrix, bx, by, bz).setColor(color)
-            buffer.addVertex(matrix, ax, ay, az).setColor(color)
+    fun drawFilledBox(x: Double, y: Double, z: Double, width: Double, height: Double, color: Color, depth: Boolean = true) {
+        val hw = width / 2.0
+        val aabb = AABB(x + 0.5 - hw, y, z + 0.5 - hw, x + 0.5 + hw, y + height, z + 0.5 + hw)
+        Astrum.queueBox(aabb, color, filled = true, depth = depth)
+    }
+
+    fun drawLine(start: Vec3, finish: Vec3, thickness: Float, color: Color, depth: Boolean = true) {
+        Astrum.queueLine(start, finish, color, thickness, depth)
+    }
+
+    fun drawLineFromCursor(target: Vec3, color: Color, width: Float = 1f) {
+        val start = camera.position().add(Vec3.directionFromRotation(camera.xRot(), camera.yRot()).scale(0.5))
+        Astrum.queueLine(start, target, color, width, depth = false)
+    }
+
+    fun drawText(
+        text: String,
+        x: Double,
+        y: Double,
+        z: Double,
+        scale: Float = 1f,
+        color: Int = 0xFFFFFFFF.toInt(),
+        bgBox: Boolean = false,
+        increase: Boolean = false,
+        depth: Boolean = true,
+    ) {
+        drawText(text, Vec3(x, y, z), scale, color, bgBox, increase, depth)
+    }
+
+    fun drawText(
+        text: String,
+        pos: Vec3,
+        scale: Float = 1f,
+        color: Int = 0xFFFFFFFF.toInt(),
+        bgBox: Boolean = false,
+        increase: Boolean = false,
+        depth: Boolean = true
+    ) {
+        var finalScale = scale
+        if (increase) {
+            val dist = camera.position().distanceTo(pos)
+            finalScale *= (dist.toFloat() / 120f) / 0.025f
         }
 
-        doubleQuad(minX, minY, minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY, maxZ)
-        doubleQuad(minX, maxY, maxZ, maxX, maxY, maxZ, maxX, maxY, minZ, minX, maxY, minZ)
-        doubleQuad(minX, maxY, minZ, maxX, maxY, minZ, maxX, minY, minZ, minX, minY, minZ)
-        doubleQuad(minX, minY, maxZ, maxX, minY, maxZ, maxX, maxY, maxZ, minX, maxY, maxZ)
-        doubleQuad(minX, minY, minZ, minX, minY, maxZ, minX, maxY, maxZ, minX, maxY, minZ)
-        doubleQuad(maxX, maxY, minZ, maxX, maxY, maxZ, maxX, minY, maxZ, maxX, minY, minZ)
-    }
+        val lines = text.split("\n")
+        lines.forEachIndexed { i, line ->
+            val yOffset = i * 9.0 * 0.025 * finalScale
+            val linePos = pos.subtract(0.0, yOffset, 0.0)
+            val bgColor = if (bgBox) (client.options.getBackgroundOpacity(0.25f) * 255).toInt() shl 24 else 0
 
-    // --- Convenience Overloads for BlockPos and AABB ---
-
-    fun drawOutlinedBox(buffer: VertexConsumer, matrix: Matrix4f, pos: BlockPos, color: Int) {
-        drawOutlinedBox(
-            buffer, matrix,
-            pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
-            (pos.x + 1).toFloat(), (pos.y + 1).toFloat(), (pos.z + 1).toFloat(),
-            color
-        )
-    }
-
-    fun drawFilledBox(buffer: VertexConsumer, matrix: Matrix4f, pos: BlockPos, color: Int) {
-        drawFilledBox(
-            buffer, matrix,
-            pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
-            (pos.x + 1).toFloat(), (pos.y + 1).toFloat(), (pos.z + 1).toFloat(),
-            color
-        )
-    }
-
-    fun drawOutlinedBox(buffer: VertexConsumer, matrix: Matrix4f, box: AABB, color: Int) {
-        drawOutlinedBox(
-            buffer, matrix,
-            box.minX.toFloat(), box.minY.toFloat(), box.minZ.toFloat(),
-            box.maxX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat(),
-            color
-        )
-    }
-
-    // --- Backwards Compatibility Aliases (Keeps MimicChest and others working) ---
-
-    fun drawBox(
-        buffer: VertexConsumer, matrix: Matrix4f,
-        dx: Double, dy: Double, dz: Double,
-        sx: Double, sy: Double, sz: Double,
-        color: Int
-    ) {
-        drawOutlinedBox(
-            buffer, matrix,
-            (dx - sx).toFloat(), (dy - sy).toFloat(), (dz - sz).toFloat(),
-            (dx + sx).toFloat(), (dy + sy).toFloat(), (dz + sz).toFloat(),
-            color
-        )
-    }
-
-    fun drawBoxDoubleSided(
-        buffer: VertexConsumer, matrix: Matrix4f,
-        dx: Double, dy: Double, dz: Double,
-        sx: Double, sy: Double, sz: Double,
-        color: Int
-    ) {
-        drawDoubleSidedFilledBox(
-            buffer, matrix,
-            (dx - sx).toFloat(), (dy - sy).toFloat(), (dz - sz).toFloat(),
-            (dx + sx).toFloat(), (dy + sy).toFloat(), (dz + sz).toFloat(),
-            color
-        )
+            Astrum.queueText(line, linePos, color, finalScale, shadow = true, depth = depth, bgColor = bgColor)
+        }
     }
 }

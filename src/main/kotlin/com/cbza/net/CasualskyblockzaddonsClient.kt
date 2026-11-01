@@ -2,6 +2,7 @@ package com.cbza.net
 
 import com.cbza.net.Info.currentVersion
 import com.cbza.net.Info.FirstLogin
+import com.cbza.net.api.astrum.Astrum
 import com.cbza.net.commands.MainCommands
 import com.cbza.net.commands.MiningCommands
 import com.cbza.net.commands.ShortCommands
@@ -45,6 +46,8 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		currentVersion
 		FirstLogin
 
+		Astrum
+
 		MainCommands.register()
 		MiningCommands.register()
 		ShortCommands.register()
@@ -56,8 +59,8 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "main_hud")) { graphics, _ ->
 //? if >=26.2 {
-			/*if (Minecraft.getInstance().gui is HudEditorScreen) return@addLast
-            *///?} else {
+			//if (Minecraft.getInstance().gui is HudEditorScreen) return@addLast
+            //?} else {
 			if (Minecraft.getInstance().screen is HudEditorScreen) return@addLast
 //?}
 			HudLayers.renderAll(graphics)

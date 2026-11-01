@@ -1,6 +1,7 @@
 package com.cbza.net.config
 
-import com.cbza.net.config.TEMPCategoryPanel.rowY
+import com.cbza.net.user_interface.CategoryPanel
+import com.cbza.net.user_interface.CategoryPanel.rowY
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
@@ -245,7 +246,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 
 		for (col in drawOrder ) {
 			val panel = panels[col]
-			TEMPCategoryPanel.draw(context, categories[col], panel.x, panel.y, panelWidth(panel), titleHeight(panel), rowHeight(panel) , panel.folded, mouseX, mouseY, col == hoveredPanel)
+			CategoryPanel.draw(context, categories[col], panel.x, panel.y, panelWidth(panel), titleHeight(panel), rowHeight(panel) , panel.folded, mouseX, mouseY, col == hoveredPanel)
 		}
 
 		if (currentHoverKey != null && currentHoverDescription != null) {

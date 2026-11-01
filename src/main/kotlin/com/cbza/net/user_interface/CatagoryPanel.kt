@@ -1,22 +1,23 @@
-package com.cbza.net.config
+package com.cbza.net.user_interface
 
+import com.cbza.net.config.ConfigCategory
 import com.cbza.net.utility.ColorCatalog
-import com.cbza.net.utility.rendering.TEMPRender2D
-import com.cbza.net.utility.rendering.TEMPRender2D.width
+import com.cbza.net.utility.rendering.Render2D
+import com.cbza.net.utility.rendering.Render2D.width
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import java.awt.Color
 
-object TEMPCategoryPanel {
+object CategoryPanel {
 
     fun rowY(panelY: Int, row: Int, titleH: Int, rowH: Int): Int =
         panelY + titleH + row * rowH
 
-    fun draw(ctx: GuiGraphicsExtractor,category: ConfigCategory,x: Int, y: Int, width: Int, titleH: Int, rowH: Int, folded: Boolean, mouseX: Int, mouseY: Int, active: Boolean) {
+    fun draw(ctx: GuiGraphicsExtractor, category: ConfigCategory, x: Int, y: Int, width: Int, titleH: Int, rowH: Int, folded: Boolean, mouseX: Int, mouseY: Int, active: Boolean) {
 
         val titleHovered = active && mouseX in x..(x + width) && mouseY in y..(y + titleH)
         val titleColor = if (titleHovered) ColorCatalog.UNSELECTED_HOVER1 else ColorCatalog.UNSELECTED1
 
-        TEMPRender2D.drawRect(ctx, x, y, width, titleH, Color(titleColor, true))
+        Render2D.drawRect(ctx, x, y, width, titleH, Color(titleColor, true))
 
         for (row in category.entries.indices) {
             if (!folded) {
@@ -32,10 +33,10 @@ object TEMPCategoryPanel {
                     else -> ColorCatalog.UNSELECTED1
                 }
 
-                TEMPRender2D.drawRect(ctx, x, top, width, rowH, Color(color, true))
+                Render2D.drawRect(ctx, x, top, width, rowH, Color(color, true))
 
                 if (enabled) {
-                    TEMPRender2D.drawRect(ctx, x, top, 3, rowH, Color(ColorCatalog.LINECOLOR1, true))
+                    Render2D.drawRect(ctx, x, top, 3, rowH, Color(ColorCatalog.LINECOLOR1, true))
                 }
                 val lineHeight = 6f
                 val scale = rowH / 15f //19
@@ -45,7 +46,7 @@ object TEMPCategoryPanel {
 
                 val scaledTextWidth = entry.label.width() * scale
                 val textX = (x) + ((width) - scaledTextWidth) / 2
-                TEMPRender2D.drawString(ctx, entry.label, (textX / scale).toInt(), (textY / scale).toInt(), color = Color.WHITE, scale = scale)
+                Render2D.drawString(ctx, entry.label, (textX / scale).toInt(), (textY / scale).toInt(), color = Color.WHITE, scale = scale)
             }
         }
 
@@ -58,6 +59,6 @@ object TEMPCategoryPanel {
         val scaledTextWidth = category.name.width() * scale
         val textX = (x) + ((width) - scaledTextWidth) / 2
 
-        TEMPRender2D.drawString(ctx, category.name, (textX / scale).toInt(), (textY / scale).toInt(), color = Color.WHITE, scale = scale)
+        Render2D.drawString(ctx, category.name, (textX / scale).toInt(), (textY / scale).toInt(), color = Color.WHITE, scale = scale)
     }
 }

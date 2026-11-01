@@ -2,7 +2,7 @@ package com.cbza.net.commands
 
 import com.mojang.brigadier.CommandDispatcher
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import tech.thatgravyboat.skyblockapi.helpers.McClient
 
@@ -43,7 +43,8 @@ object ShortCommands {
         vararg aliases: String
     ) {
         for (name in aliases) {
-            dispatcher.register(literal(name)
+            dispatcher.register(
+                ClientCommands.literal(name)
                 .executes {
                     McClient.sendCommand("warp $target")
                     1

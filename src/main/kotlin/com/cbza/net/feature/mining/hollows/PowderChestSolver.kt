@@ -1,19 +1,20 @@
 package com.cbza.net.feature.mining.hollows
 
+import com.cbza.net.api.astrum.Astrum
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.ParticleEvent
 import com.cbza.net.event.events.RenderEvent
-import com.cbza.net.utility.rendering.Render3D
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec
 
-import net.minecraft.util.ARGB
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+import java.awt.Color
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -34,7 +35,7 @@ object PowderChestSolver {
 			}
 		}
 		EventBus.subscribe(RenderEvent::class.java) { event ->
-			render(event)
+			render()
 		}
 	}
 
@@ -50,31 +51,15 @@ object PowderChestSolver {
 	private const val PARTICLE_POINT_LIFETIME_MS = 250L
 	private const val PARTICLE_WINDOW_MS = 60000L
 
-	private fun render(event: RenderEvent) {
+	private fun render() {
 		if (!ModConfig.get().powderChestSolver) return
 		val positions = getActiveChestPositions()
 		if (positions.isEmpty()) return
 
-		val color = ARGB.colorFromFloat(1.0f, 0.0f, 1.0f, 0.0f)
-		val camPos = event.camPos
-
-		//? if >=26.2 {
-		/*event.collector.submitCustomGeometry(event.poseStack, RenderTypes.debugFilledBox()) { pose, buffer ->
-           for (targetPos in positions) {
-              Render3D.drawBox(buffer, pose.pose(),
-                 targetPos.x - camPos.x, targetPos.y - camPos.y, targetPos.z - camPos.z,
-                 0.05, 0.05, 0.05, color)
-           }
-        }
-        *///?} else {
-		val buffer = event.bufferSource.getBuffer(RenderTypes.debugFilledBox())
-		for (targetPos in positions) {
-			Render3D.drawBox(buffer, event.matrix,
-				targetPos.x - camPos.x, targetPos.y - camPos.y, targetPos.z - camPos.z,
-				0.05, 0.05, 0.05, color)
+		for (pos in positions) {
+				val box = AABB.ofSize(pos, 0.1, 0.1, 0.1)
+				Astrum.queueBox(box, Color(0, 255, 0), filled = true, depth = true)
 		}
-		event.bufferSource.endBatch(RenderTypes.debugFilledBox())
-		//?}
 	}
 
 	private fun isRecentlyMining(): Boolean {

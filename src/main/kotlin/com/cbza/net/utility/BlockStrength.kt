@@ -15,6 +15,16 @@ object BlockStrength {
         // --- Block ---
         "OBSIDIAN" to 445,
 
+        // --- Pure ore ---
+        "PURE_COAL" to 600,
+        "PURE_IRON" to 600,
+        "PURE_GOLD" to 600,
+        "PURE_LAPIS" to 600,
+        "PURE_REDSTONE" to 600, // not working
+        "PURE_EMERALD" to 600,
+        "PURE_DIAMOND" to 600,
+        "PURE_NETHER_QUARTZ" to 600,
+
         // --- Dwarven / Mineshaft ---
         "LOW_TIER_MITHRIL" to 500,
         "MID_TIER_MITHRIL" to 800,

@@ -100,7 +100,7 @@ java {
 tasks.jar {
 	val projectName = rootProject.name
 	inputs.property("projectName", projectName)
-	archiveBaseName.set("casualskyblockzaddons-mc$minecraftVersion")
+	archiveBaseName.set("casualskyblockzaddons-$minecraftVersion")
 	from(rootProject.file("LICENSE")) {
 		rename { "${it}_$projectName" }
 	}

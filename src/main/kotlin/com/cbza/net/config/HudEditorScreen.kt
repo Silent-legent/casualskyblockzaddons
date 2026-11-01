@@ -83,8 +83,8 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         }
     }
 
-    private val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")
-    private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "player_arrow")
+    private val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "textures/nucleus_map.png")
+    private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "textures/player_arrow.png")
 
     private var lastMouseX = 0
     private var lastMouseY = 0

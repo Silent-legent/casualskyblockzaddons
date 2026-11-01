@@ -56,8 +56,8 @@ object MainCommands {
         val client = Minecraft.getInstance()
         client.execute {
             //? if >=26.2 {
-            /*client.gui.setScreen(ConfigScreen(client.gui.screen()))
-            *///?} else {
+            //client.gui.setScreen(ConfigScreen(client.gui.screen()))
+            //?} else {
             client.setScreen(ConfigScreen(client.screen))
             //?}
         }
@@ -67,8 +67,8 @@ object MainCommands {
         val client = Minecraft.getInstance()
         client.execute {
             //? if >=26.2 {
-            /*client.gui.setScreen(HudEditorScreen())
-            *///?} else {
+            //client.gui.setScreen(HudEditorScreen())
+            //?} else {
             client.setScreen(HudEditorScreen())
             //?}
         }

@@ -1,19 +1,19 @@
 package com.cbza.net.feature.dungeons
 
+import com.cbza.net.api.astrum.Astrum
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.event.events.RenderEvent
-import com.cbza.net.utility.rendering.Render3D
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.core.BlockPos
-import net.minecraft.util.ARGB
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.phys.AABB
 
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
+import java.awt.Color
 
 object MimicChest {
     init {
@@ -21,7 +21,7 @@ object MimicChest {
             tick()
         }
         EventBus.subscribe<RenderEvent> { event ->
-            render(event)
+            render()
         }
         EventBus.subscribe<ChatEvent> { event ->
             if (event.text.contains("The Catacombs")) {
@@ -35,36 +35,17 @@ object MimicChest {
     private var tickCounter = 0
     private var clearChestsDelay = 0
 
-    private fun render(event: RenderEvent) {
+    private fun render() {
         if (!ModConfig.get().mimicChest) return
         val positions = getMimicChestPositions()
         if (positions.isEmpty()) return
 
-        val color = ARGB.colorFromFloat(1.0f, 1.0f, 0.0f, 0.0f)
-        val camPos = event.camPos
-
-        //? if >=26.2 {
-        /*event.collector.submitCustomGeometry(event.poseStack, RenderTypes.debugFilledBox()) { pose, buffer ->
-            for (targetPos in positions) {
-                val dx = targetPos.x + 0.5 - camPos.x
-                val dy = targetPos.y + 0.5 - camPos.y
-                val dz = targetPos.z + 0.5 - camPos.z
-                Render3D.drawBoxDoubleSided(buffer, pose.pose(), dx, dy, dz, 0.5, 0.5, 0.5, color)
-            }
-        }
-        *///?} else {
-        val buffer = event.bufferSource.getBuffer(RenderTypes.debugFilledBox())
         for (targetPos in positions) {
-            val dx = targetPos.x + 0.5 - camPos.x
-            val dy = targetPos.y + 0.5 - camPos.y
-            val dz = targetPos.z + 0.5 - camPos.z
-            Render3D.drawBoxDoubleSided(buffer, event.matrix, dx, dy, dz, 0.5, 0.5, 0.5, color)
+            Astrum.queueBox(AABB(targetPos), Color(255, 0, 0), true, true, 1f)
         }
-        event.bufferSource.endBatch(RenderTypes.debugFilledBox())
-        //?}
     }
 
-    fun getMimicChestPositions(): List<BlockPos> {
+        fun getMimicChestPositions(): List<BlockPos> {
         return trackedChests.toList()
     }
 

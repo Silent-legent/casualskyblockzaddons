@@ -28,8 +28,8 @@ object CommissionsDisplay {
             val cfg = ModConfig.get()
             if (!cfg.commissionsDisplay) return
         //? if >=26.2 {
-        /*if (Minecraft.getInstance().gui.screen() is HudEditorScreen) return
-        *///?} else {
+        //if (Minecraft.getInstance().gui.screen() is HudEditorScreen) return
+        //?} else {
             if (Minecraft.getInstance().screen is HudEditorScreen) return
         //?}
 

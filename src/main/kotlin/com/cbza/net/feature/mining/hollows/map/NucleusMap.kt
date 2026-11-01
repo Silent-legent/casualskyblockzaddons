@@ -37,8 +37,8 @@ object NucleusMap {
         }
     }
 
-    private val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "nucleus_map")
-    private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "player_arrow")
+    private val textureId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "textures/nucleus_map.png")
+    private val arrowId = Identifier.fromNamespaceAndPath("casualskyblockzaddons", "textures/player_arrow.png")
 
     private const val NUCLEUS_CENTER_X = 512.0
     private const val NUCLEUS_CENTER_Z = 512.0
@@ -336,7 +336,7 @@ object NucleusMap {
             val mapX = cfg.nucleusMapX
             val mapY = cfg.nucleusMapY
 
-            Render2D.drawImage(graphics, textureId, mapX, mapY, mapSize, mapSize)
+        Render2D.drawImage(graphics, textureId, mapX, mapY, mapSize, mapSize)
 
             for ((name, coords) in discoveredPois) {
                 val color = poiColors[name] ?: continue
