@@ -88,6 +88,6 @@ object MimicChest {
     }
 
     fun clearChests() {
-        clearChestsDelay = 60 // 3s
+        clearChestsDelay = 60
     }
 }

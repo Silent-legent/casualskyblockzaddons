@@ -21,7 +21,9 @@ import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.feature.mining.hollows.map.WishingCompassSolver
 import com.cbza.net.feature.rift.PuffKillAnnouncer
 import com.cbza.net.feature.slayers.SlayerXpTracker
+import com.cbza.net.config.ModConfig
 
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
@@ -55,6 +57,11 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 
 		ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
 			EventBus.post(ServerJoinEvent)
+		}
+		// Hide action bar messages from the server when the config option is on
+		ClientReceiveMessageEvents.ALLOW_GAME.register { _, overlay ->
+			// true = show the message, false = drop it
+			!(overlay && ModConfig.get().hideActionBarStats)
 		}
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "main_hud")) { graphics, _ ->
