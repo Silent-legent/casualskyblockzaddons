@@ -1,6 +1,7 @@
 package com.cbza.net.feature.mining.general
 
 import com.cbza.net.config.ModConfig
+import com.cbza.net.config.config
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.ServerJoinEvent
@@ -78,7 +79,7 @@ object MiningAbilityTracker {
     private var wasOnMiningIsland = false
 
     fun onAbilityUsed(chatMessage: String) {
-        if (!ModConfig.get().miningAbilityAnnouncer) return
+        if (!ModConfig.get().mining.miningAbilityAnnouncer) return
         if (System.currentTimeMillis() - lastServerJoinTime < STARTUP_GRACE_MS) return
         val match = abilityNames.firstOrNull { chatMessage.contains(it) } ?: return
         activeAbilityName = match
@@ -90,7 +91,7 @@ object MiningAbilityTracker {
     }
 
     fun onAbilityReady(chatMessage: String) {
-        if (!ModConfig.get().miningAbilityAnnouncer) return
+        if (!ModConfig.get().mining.miningAbilityAnnouncer) return
         if (System.currentTimeMillis() - lastServerJoinTime < STARTUP_GRACE_MS) return
         if (!waitingForReady) return
         if (activeAbilityName.isEmpty()) return
@@ -106,7 +107,7 @@ object MiningAbilityTracker {
         if (wasOnMiningIsland && !onMiningIsland) reset()
         wasOnMiningIsland = onMiningIsland
         if (!onMiningIsland) return
-        if (!ModConfig.get().miningAbilityAnnouncer) return
+        if (!ModConfig.get().mining.miningAbilityAnnouncer) return
         if (!waitingForReady) return
 
         if (!gotTimeFromTab && System.currentTimeMillis() - abilityUsedTime > TAB_READ_DELAY_MS) {
@@ -200,13 +201,12 @@ object MiningAbilityTracker {
     fun render(graphics: GuiGraphicsExtractor) {
         val popup = getActivePopup() ?: return
         val mc = Minecraft.getInstance()
-        val cfg = ModConfig.get()
         val screenWidth = mc.window.guiScaledWidth
         val screenHeight = mc.window.guiScaledHeight
-        val scale = cfg.abilityAnnouncerScale
+        val scale = config.mining.miningAbilityAnnouncerPos.scale
         val textWidth = mc.font.width(popup)
-        val x = if (cfg.abilityAnnouncerX == -1) ((screenWidth - textWidth * scale) / 2).toInt() else cfg.abilityAnnouncerX
-        val y = if (cfg.abilityAnnouncerY == -1) screenHeight / 3 else cfg.abilityAnnouncerY
+        val x = if (config.mining.miningAbilityAnnouncerPos.x == -1) ((screenWidth - textWidth * scale) / 2).toInt() else config.mining.miningAbilityAnnouncerPos.x
+        val y = if (config.mining.miningAbilityAnnouncerPos.y == -1) screenHeight / 3 else config.mining.miningAbilityAnnouncerPos.x
         val color = ColorCatalog.GREEN
         graphics.pose().pushMatrix()
         graphics.pose().scale(scale, scale)

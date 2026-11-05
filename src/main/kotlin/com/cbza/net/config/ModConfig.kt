@@ -8,62 +8,60 @@ import java.nio.file.Path
 
 class ModConfig {
 
-	// --- Info ---
 	var firstTimeUsing = false
 
-	// --- Toggles ---
-	//  General
-	var showRarityBackgrounds = true
-	var PlayerInventory = false
-	var hideActionBarStats = true
+	var misc = Misc()
+	var general = General()
+	var mining = Mining()
+	var dungeons = Dungeons()
+	var rift = Rift()
 
-	//  Mining
-	var nucleusMap = true
-	var miningAbilityAnnouncer = true
-	var commissionsDisplay = true
-	var pingGlide = true
-	var powderChestSolver = true
-	//  Dungeons
-	var mimicChest = true
-	//  Rift
-	var puffKillAnnouncer = false
+	class Misc {
+		var panels: MutableMap<String, PanelState> = mutableMapOf()
+		var panelOrder: MutableList<String> = mutableListOf()
+		var hudLayerOrder: MutableList<String> = mutableListOf(
+			"ability_announcer",
+			"puff_kill_announcer",
+			"commission_display",
+			"nucleus_map",
+			"player_inventory",
+		)
+	}
 
-	// --- Settings ---
-	var powderChestYOffset = 0.0
-	var manualPing = 0
+	class General {
+		var showRarityBackgrounds = true
 
-	// --- Config UI ---
-	var panels: MutableMap<String, PanelState> = mutableMapOf()
-	var panelOrder: MutableList<String> = mutableListOf()
+		var playerInventory = false
+		var playerInventoryPos = HudPosition(-1,  -1, 1.0f)
 
-	// --- HUD Positioning ---
-	var hudLayerOrder: MutableList<String> = mutableListOf(
-		"ability_announcer",
-		"puff_kill_announcer",
-		"commission_display",
-		"nucleus_map",
-		"player_inventory",
-	)
+		var hideActionBarStats = true
+	}
 
-	var abilityAnnouncerX = -1
-	var abilityAnnouncerY = -1
-	var abilityAnnouncerScale = 3.5f
+	class Mining {
+		var nucleusMap = true
+		var nucleusMapPos = HudPosition(0,  0, 1.0f)
 
-	var puffKillAnnouncerX = -1
-	var puffKillAnnouncerY = -1
-	var puffKillAnnouncerScale = 1f
+		var miningAbilityAnnouncer = true
+		var miningAbilityAnnouncerPos = HudPosition(-1,  -1, 3.5f)
 
-	var nucleusMapX = 0
-	var nucleusMapY = 0
-	var nucleusMapScale = 1.0f
+		var commissionsDisplay = true
+		var commissionDisplayPos = HudPosition(0,  100, 1.0f)
 
-	var commissionsDisplayX = 0
-	var commissionsDisplayY = 100
-	var commissionsDisplayScale = 1.0f
+		var pingGlide = true
+		var manualPing = 0
 
-	var playerInventoryDisplayX = -1
-	var playerInventoryDisplayY = -1
-	var playerInventoryDisplayScale = 1.0f
+		var powderChestSolver = true
+		var powderChestYOffset = 0.0
+	}
+
+	class Dungeons {
+		var mimicChest = true
+	}
+
+	class Rift {
+		var puffKillAnnouncer = false
+		var puffKillAnnouncerPos = HudPosition(-1,  -1, 1.0f)
+	}
 
 	companion object {
 		private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
@@ -78,7 +76,7 @@ class ModConfig {
 		}
 
 		fun load(): ModConfig {
-			val config = if (Files.exists(PATH)) {
+			val loaded = if (Files.exists(PATH)) {
 				try {
 					val json = PATH.toFile().readText(Charsets.UTF_8)
 					GSON.fromJson(json, ModConfig::class.java) ?: ModConfig()
@@ -89,15 +87,15 @@ class ModConfig {
 				ModConfig()
 			}
 
-			val defaults = ModConfig().hudLayerOrder
+			val defaults = ModConfig().misc.hudLayerOrder
 			for (layer in defaults) {
-				if (!config.hudLayerOrder.contains(layer)) {
-					config.hudLayerOrder.add(layer)
+				if (!loaded.misc.hudLayerOrder.contains(layer)) {
+					loaded.misc.hudLayerOrder.add(layer)
 				}
 			}
 
-			instance = config
-			return config
+			instance = loaded
+			return loaded
 		}
 
 		fun save() {
@@ -111,4 +109,6 @@ class ModConfig {
 			}
 		}
 	}
+	class HudPosition(var x: Int = -1, var y: Int = -1, var scale: Float = 1f)
 }
+val config get() = ModConfig.get()

@@ -136,7 +136,7 @@ object NucleusMap {
     }
 
     fun onCoordsShared(text: String) {
-        if (!ModConfig.get().nucleusMap) return
+        if (!ModConfig.get().mining.nucleusMap) return
         if (!inCrystalHollows) return
 
         val match = coordRegex.find(text) ?: return
@@ -170,7 +170,7 @@ object NucleusMap {
     }
 
     fun tick() {
-        if (!ModConfig.get().nucleusMap) return
+        if (!ModConfig.get().mining.nucleusMap) return
 
         val mc = Minecraft.getInstance()
         val now = System.currentTimeMillis()
@@ -324,23 +324,23 @@ object NucleusMap {
     }
 
     fun render(graphics: GuiGraphicsExtractor) {
-            if (!ModConfig.get().nucleusMap) return
+            if (!ModConfig.get().mining.nucleusMap) return
             if (!inCrystalHollows) return
 
             val mc = Minecraft.getInstance()
-            val cfg = ModConfig.get()
-            val mapSize = (100 * cfg.nucleusMapScale).toInt()
-            val arrowWidth = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
-            val arrowHeight = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
+            val mcm = ModConfig.get().mining
+            val mapSize = (100 * mcm.nucleusMapPos.scale).toInt()
+            val arrowWidth = (9 * mcm.nucleusMapPos.scale).toInt().coerceAtLeast(3)
+            val arrowHeight = (9 * mcm.nucleusMapPos.scale).toInt().coerceAtLeast(3)
 
-            val mapX = cfg.nucleusMapX
-            val mapY = cfg.nucleusMapY
+            val mapX = mcm.nucleusMapPos.x
+            val mapY = mcm.nucleusMapPos.y
 
         Render2D.drawImage(graphics, textureId, mapX, mapY, mapSize, mapSize)
 
             for ((name, coords) in discoveredPois) {
                 val color = poiColors[name] ?: continue
-                val size = ((poiSizes[name] ?: 6) * cfg.nucleusMapScale).toInt()
+                val size = ((poiSizes[name] ?: 6) * mcm.nucleusMapPos.scale).toInt()
                 val poiPos = getPoiMapPosition(coords.first, coords.second, mapSize)
                 val px = mapX + poiPos.first
                 val py = mapY + poiPos.second
@@ -351,7 +351,7 @@ object NucleusMap {
                 val poiPos = getPoiMapPosition(coords.first, coords.second, mapSize)
                 val px = mapX + poiPos.first
                 val py = mapY + poiPos.second
-                val size = (6 * cfg.nucleusMapScale).toInt()
+                val size = (6 * mcm.nucleusMapPos.scale).toInt()
                 graphics.fill(px - size / 2, py - size / 2, px + size / 2, py + size / 2, 0xFF808080.toInt())
             }
 

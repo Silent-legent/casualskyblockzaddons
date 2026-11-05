@@ -30,11 +30,10 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
     }
 
     private fun getBounds(name: String): HudBounds? {
-        val cfg = ModConfig.get()
         return when (name) {
             // --- Gnereal ---
             "player_inventory" -> {
-                val scale = cfg.playerInventoryDisplayScale
+                val scale = config.general.playerInventoryPos.scale
                 val inventorysizeWidth = ((COLUMS * SLOT_SIZE + MARGIN) * scale).toInt()
                 val inventorySizeHight = ((ROWS * SLOT_SIZE + MARGIN) * scale).toInt()
                 val (x, y) = InventoryHudOverlay.getDefaultPosition()
@@ -42,16 +41,16 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
             }
             // --- Mining ---
             "nucleus_map" -> {
-                val mapSize = (100 * cfg.nucleusMapScale).toInt()
-                HudBounds(cfg.nucleusMapX, cfg.nucleusMapY, mapSize, mapSize)
+                val mapSize = (100 * config.mining.nucleusMapPos.scale).toInt()
+                HudBounds(config.mining.nucleusMapPos.x, config.mining.nucleusMapPos.y, mapSize, mapSize)
             }
             "ability_announcer" -> {
                 val text = "Maniac Miner Ready!"
-                val scale = cfg.abilityAnnouncerScale
+                val scale = config.mining.miningAbilityAnnouncerPos.scale
                 val w = (this.font.width(text) * scale).toInt()
                 val h = (10 * scale).toInt()
-                val x = if (cfg.abilityAnnouncerX == -1) (width - w) / 2 else cfg.abilityAnnouncerX
-                val y = if (cfg.abilityAnnouncerY == -1) height / 3 else cfg.abilityAnnouncerY
+                val x = if (config.mining.miningAbilityAnnouncerPos.x == -1) (width - w) / 2 else config.mining.miningAbilityAnnouncerPos.x
+                val y = if (config.mining.miningAbilityAnnouncerPos.y == -1) height / 3 else config.mining.miningAbilityAnnouncerPos.y
                 HudBounds(x, y, w, h)
             }
             "commission_display" -> {
@@ -61,22 +60,22 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                     "Boss corleon slayer: DONE",
                     "Amber Crystal Hunter: 0%"
                 )
-                val scale = cfg.commissionsDisplayScale
+                val scale = config.mining.commissionDisplayPos.scale
                 val lineHeight = 10
                 val w = (fakeCommissions.maxOf { this.font.width(it) } * scale).toInt()
                 val h = (fakeCommissions.size * lineHeight * scale).toInt()
-                val x = if (cfg.commissionsDisplayX == -1) (width - w) / 2 else cfg.commissionsDisplayX
-                val y = if (cfg.commissionsDisplayY == -1) height / 3 else cfg.commissionsDisplayY
+                val x = if (config.mining.commissionDisplayPos.x == -1) (width - w) / 2 else config.mining.commissionDisplayPos.x
+                val y = if (config.mining.commissionDisplayPos.y == -1) height / 3 else config.mining.commissionDisplayPos.y
                 HudBounds(x, y, w, h)
             }
             // --- Rift ---
             "puff_kill_announcer" -> {
                 val text = "Kill Puffs!"
-                val scale = cfg.puffKillAnnouncerScale
+                val scale = config.rift.puffKillAnnouncerPos.scale
                 val w = (this.font.width(text) * scale).toInt()
                 val h = (10 * scale).toInt()
-                val x = if (cfg.puffKillAnnouncerX == -1) (width - w) / 2 else cfg.puffKillAnnouncerX
-                val y = if (cfg.puffKillAnnouncerY == -1) height / 3 else cfg.puffKillAnnouncerY
+                val x = if (config.rift.puffKillAnnouncerPos.x == -1) (width - w) / 2 else config.rift.puffKillAnnouncerPos.x
+                val y = if (config.rift.puffKillAnnouncerPos.y == -1) height / 3 else config.rift.puffKillAnnouncerPos.y
                 HudBounds(x, y, w, h)
             }
             else -> null
@@ -98,32 +97,31 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
     override fun init() {
         super.init()
         val resetButton = Button.builder(Component.literal("Reset Positions")) {
-            val cfg = ModConfig.get()
 
-            cfg.hudLayerOrder = mutableListOf("commission_display", "puff_kill_announcer", "ability_announcer", "nucleus_map", "player_inventory")
+            config.misc.hudLayerOrder = mutableListOf("commission_display", "puff_kill_announcer", "ability_announcer", "nucleus_map", "player_inventory")
 
             // --- General ---
-            cfg.playerInventoryDisplayX = -1
-            cfg.playerInventoryDisplayY = -1
-            cfg.playerInventoryDisplayScale = 1.0f
+            config.general.playerInventoryPos.x = -1
+            config.general.playerInventoryPos.y = -1
+            config.general.playerInventoryPos.scale = 1.0f
 
             // --- Mining ---
-            cfg.nucleusMapX = 0
-            cfg.nucleusMapY = 0
-            cfg.nucleusMapScale = 1.0f
+            config.mining.nucleusMapPos.x = 0
+            config.mining.nucleusMapPos.y = 0
+            config.mining.nucleusMapPos.scale = 1.0f
 
-            cfg.abilityAnnouncerX = -1
-            cfg.abilityAnnouncerY = -1
-            cfg.abilityAnnouncerScale = 3.5f
+            config.mining.miningAbilityAnnouncerPos.x = -1
+            config.mining.miningAbilityAnnouncerPos.y = -1
+            config.mining.miningAbilityAnnouncerPos.scale = 3.5f
 
-            cfg.commissionsDisplayX = 0
-            cfg.commissionsDisplayY = 100
-            cfg.commissionsDisplayScale = 1.0f
+            config.mining.commissionDisplayPos.x = 0
+            config.mining.commissionDisplayPos.y = 100
+            config.mining.commissionDisplayPos.scale = 1.0f
 
             // --- Rift ---
-            cfg.puffKillAnnouncerX = -1
-            cfg.puffKillAnnouncerY = -1
-            cfg.puffKillAnnouncerScale = 3.5f
+            config.rift.puffKillAnnouncerPos.x = -1
+            config.rift.puffKillAnnouncerPos.y = -1
+            config.rift.puffKillAnnouncerPos.scale = 3.5f
 
             ModConfig.save()
         }.bounds(width / 2 - 50, height - 30, 100, 20).build()
@@ -136,17 +134,15 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         lastMouseX = mouseX
         lastMouseY = mouseY
 
-        val cfg = ModConfig.get()
-
-        for (name in cfg.hudLayerOrder) {
+        for (name in config.misc.hudLayerOrder) {
             val bounds = getBounds(name) ?: continue
 
             when (name) {
                 // --- General ---
                 "player_inventory" -> {
-                    if (cfg.PlayerInventory) {
+                    if (config.general.playerInventory) {
                         val player = Minecraft.getInstance().player ?: continue
-                        val scale = cfg.playerInventoryDisplayScale
+                        val scale = config.general.playerInventoryPos.scale
 
                         drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
 
@@ -176,7 +172,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
                 // --- Mining ---
                 "nucleus_map" -> {
-                    if (cfg.nucleusMap) {
+                    if (config.mining.nucleusMap) {
                         drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
 
                         Render2D.drawImage(context, textureId, bounds.x, bounds.y, bounds.w, bounds.h)
@@ -187,7 +183,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                         for (i in fakePoiOrder.indices) {
                             val poiName = fakePoiOrder[i]
                             val color = NucleusMap.poiColors[poiName] ?: continue
-                            val size = ((NucleusMap.poiSizes[poiName] ?: 6) * cfg.nucleusMapScale).toInt()
+                            val size = ((NucleusMap.poiSizes[poiName] ?: 6) * config.mining.nucleusMapPos.scale).toInt()
                             val (offX, offY) = fakeOffsets[i]
                             val px = bounds.x + (bounds.w * offX).toInt()
                             val py = bounds.y + (bounds.h * offY).toInt()
@@ -196,7 +192,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
                         val centerX = bounds.x + bounds.w / 2
                         val centerY = bounds.y + bounds.h / 2
-                        val arrowSize = (9 * cfg.nucleusMapScale).toInt().coerceAtLeast(3)
+                        val arrowSize = (9 * config.mining.nucleusMapPos.scale).toInt().coerceAtLeast(3)
                         context.pose().pushMatrix()
                         context.pose().translate(centerX.toFloat(), centerY.toFloat())
                         context.pose().translate(-(arrowSize / 2).toFloat(), -(arrowSize / 2).toFloat())
@@ -205,9 +201,9 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                     }
                 }
                 "ability_announcer" -> {
-                    if (cfg.miningAbilityAnnouncer) {
+                    if (config.mining.miningAbilityAnnouncer) {
                         val text = "Maniac Miner Ready!"
-                        val scale = cfg.abilityAnnouncerScale
+                        val scale = config.mining.miningAbilityAnnouncerPos.scale
 
                         drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
 
@@ -218,14 +214,14 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                     }
                 }
                 "commission_display" -> {
-                    if (cfg.commissionsDisplay) {
+                    if (config.mining.commissionsDisplay) {
                         val fakeCommissions = listOf(
                             "Sludge slayer: 74.5% ",
                             "Yog slayer: 25%",
                             "Boss corleon slayer: DONE",
                             "Amber Crystal Hunter: 0%"
                         )
-                        val scale = cfg.commissionsDisplayScale
+                        val scale = config.mining.commissionDisplayPos.scale
                         val lineHeight = 10
                         val nameColor = ColorCatalog.WHITE
 
@@ -261,9 +257,9 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                 }
                 // --- Rift ---
                 "puff_kill_announcer" -> {
-                    if (cfg.puffKillAnnouncer) {
+                    if (config.rift.puffKillAnnouncer) {
                         val text = "Kill Puff!"
-                        val scale = cfg.puffKillAnnouncerScale
+                        val scale = config.rift.puffKillAnnouncerPos.scale
 
                         drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
 
@@ -309,7 +305,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
     }
 
     override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
-        val cfg = ModConfig.get()
+
         val mx = event.x().toInt()
         val my = event.y().toInt()
 
@@ -321,11 +317,11 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
                 dragOffsetY = my - bounds.y
 
                 when (name) {
-                    "player_inventory" -> { cfg.playerInventoryDisplayX = bounds.x; cfg.playerInventoryDisplayY = bounds.y }
-                    "nucleus_map" -> { cfg.nucleusMapX = bounds.x; cfg.nucleusMapY = bounds.y }
-                    "ability_announcer" -> { cfg.abilityAnnouncerX = bounds.x; cfg.abilityAnnouncerY = bounds.y }
-                    "puff_kill_announcer" -> { cfg.puffKillAnnouncerX = bounds.x; cfg.puffKillAnnouncerY = bounds.y }
-                    "commission_display" -> { cfg.commissionsDisplayX = bounds.x; cfg.commissionsDisplayY = bounds.y }
+                    "player_inventory" -> { config.general.playerInventoryPos.x = bounds.x; config.general.playerInventoryPos.y = bounds.y }
+                    "nucleus_map" -> { config.mining.nucleusMapPos.x = bounds.x; config.mining.nucleusMapPos.y = bounds.y }
+                    "ability_announcer" -> { config.mining.miningAbilityAnnouncerPos.x = bounds.x; config.mining.miningAbilityAnnouncerPos.y = bounds.y }
+                    "commission_display" -> { config.mining.commissionDisplayPos.x = bounds.x; config.mining.commissionDisplayPos.y = bounds.y }
+                    "puff_kill_announcer" -> { config.rift.puffKillAnnouncerPos.x = bounds.x; config.rift.puffKillAnnouncerPos.y = bounds.y }
 
                 }
                 return true
@@ -335,29 +331,29 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
     }
 
     override fun mouseDragged(event: MouseButtonEvent, dragX: Double, dragY: Double): Boolean {
-        val cfg = ModConfig.get()
         val mx = event.x().toInt()
         val my = event.y().toInt()
+
         when (draggingElement) {
             "player_inventory" -> {
-                cfg.playerInventoryDisplayX = mx - dragOffsetX
-                cfg.playerInventoryDisplayY = my - dragOffsetY
+                config.general.playerInventoryPos.x = mx - dragOffsetX
+                config.general.playerInventoryPos.y = my - dragOffsetY
             }
             "nucleus_map" -> {
-                cfg.nucleusMapX = mx - dragOffsetX
-                cfg.nucleusMapY = my - dragOffsetY
+                config.mining.nucleusMapPos.x = mx - dragOffsetX
+                config.mining.nucleusMapPos.y = my - dragOffsetY
             }
             "ability_announcer" -> {
-                cfg.abilityAnnouncerX = mx - dragOffsetX
-                cfg.abilityAnnouncerY = my - dragOffsetY
-            }
-            "puff_kill_announcer" -> {
-                cfg.puffKillAnnouncerX = mx - dragOffsetX
-                cfg.puffKillAnnouncerY = my - dragOffsetY
+                config.mining.miningAbilityAnnouncerPos.x = mx - dragOffsetX
+                config.mining.miningAbilityAnnouncerPos.y = my - dragOffsetY
             }
             "commission_display" -> {
-                cfg.commissionsDisplayX = mx - dragOffsetX
-                cfg.commissionsDisplayY = my - dragOffsetY
+                config.mining.commissionDisplayPos.x = mx - dragOffsetX
+                config.mining.commissionDisplayPos.y = my - dragOffsetY
+            }
+            "puff_kill_announcer" -> {
+                config.rift.puffKillAnnouncerPos.x = mx - dragOffsetX
+                config.rift.puffKillAnnouncerPos.y = my - dragOffsetY
             }
         }
         return true
@@ -369,7 +365,6 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
-        val cfg = ModConfig.get()
         val mx = mouseX.toInt()
         val my = mouseY.toInt()
 
@@ -377,11 +372,12 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         val delta = scrollY.toFloat() * 0.1f
 
         when (target) {
-            "nucleus_map" -> cfg.nucleusMapScale = (cfg.nucleusMapScale + delta).coerceIn(0.3f, 3.0f)
-            "ability_announcer" -> cfg.abilityAnnouncerScale = (cfg.abilityAnnouncerScale + delta).coerceIn(1.0f, 6.0f)
-            "puff_kill_announcer" -> cfg.puffKillAnnouncerScale = (cfg.puffKillAnnouncerScale + delta).coerceIn(1.0f, 6.0f)
-            "commission_display" -> cfg.commissionsDisplayScale = (cfg.commissionsDisplayScale + delta).coerceIn(1.0f, 6.0f)
-            "player_inventory" -> cfg.playerInventoryDisplayScale = (cfg.playerInventoryDisplayScale + delta).coerceIn(0.5f, 6.0f)
+            "player_inventory" -> config.general.playerInventoryPos.scale = (config.general.playerInventoryPos.scale + delta).coerceIn(0.5f, 6.0f)
+            "nucleus_map" -> config.mining.nucleusMapPos.scale = (config.mining.nucleusMapPos.scale + delta).coerceIn(0.3f, 3.0f)
+            "ability_announcer" -> config.mining.miningAbilityAnnouncerPos.scale = (config.mining.miningAbilityAnnouncerPos.scale + delta).coerceIn(1.0f, 6.0f)
+            "commission_display" -> config.mining.commissionDisplayPos.scale = (config.mining.commissionDisplayPos.scale + delta).coerceIn(1.0f, 6.0f)
+            "puff_kill_announcer" -> config.rift.puffKillAnnouncerPos.scale = (config.rift.puffKillAnnouncerPos.scale + delta).coerceIn(1.0f, 6.0f)
+
         }
         return true
     }

@@ -18,7 +18,7 @@ object RarityBackground {
     private fun slotKey(x: Int, y: Int): Int = x * 100000 + y
 
     fun getRarityColor(itemStack: ItemStack?, x: Int, y: Int): Int {
-        if (!ModConfig.get().showRarityBackgrounds) return -1
+        if (!ModConfig.get().general.showRarityBackgrounds) return -1
 
         val key = slotKey(x, y)
 

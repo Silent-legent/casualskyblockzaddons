@@ -58,7 +58,7 @@ object PingGlide {
     )
 
     private fun render() {
-        if (!ModConfig.get().pingGlide) return
+        if (!ModConfig.get().mining.pingGlide) return
         if (!_isCurrentlyMining) return
         val blockPos = _currentBlockPos ?: return
 
@@ -124,7 +124,7 @@ object PingGlide {
     fun getCurrentBlockPos(): BlockPos? = _currentBlockPos
 
     fun tick() {
-        if (!ModConfig.get().pingGlide) return
+        if (!ModConfig.get().mining.pingGlide) return
         if (!isEligibleIsland()) {
             _isCurrentlyMining = false
             return
@@ -174,7 +174,7 @@ object PingGlide {
     }
 
     fun getPing(): Int {
-        return PingTracker.getPing()?.toInt() ?: ModConfig.get().manualPing
+        return PingTracker.getPing()?.toInt() ?: ModConfig.get().mining.manualPing
     }
 
     fun getElapsedMs(): Long {

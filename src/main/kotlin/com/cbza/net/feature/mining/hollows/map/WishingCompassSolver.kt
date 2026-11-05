@@ -74,7 +74,7 @@ object WishingCompassSolver {
     }
 
     fun handleParticle(x: Double, y: Double, z: Double) {
-        if (!ModConfig.get().nucleusMap) return
+        if (!ModConfig.get().mining.nucleusMap) return
         if (!NucleusMap.inCrystalHollows) return
 
         val now = System.currentTimeMillis()
@@ -162,7 +162,7 @@ object WishingCompassSolver {
     }
 
     fun onKingsScentGranted() {
-        if (!ModConfig.get().nucleusMap) return
+        if (!ModConfig.get().mining.nucleusMap) return
         if (!NucleusMap.inCrystalHollows) return
 
         kingsScentExpiresAt = System.currentTimeMillis() + KINGS_CENT_DURATION_MS

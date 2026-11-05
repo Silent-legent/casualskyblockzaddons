@@ -42,7 +42,7 @@ object PuffKillAnnouncer {
 
 
     fun onPuffDying() {
-        if (!ModConfig.get().puffKillAnnouncer) return
+        if (!ModConfig.get().rift.puffKillAnnouncer) return
         inRift = SkyBlockIsland.THE_RIFT.inIsland()
         onMountainTop = SkyBlockAreas.THE_MOUNTAINTOP.inArea()
 
@@ -138,14 +138,14 @@ object PuffKillAnnouncer {
     }
 
     fun render(graphics: GuiGraphicsExtractor) {
-        val cfg = ModConfig.get()
-        if (!cfg.puffKillAnnouncer) return
+        val mcr = ModConfig.get().rift
+        if (!mcr.puffKillAnnouncer) return
 
         val popup = getActivePopup() ?: return
         val mc = Minecraft.getInstance()
-        val startX = cfg.puffKillAnnouncerX
-        val startY = cfg.puffKillAnnouncerY
-        val scale = cfg.puffKillAnnouncerScale
+        val startX = mcr.puffKillAnnouncerPos.x
+        val startY = mcr.puffKillAnnouncerPos.x
+        val scale = mcr.puffKillAnnouncerPos.scale
 
         graphics.pose().pushMatrix()
         graphics.pose().scale(scale, scale)

@@ -61,7 +61,7 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		// Hide action bar messages from the server when the config option is on
 		ClientReceiveMessageEvents.ALLOW_GAME.register { _, overlay ->
 			// true = show the message, false = drop it
-			!(overlay && ModConfig.get().hideActionBarStats)
+			!(overlay && ModConfig.get().general.hideActionBarStats)
 		}
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("casualskyblockzaddons", "main_hud")) { graphics, _ ->

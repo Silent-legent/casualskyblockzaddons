@@ -1,6 +1,7 @@
 package com.cbza.net.feature.general
 
 import com.cbza.net.config.ModConfig
+import com.cbza.net.config.config
 import com.cbza.net.utility.ColorCatalog
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
@@ -24,32 +25,30 @@ object InventoryHudOverlay {
 
     fun getDefaultPosition(): Pair<Int, Int> {
         val mc = Minecraft.getInstance()
-        val cfg = ModConfig.get()
 
         val screenWidth = mc.window.guiScaledWidth
         val screenHeight = mc.window.guiScaledHeight
-        val scale = cfg.playerInventoryDisplayScale
+        val scale = config.general.playerInventoryPos.scale
 
-        val x = if (cfg.playerInventoryDisplayX == -1)
+        val x = if (config.general.playerInventoryPos.x == -1)
             (screenWidth / 2 - ((COLUMS * SLOT_SIZE + MARGIN) * scale) / 2).toInt()
-        else cfg.playerInventoryDisplayX
+        else config.general.playerInventoryPos.x
 
-        val y = if (cfg.playerInventoryDisplayY == -1)
+        val y = if (config.general.playerInventoryPos.y == -1)
             (screenHeight - 40 - (ROWS * SLOT_SIZE + MARGIN) * scale).toInt()
-        else cfg.playerInventoryDisplayY
+        else config.general.playerInventoryPos.y
 
         return Pair(x, y)
     }
 
     fun render(graphics: GuiGraphicsExtractor) {
-        if (!ModConfig.get().PlayerInventory) return
+        if (!ModConfig.get().general.playerInventory) return
         if (!isInGameUi()) return
 
         val mc = Minecraft.getInstance()
-        val cfg = ModConfig.get()
         val player = mc.player ?: return
 
-        val scale = cfg.playerInventoryDisplayScale
+        val scale = config.general.playerInventoryPos.scale
 
         val (x, y) = getDefaultPosition()
 

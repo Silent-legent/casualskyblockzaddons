@@ -36,7 +36,7 @@ object MimicChest {
     private var clearChestsDelay = 0
 
     private fun render() {
-        if (!ModConfig.get().mimicChest) return
+        if (!ModConfig.get().dungeons.mimicChest) return
         val positions = getMimicChestPositions()
         if (positions.isEmpty()) return
 

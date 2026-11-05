@@ -94,7 +94,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 			panel.folded = !panel.folded
 		}
 
-		ModConfig.get().panelOrder = drawOrder.map { categories[it].name }.toMutableList()
+		ModConfig.get().misc.panelOrder = drawOrder.map { categories[it].name }.toMutableList()
 		ModConfig.save()
 		draggingPanel = null
 
@@ -120,77 +120,80 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 	}
 
 	private fun buildCategories() {
-		val cfg = ModConfig.get()
 
 		val general = ConfigCategory("General")
 			.toggle(
 				"Rarity Backgrounds",
-				cfg::showRarityBackgrounds,
+				config.general::showRarityBackgrounds,
 				"Colors item backgrounds based on their rarity."
 			)
 			.toggle(
 				"Inventory overlay",
-				cfg::PlayerInventory,
+				config.general::playerInventory,
 				"Overlays your inventory's content outside the inventory."
 			)
 			.toggle(
 				"Action Bar stats",
-				cfg::hideActionBarStats,
+				config.general::hideActionBarStats,
 				"Removes the stats in your action bar."
 			)
 
 		val dungeons = ConfigCategory("Dungeons")
 			.toggle(
 				"Mimic Chest",
-				cfg::mimicChest,
+				config.dungeons::mimicChest,
 				"Outlines the mimic chest inside Dungeons."
 			)
 
 		val mining = ConfigCategory("Mining")
 			.toggle(
 				"Ability Announcer",
-				cfg::miningAbilityAnnouncer,
+				config.mining::miningAbilityAnnouncer,
 				"Shows a popup and sound when your pickaxe ability is ready."
 			)
 			.toggle(
 				"Ping Glide",
-				cfg::pingGlide,
+				config.mining::pingGlide,
 				"Outlines your block and shows when it's safe to move without losing progress"
 			)
 			.toggle(
 				"Chest Solver",
-				cfg::powderChestSolver,
+				config.mining::powderChestSolver,
 				"Highlights the exact point to look while opening PowderChests."
 			)
 			.toggle(
 				"Nucleus Map",
-				cfg::nucleusMap,
+				config.mining::nucleusMap,
 				"Shows a mini-map of Crystal Hollows."
 			)
 			.toggle(
 				"Commission Display",
-				cfg::commissionsDisplay,
+				config.mining::commissionsDisplay,
 				"Show your curent commissions and there progression."
 			)
 		val rift = ConfigCategory("Rift")
 			.toggle(
 				"Puff Kill Announcer",
-				cfg::puffKillAnnouncer,
+				config.rift::puffKillAnnouncer,
 				"Shows when to kill your puffs."
 			)
 
 		categories.add(general)
-		categories.add(dungeons)
 		categories.add(mining)
+		categories.add(dungeons)
+		// farming
+		// slayers
+		// fishing
+		// foraging
 		categories.add(rift)
 
 		for (col in categories.indices) {
 			val defaultX = PANEL_X + col * (PANEL_WIDTH + 5)
-			val state = cfg.panels.getOrPut(categories[col].name) { PanelState(defaultX, PANEL_Y) }
+			val state = config.misc.panels.getOrPut(categories[col].name) { PanelState(defaultX, PANEL_Y) }
 			panels.add(state)
 		}
 		drawOrder.addAll(categories.indices)
-		drawOrder.sortBy { cfg.panelOrder.indexOf(categories[it].name) }
+		drawOrder.sortBy { config.misc.panelOrder.indexOf(categories[it].name) }
 		openCategories.addAll(categories.indices)
 	}
 

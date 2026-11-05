@@ -17,7 +17,7 @@ object HudLayers {
     )
 
     fun renderAll(graphics: GuiGraphicsExtractor) {
-        for (name in ModConfig.get().hudLayerOrder) {
+        for (name in ModConfig.get().misc.hudLayerOrder) {
             renderers[name]?.invoke(graphics)
         }
     }

@@ -3,10 +3,10 @@ package com.cbza.net.config
 import java.util.Collections
 
 object HudLayerManager {
-    fun hitOrder(): List<String> = ModConfig.get().hudLayerOrder.reversed()
+    fun hitOrder(): List<String> = ModConfig.get().misc.hudLayerOrder.reversed()
 
     fun moveLayer(name: String, up: Boolean) {
-        val list = ModConfig.get().hudLayerOrder
+        val list = ModConfig.get().misc.hudLayerOrder
         val index = list.indexOf(name)
         if (index == -1) return
 
