@@ -4,8 +4,9 @@ import com.cbza.net.config.HudEditorScreen
 import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.TabListReader
+import com.cbza.net.api.cushion.RenderContext
+
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
 object CommissionsDisplay {
@@ -19,7 +20,7 @@ object CommissionsDisplay {
 
     val commissionPattern = Regex("""(.+): (\d+(?:\.\d+)?%|DONE)""")
 
-    fun render(graphics: GuiGraphicsExtractor) {
+    fun render(graphics: RenderContext) {
             val onMiningIsland = miningIslands.any { it.inIsland() }
             if (wasOnMiningIsland && !onMiningIsland) reset()
             wasOnMiningIsland = onMiningIsland

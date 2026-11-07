@@ -5,23 +5,25 @@ import com.cbza.net.feature.general.InventoryHudOverlay.COLUMS
 import com.cbza.net.feature.general.InventoryHudOverlay.ROWS
 import com.cbza.net.feature.general.InventoryHudOverlay.SLOT_SIZE
 import com.cbza.net.feature.general.InventoryHudOverlay.MARGIN
-
 import com.cbza.net.feature.mining.general.CommissionsDisplay
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.rendering.Render2D
-import net.minecraft.client.Minecraft
+import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.Screen
+import com.cbza.net.api.cushion.MouseButtonEvent
+import com.cbza.net.api.cushion.Minecraft
+import com.cbza.net.api.cushion.KeyEvent
+import com.cbza.net.api.cushion.ChatComponent
+import com.cbza.net.api.cushion.Identifier
 
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
-import net.minecraft.client.gui.screens.Screen
-import net.minecraft.client.input.MouseButtonEvent
-import net.minecraft.client.input.KeyEvent
-import net.minecraft.network.chat.Component
-import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
+import java.awt.Color
 
-class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
+// import java.awt.Color
+
+class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
 
     val mc = Minecraft.getInstance()
 
@@ -96,7 +98,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
 
     override fun init() {
         super.init()
-        val resetButton = Button.builder(Component.literal("Reset Positions")) {
+        val resetButton = Button.builder(ChatComponent.literal("Reset Positions")) {
 
             config.misc.hudLayerOrder = mutableListOf("commission_display", "puff_kill_announcer", "ability_announcer", "nucleus_map", "player_inventory")
 
@@ -128,7 +130,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         addRenderableWidget(resetButton)
     }
 
-    override fun extractRenderState(context: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractRenderState(context: RenderContext, mouseX: Int, mouseY: Int, delta: Float) {
         context.fillGradient(0, 0, width, height, 0x90101010.toInt(), 0x90151515.toInt())
 
         lastMouseX = mouseX
@@ -283,7 +285,7 @@ class HudEditorScreen : Screen(Component.literal("HUD Editor")) {
         }
     }
 
-    private fun drawEditorBox(context: GuiGraphicsExtractor, x: Int, y: Int, w: Int, h: Int) {
+    private fun drawEditorBox(context: RenderContext, x: Int, y: Int, w: Int, h: Int) {
         context.fill(x - 1, y - 1, x + w + 1, y, 0x80FFFFFF.toInt())
         context.fill(x - 1, y + h, x + w + 1, y + h + 1, 0x80FFFFFF.toInt())
         context.fill(x - 1, y, x, y + h, 0x80FFFFFF.toInt())

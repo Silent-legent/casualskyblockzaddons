@@ -4,7 +4,7 @@ import com.cbza.net.config.ConfigCategory
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.rendering.Render2D
 import com.cbza.net.utility.rendering.Render2D.width
-import net.minecraft.client.gui.GuiGraphicsExtractor
+import com.cbza.net.api.cushion.RenderContext
 import java.awt.Color
 
 object CategoryPanel {
@@ -12,7 +12,7 @@ object CategoryPanel {
     fun rowY(panelY: Int, row: Int, titleH: Int, rowH: Int): Int =
         panelY + titleH + row * rowH
 
-    fun draw(ctx: GuiGraphicsExtractor, category: ConfigCategory, x: Int, y: Int, width: Int, titleH: Int, rowH: Int, folded: Boolean, mouseX: Int, mouseY: Int, active: Boolean) {
+    fun draw(ctx: RenderContext, category: ConfigCategory, x: Int, y: Int, width: Int, titleH: Int, rowH: Int, folded: Boolean, mouseX: Int, mouseY: Int, active: Boolean) {
 
         val titleHovered = active && mouseX in x..(x + width) && mouseY in y..(y + titleH)
         val titleColor = if (titleHovered) ColorCatalog.UNSELECTED_HOVER1 else ColorCatalog.UNSELECTED1

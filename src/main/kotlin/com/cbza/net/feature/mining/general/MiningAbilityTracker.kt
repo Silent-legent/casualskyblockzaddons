@@ -7,9 +7,9 @@ import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.ServerJoinEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.ColorCatalog
+import com.cbza.net.api.cushion.RenderContext
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 
@@ -198,7 +198,7 @@ object MiningAbilityTracker {
         return msg
     }
 
-    fun render(graphics: GuiGraphicsExtractor) {
+    fun render(graphics: RenderContext) {
         val popup = getActivePopup() ?: return
         val mc = Minecraft.getInstance()
         val screenWidth = mc.window.guiScaledWidth

@@ -74,7 +74,7 @@ object PingGlide {
         val origin = Vec3.atLowerCornerOf(blockPos)
 
         Astrum.queueVoxelFill(shape, origin, fillColor, true)
-        Astrum.queueVoxelOutline(shape, origin, outlineColor, true, lineWidth = 10.0f )
+        Astrum.queueVoxelOutline(shape, origin, outlineColor, false, 10f )
     }
 
     private fun isEligibleIsland(): Boolean = eligibleIslands.any { it.inIsland() }

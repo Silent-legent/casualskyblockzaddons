@@ -31,8 +31,6 @@ object AstrumLayers {
     private val LINES_THROUGH_WALLS = RenderType.create(
         "lines_through_walls",
         RenderSetup.builder(AstrumPipelines.LINES_THROUGH_WALLS)
-            //? if <26.3
-            .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
             .createRenderSetup()
     )
 
@@ -40,8 +38,6 @@ object AstrumLayers {
         "lines",
         RenderSetup.builder(AstrumPipelines.LINES)
             .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-            //? if <26.3
-            .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
             .createRenderSetup()
     )
 

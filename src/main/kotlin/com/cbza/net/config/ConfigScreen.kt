@@ -2,12 +2,12 @@ package com.cbza.net.config
 
 import com.cbza.net.user_interface.CategoryPanel
 import com.cbza.net.user_interface.CategoryPanel.rowY
-import net.minecraft.client.gui.GuiGraphicsExtractor
-import net.minecraft.client.gui.screens.Screen
-import net.minecraft.client.input.MouseButtonEvent
-import net.minecraft.network.chat.Component
+import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.Screen
+import com.cbza.net.api.cushion.MouseButtonEvent
+import com.cbza.net.api.cushion.ChatComponent
 
-class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzAddons")) {
+class ConfigScreen(parent: Screen?) : Screen(ChatComponent.literal("CasualSkyblockzAddons")) {
 
 	private val categories = mutableListOf<ConfigCategory>()
 	private val openCategories = mutableSetOf<Int>()
@@ -208,7 +208,7 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		return null
 	}
 
-	override fun extractRenderState(context: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
+	override fun extractRenderState(context: RenderContext, mouseX: Int, mouseY: Int, delta: Float) {
 		context.fillGradient(0, 0, width, height, 0x60101010, 0x60151515)
 
 		val hoveredPanel = panelAt(mouseX, mouseY)
@@ -261,8 +261,8 @@ class ConfigScreen(parent: Screen?) : Screen(Component.literal("CasualSkyblockzA
 		}
 	}
 
-	private fun drawDescriptionBox(context: GuiGraphicsExtractor, description: String, x: Int, y: Int) {
-		val wrappedLines = this.font.split(Component.literal(description), DESC_MAX_WIDTH)
+	private fun drawDescriptionBox(context: RenderContext, description: String, x: Int, y: Int) {
+		val wrappedLines = this.font.split(ChatComponent.literal(description), DESC_MAX_WIDTH)
 
 		var textWidth = 0
 		for (line in wrappedLines) {

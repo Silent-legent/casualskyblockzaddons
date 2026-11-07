@@ -6,7 +6,7 @@ import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.ParticleEvent
 import com.cbza.net.event.events.RenderEvent
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec
+// import net.fabricmc.loader.impl.lib.sat4j.core.Vec
 
 import net.minecraft.client.Minecraft
 import net.minecraft.core.particles.ParticleTypes

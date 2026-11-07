@@ -1,14 +1,14 @@
 package com.cbza.net.config
 
+import com.cbza.net.api.cushion.RenderContext
 import com.cbza.net.feature.general.InventoryHudOverlay
 import com.cbza.net.feature.mining.general.CommissionsDisplay
 import com.cbza.net.feature.mining.general.MiningAbilityTracker
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.feature.rift.PuffKillAnnouncer
-import net.minecraft.client.gui.GuiGraphicsExtractor
 
 object HudLayers {
-    private val renderers: Map<String, (GuiGraphicsExtractor) -> Unit> = mapOf(
+    private val renderers: Map<String, (RenderContext) -> Unit> = mapOf(
         "ability_announcer"  to MiningAbilityTracker::render,
         "puff_kill_announcer" to PuffKillAnnouncer::render,
         "commission_display" to CommissionsDisplay::render,
@@ -16,7 +16,7 @@ object HudLayers {
         "player_inventory" to InventoryHudOverlay::render
     )
 
-    fun renderAll(graphics: GuiGraphicsExtractor) {
+    fun renderAll(graphics: RenderContext) {
         for (name in ModConfig.get().misc.hudLayerOrder) {
             renderers[name]?.invoke(graphics)
         }

@@ -6,10 +6,13 @@ import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.SoundPlayedEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.ColorCatalog
+import com.cbza.net.api.cushion.RenderContext
+
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundEvents.CHICKEN_EGG
+
+
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockAreas
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
@@ -137,7 +140,7 @@ object PuffKillAnnouncer {
 
     }
 
-    fun render(graphics: GuiGraphicsExtractor) {
+    fun render(graphics: RenderContext) {
         val mcr = ModConfig.get().rift
         if (!mcr.puffKillAnnouncer) return
 

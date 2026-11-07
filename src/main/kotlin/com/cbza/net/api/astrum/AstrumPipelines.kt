@@ -8,10 +8,14 @@ package com.cbza.net.api.astrum
 // import com.cbza.net.CasualskyblockzaddonsClient
 // import com.mojang.blaze3d.pipeline.DepthStencilState
 //? if <26.3 {
+import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
 import com.mojang.blaze3d.pipeline.RenderPipeline
 //?} else {
-//import com.mojang.renderpearl.api.pipeline.RenderPipeline
-//?}
+/*import com.mojang.renderpearl.api.pipeline.BlendFunction
+import com.mojang.renderpearl.api.pipeline.ColorTargetState
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+*///?}
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.resources.Identifier
 import java.util.Optional
@@ -19,15 +23,19 @@ import java.util.Optional
 private const val NAMESPACE = "casualskyblockzaddons"
 
 object AstrumPipelines {
+    val TRANSLUCENT = ColorTargetState(BlendFunction.TRANSLUCENT)
+
     val LINES: RenderPipeline = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
             .withLocation(id( "lines"))
+            .withColorTargetState(TRANSLUCENT)
             .build()
     )
 
     val LINES_THROUGH_WALLS: RenderPipeline = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
             .withLocation(id( "lines_through_walls"))
+            .withColorTargetState(TRANSLUCENT)
             .withDepthStencilState(Optional.empty())
             .build()
     )
@@ -35,12 +43,14 @@ object AstrumPipelines {
     val FILLED: RenderPipeline = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(id("filled"))
+            .withColorTargetState(TRANSLUCENT)
             .build()
     )
 
     val FILLED_THROUGH_WALLS: RenderPipeline = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(id("filled_through_walls"))
+            .withColorTargetState(TRANSLUCENT)
             .withDepthStencilState(Optional.empty())
             .build()
     )

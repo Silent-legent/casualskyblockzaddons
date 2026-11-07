@@ -3,7 +3,7 @@ package com.cbza.net.Info
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ServerJoinEvent
-import com.cbza.net.feature.mining.general.MiningAbilityTracker.onServerJoin
+// import com.cbza.net.feature.mining.general.MiningAbilityTracker.onServerJoin
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component

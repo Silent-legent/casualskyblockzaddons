@@ -6,9 +6,10 @@
 
 package com.cbza.net.utility.rendering
 
+import com.cbza.net.api.cushion.RenderContext
+
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -24,30 +25,30 @@ object Render2D {
     private val formattingRegex = "(?<!\\\\\\\\)&(?=[0-9a-fk-or])".toRegex()
     val client = Minecraft.getInstance()
 
-    fun drawImage(ctx: GuiGraphicsExtractor, image: Identifier?, x: Int, y: Int, width: Int, height: Int, color: Color) {
+    fun drawImage(ctx: RenderContext, image: Identifier?, x: Int, y: Int, width: Int, height: Int, color: Color) {
         drawImage(ctx, image, x, y, width, height, color.rgb)
     }
 
-    fun drawImage(ctx: GuiGraphicsExtractor, image: Identifier?, x: Int, y: Int, width: Int, height: Int, color: Int = -1) {
+    fun drawImage(ctx: RenderContext, image: Identifier?, x: Int, y: Int, width: Int, height: Int, color: Int = -1) {
         if (image == null) return
         ctx.blit(RenderPipelines.GUI_TEXTURED, image, x, y, 0f, 0f, width, height, width, height, width, height, color)
     }
 
-    fun drawSprite(ctx: GuiGraphicsExtractor, sprite: Identifier, x: Int, y: Int, width: Int, height: Int, color: Color) {
+    fun drawSprite(ctx: RenderContext, sprite: Identifier, x: Int, y: Int, width: Int, height: Int, color: Color) {
         drawSprite(ctx, sprite, x, y, width, height, color.rgb)
     }
 
-    fun drawSprite(ctx: GuiGraphicsExtractor, sprite: Identifier, x: Int, y: Int, width: Int, height: Int, color: Int = -1) {
+    fun drawSprite(ctx: RenderContext, sprite: Identifier, x: Int, y: Int, width: Int, height: Int, color: Int = -1) {
         ctx.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, width, height, color)
     }
 
     @JvmOverloads
-    fun drawRect(ctx: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int, color: Color = Color.WHITE) {
+    fun drawRect(ctx: RenderContext, x: Int, y: Int, width: Int, height: Int, color: Color = Color.WHITE) {
         ctx.fill(RenderPipelines.GUI, x, y, x + width, y + height, color.rgb)
     }
 
     @JvmOverloads
-    fun drawHollowRect(ctx: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int, thickness: Int, color: Color = Color.WHITE) {
+    fun drawHollowRect(ctx: RenderContext, x: Int, y: Int, width: Int, height: Int, thickness: Int, color: Color = Color.WHITE) {
         if (thickness <= 0) return
         val rgb = color.rgb
         ctx.fill(RenderPipelines.GUI, x, y, x + width, y + thickness, rgb)
@@ -57,7 +58,7 @@ object Render2D {
     }
 
     @JvmOverloads
-    fun drawString(ctx: GuiGraphicsExtractor, str: String, x: Int, y: Int, scale: Float = 1f, shadow: Boolean = true) {
+    fun drawString(ctx: RenderContext, str: String, x: Int, y: Int, scale: Float = 1f, shadow: Boolean = true) {
         val matrices = ctx.pose()
         if (scale != 1f) {
             matrices.pushMatrix()
@@ -77,7 +78,7 @@ object Render2D {
     }
 
     @JvmOverloads
-    fun drawString(ctx: GuiGraphicsExtractor, str: Component, x: Int, y: Int, scale: Float = 1f, shadow: Boolean = true) {
+    fun drawString(ctx: RenderContext, str: Component, x: Int, y: Int, scale: Float = 1f, shadow: Boolean = true) {
         val matrices = ctx.pose()
         if (scale != 1f) {
             matrices.pushMatrix()
@@ -97,7 +98,7 @@ object Render2D {
     }
 
     @JvmOverloads
-    fun drawString(ctx: GuiGraphicsExtractor, str: String, x: Int, y: Int, scale: Float = 1f, color: Color, shadow: Boolean = true) {
+    fun drawString(ctx: RenderContext, str: String, x: Int, y: Int, scale: Float = 1f, color: Color, shadow: Boolean = true) {
         val matrices = ctx.pose()
         if (scale != 1f) {
             matrices.pushMatrix()
@@ -116,7 +117,7 @@ object Render2D {
         if (scale != 1f) matrices.popMatrix()
     }
 
-    fun renderItem(context: GuiGraphicsExtractor, item: ItemStack, x: Float, y: Float, scale: Float) {
+    fun renderItem(context: RenderContext, item: ItemStack, x: Float, y: Float, scale: Float) {
         context.pose().pushMatrix()
         context.pose().translate(x, y)
         context.pose().scale(scale, scale)
@@ -145,7 +146,7 @@ object Render2D {
         return client.font.lineHeight * lineCount
     }
 
-    fun renderScrolled(ctx: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int, scrollOffset: Float, block: () -> Unit) {
+    fun renderScrolled(ctx: RenderContext, x: Int, y: Int, width: Int, height: Int, scrollOffset: Float, block: () -> Unit) {
         ctx.enableScissor(x, y, x + width, y + height)
         ctx.pushPop {
             ctx.pose().translate(x.toFloat(), y.toFloat())
@@ -161,7 +162,7 @@ object Render2D {
         return (currentTarget + amount * speed).coerceIn(-maxScroll, 0f)
     }
 
-    fun drawScrollbar(ctx: GuiGraphicsExtractor, x: Int, y: Int, viewportHeight: Int, scrollOffset: Float, totalHeight: Int, color: Color) {
+    fun drawScrollbar(ctx: RenderContext, x: Int, y: Int, viewportHeight: Int, scrollOffset: Float, totalHeight: Int, color: Color) {
         if (totalHeight <= viewportHeight) return
         val barHeight = (viewportHeight.toFloat() / totalHeight) * viewportHeight
         val barY = (-scrollOffset / totalHeight) * viewportHeight
@@ -169,7 +170,7 @@ object Render2D {
     }
 
     fun drawLine(
-        ctx: GuiGraphicsExtractor,
+        ctx: RenderContext,
         x1: Float, y1: Float,
         x2: Float, y2: Float,
         color: Color,

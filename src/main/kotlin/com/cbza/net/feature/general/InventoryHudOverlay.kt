@@ -2,10 +2,11 @@ package com.cbza.net.feature.general
 
 import com.cbza.net.config.ModConfig
 import com.cbza.net.config.config
+import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.ChatScreen
+
 import com.cbza.net.utility.ColorCatalog
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphicsExtractor
-import net.minecraft.client.gui.screens.ChatScreen
 
 object InventoryHudOverlay {
 
@@ -41,7 +42,7 @@ object InventoryHudOverlay {
         return Pair(x, y)
     }
 
-    fun render(graphics: GuiGraphicsExtractor) {
+    fun render(graphics: RenderContext) {
         if (!ModConfig.get().general.playerInventory) return
         if (!isInGameUi()) return
 

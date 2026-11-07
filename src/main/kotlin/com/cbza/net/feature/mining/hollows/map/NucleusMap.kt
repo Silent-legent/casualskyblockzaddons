@@ -7,10 +7,10 @@ import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.rendering.Render2D
+import com.cbza.net.api.cushion.RenderContext
 
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.resources.Identifier
 
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
@@ -323,7 +323,7 @@ object NucleusMap {
         }
     }
 
-    fun render(graphics: GuiGraphicsExtractor) {
+    fun render(graphics: RenderContext) {
             if (!ModConfig.get().mining.nucleusMap) return
             if (!inCrystalHollows) return
 
