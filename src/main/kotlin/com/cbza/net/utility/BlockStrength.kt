@@ -36,17 +36,17 @@ object BlockStrength {
         "GLACITE" to 6000,
 
         // --- Gemstone ---
-        "RUBY" to 2300,
+        "RUBY" to 2500,
         "SAPPHIRE" to 3000,
         "JADE" to 3000,
         "AMETHYST" to 3000,
         "OPAL" to 3000,
-        "TOPAZ" to 3800,
-        "JASPER" to 4800,
-        "ONYX" to 5200,
-        "AQUAMARINE" to 5200,
-        "CITRINE" to 5200,
-        "PERIDOT" to 5200,
+        "TOPAZ" to 3500,
+        "JASPER" to 4000,
+        "ONYX" to 4000,
+        "AQUAMARINE" to 4000,
+        "CITRINE" to 4000,
+        "PERIDOT" to 4000,
 
 
         )

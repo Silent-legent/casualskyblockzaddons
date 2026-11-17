@@ -1,6 +1,7 @@
 package com.cbza.net.config
 
 import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.feature.farming.PestKillTimer
 import com.cbza.net.feature.general.InventoryHudOverlay
 import com.cbza.net.feature.mining.general.CommissionsDisplay
 import com.cbza.net.feature.mining.general.MiningAbilityTracker
@@ -13,7 +14,8 @@ object HudLayers {
         "puff_kill_announcer" to PuffKillAnnouncer::render,
         "commission_display" to CommissionsDisplay::render,
         "nucleus_map"        to NucleusMap::render,
-        "player_inventory" to InventoryHudOverlay::render
+        "player_inventory" to InventoryHudOverlay::render,
+        "Pest_Timer" to PestKillTimer::render,
     )
 
     fun renderAll(graphics: RenderContext) {

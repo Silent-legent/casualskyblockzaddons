@@ -49,4 +49,10 @@ object TabListReader {
             .map { it.trim() }
             .filter { COMMISSION_REGEX.matches(it) }
     }
+
+    fun getPestCooldown(Cooldown: String): String? {
+        val line = findLine("Cooldown:") ?: return null
+        val match = Regex("$Cooldown:\\s*(.*)", RegexOption.IGNORE_CASE).find(line) ?: return null
+        return match.groupValues[1].trim()
+    }
 }

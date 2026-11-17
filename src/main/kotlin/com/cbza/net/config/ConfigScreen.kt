@@ -145,6 +145,13 @@ class ConfigScreen(parent: Screen?) : Screen(ChatComponent.literal("CasualSkyblo
 				"Outlines the mimic chest inside Dungeons."
 			)
 
+		val farming = ConfigCategory("Farming")
+			.toggle(
+				"Pest Kill Timer",
+				config.farming::PestKillTimer,
+				"Shows a popup when Pests nearly spawn"
+			)
+
 		val mining = ConfigCategory("Mining")
 			.toggle(
 				"Ability Announcer",
@@ -181,7 +188,7 @@ class ConfigScreen(parent: Screen?) : Screen(ChatComponent.literal("CasualSkyblo
 		categories.add(general)
 		categories.add(mining)
 		categories.add(dungeons)
-		// farming
+		categories.add(farming)
 		// slayers
 		// fishing
 		// foraging

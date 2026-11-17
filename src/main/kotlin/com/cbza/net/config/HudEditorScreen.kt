@@ -70,6 +70,16 @@ class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
                 val y = if (config.mining.commissionDisplayPos.y == -1) height / 3 else config.mining.commissionDisplayPos.y
                 HudBounds(x, y, w, h)
             }
+            // --- Farming ---
+            "Pest_Timer" -> {
+                val text = "Pest Spawning"
+                val scale = config.farming.pestKillTimerPos.scale
+                val w = (this.font.width(text) * scale).toInt()
+                val h = (10 * scale).toInt()
+                val x = if (config.farming.pestKillTimerPos.x == -1) (width - w) / 2 else config.farming.pestKillTimerPos.x
+                val y = if (config.farming.pestKillTimerPos.y == -1) height / 3 else config.farming.pestKillTimerPos.y
+                HudBounds(x, y, w, h)
+            }
             // --- Rift ---
             "puff_kill_announcer" -> {
                 val text = "Kill Puffs!"
@@ -100,7 +110,7 @@ class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
         super.init()
         val resetButton = Button.builder(ChatComponent.literal("Reset Positions")) {
 
-            config.misc.hudLayerOrder = mutableListOf("commission_display", "puff_kill_announcer", "ability_announcer", "nucleus_map", "player_inventory")
+            config.misc.hudLayerOrder = mutableListOf("commission_display", "puff_kill_announcer", "ability_announcer", "nucleus_map", "player_inventory", "Pest_Timer")
 
             // --- General ---
             config.general.playerInventoryPos.x = -1
@@ -119,6 +129,11 @@ class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
             config.mining.commissionDisplayPos.x = 0
             config.mining.commissionDisplayPos.y = 100
             config.mining.commissionDisplayPos.scale = 1.0f
+
+            // --- Farming ---
+            config.farming.pestKillTimerPos.x = -1
+            config.farming.pestKillTimerPos.y = -1
+            config.farming.pestKillTimerPos.scale = 3.5f
 
             // --- Rift ---
             config.rift.puffKillAnnouncerPos.x = -1
@@ -257,6 +272,20 @@ class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
                         context.pose().popMatrix()
                     }
                 }
+                // --- farming ---
+                "Pest_Timer" -> {
+                    if (config.farming.PestKillTimer) {
+                        val text =  "Pest spawning!"
+                        val scale = config.farming.pestKillTimerPos.scale
+
+                        drawEditorBox(context, bounds.x, bounds.y, bounds.w, bounds.h)
+
+                        context.pose().pushMatrix()
+                        context.pose().scale(scale, scale)
+                        context.text(this.font, text, (bounds.x / scale).toInt(), (bounds.y / scale).toInt(), ARGB.opaque(ColorCatalog.RED), true)
+                        context.pose().popMatrix()
+                    }
+                }
                 // --- Rift ---
                 "puff_kill_announcer" -> {
                     if (config.rift.puffKillAnnouncer) {
@@ -323,6 +352,7 @@ class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
                     "nucleus_map" -> { config.mining.nucleusMapPos.x = bounds.x; config.mining.nucleusMapPos.y = bounds.y }
                     "ability_announcer" -> { config.mining.miningAbilityAnnouncerPos.x = bounds.x; config.mining.miningAbilityAnnouncerPos.y = bounds.y }
                     "commission_display" -> { config.mining.commissionDisplayPos.x = bounds.x; config.mining.commissionDisplayPos.y = bounds.y }
+                    "Pest_Timer" -> { config.farming.pestKillTimerPos.x = bounds.x; config.farming.pestKillTimerPos.y = bounds.y }
                     "puff_kill_announcer" -> { config.rift.puffKillAnnouncerPos.x = bounds.x; config.rift.puffKillAnnouncerPos.y = bounds.y }
 
                 }
@@ -353,6 +383,10 @@ class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
                 config.mining.commissionDisplayPos.x = mx - dragOffsetX
                 config.mining.commissionDisplayPos.y = my - dragOffsetY
             }
+            "Pest_Timer" -> {
+                config.farming.pestKillTimerPos.x = mx - dragOffsetX
+                config.farming.pestKillTimerPos.y = my - dragOffsetY
+            }
             "puff_kill_announcer" -> {
                 config.rift.puffKillAnnouncerPos.x = mx - dragOffsetX
                 config.rift.puffKillAnnouncerPos.y = my - dragOffsetY
@@ -378,6 +412,7 @@ class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
             "nucleus_map" -> config.mining.nucleusMapPos.scale = (config.mining.nucleusMapPos.scale + delta).coerceIn(0.3f, 3.0f)
             "ability_announcer" -> config.mining.miningAbilityAnnouncerPos.scale = (config.mining.miningAbilityAnnouncerPos.scale + delta).coerceIn(1.0f, 6.0f)
             "commission_display" -> config.mining.commissionDisplayPos.scale = (config.mining.commissionDisplayPos.scale + delta).coerceIn(1.0f, 6.0f)
+            "Pest_Timer" -> config.farming.pestKillTimerPos.scale = (config.farming.pestKillTimerPos.scale + delta).coerceIn(1.0f, 6.0f)
             "puff_kill_announcer" -> config.rift.puffKillAnnouncerPos.scale = (config.rift.puffKillAnnouncerPos.scale + delta).coerceIn(1.0f, 6.0f)
 
         }

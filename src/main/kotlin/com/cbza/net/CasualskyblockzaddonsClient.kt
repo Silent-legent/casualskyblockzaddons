@@ -22,6 +22,7 @@ import com.cbza.net.feature.mining.hollows.map.WishingCompassSolver
 import com.cbza.net.feature.rift.PuffKillAnnouncer
 import com.cbza.net.feature.slayers.SlayerXpTracker
 import com.cbza.net.config.ModConfig
+import com.cbza.net.feature.farming.PestKillTimer
 
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.api.ClientModInitializer
@@ -43,6 +44,7 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 		WishingCompassSolver
 		PingGlide
 		MimicChest
+		PestKillTimer
 		PuffKillAnnouncer
 		SlayerXpTracker
 		currentVersion

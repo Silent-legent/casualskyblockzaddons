@@ -16,6 +16,7 @@ class ModConfig {
 	var general = General()
 	var mining = Mining()
 	var dungeons = Dungeons()
+	var farming = Farming()
 	var rift = Rift()
 
 	class Misc {
@@ -58,6 +59,11 @@ class ModConfig {
 
 	class Dungeons {
 		var mimicChest = true
+	}
+
+	class Farming {
+		var PestKillTimer = true
+		var pestKillTimerPos = HudPosition(100, 50, 2.0f)
 	}
 
 	class Rift {
