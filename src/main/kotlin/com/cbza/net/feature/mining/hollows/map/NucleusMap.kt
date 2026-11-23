@@ -8,6 +8,7 @@ import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.rendering.Render2D
 import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.mc
 
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.Minecraft
@@ -172,7 +173,6 @@ object NucleusMap {
     fun tick() {
         if (!ModConfig.get().mining.nucleusMap) return
 
-        val mc = Minecraft.getInstance()
         val now = System.currentTimeMillis()
 
         if (now - lastAreaCheck > AREA_CHECK_INTERVAL_MS) {

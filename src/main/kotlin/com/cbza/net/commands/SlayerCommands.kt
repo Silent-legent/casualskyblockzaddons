@@ -1,5 +1,6 @@
 package com.cbza.net.commands
 
+import com.cbza.net.api.cushion.mc
 import com.cbza.net.feature.slayers.SlayerCalc
 import com.cbza.net.feature.slayers.SlayerXpTracker
 import com.cbza.net.feature.slayers.slayerutil.SlayerBossXp
@@ -15,7 +16,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
-import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 
 object SlayerCommands {
@@ -46,11 +46,9 @@ object SlayerCommands {
         val levelInput = IntegerArgumentType.getInteger(ctx, "level")
         val tierInput = IntegerArgumentType.getInteger(ctx, "tier")
 
-        val client = Minecraft.getInstance()
-
         val slayer = SlayerType.entries.find { it.apiId == bossInput }
         if (slayer == null) {
-            client.player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal(
                     "§f══════════════§7\n" +
                             "§c[§6CasualSkyblockZAddons§c] §fUnknown slayertype '§e$bossInput§f'.\n" +
@@ -63,7 +61,7 @@ object SlayerCommands {
 
         val currentXp = typedXp ?: SlayerXpTracker.getCurrentXp(slayer)
         if (currentXp == null) {
-            client.player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal(
                     "§c[§6CasualSkyblockZAddons§c] §fNo tracked XP for §e${slayer.displayName}§f yet.\n" +
                             "§7Type it manually: §e/slayerxp $bossInput $levelInput $tierInput <currentXp>"
@@ -74,7 +72,7 @@ object SlayerCommands {
 
         val targetXp = SlayerCalc.xpForLevel(slayer, levelInput)
         if (targetXp == null) {
-            client.player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal(
                     "§c[§6CasualSkyblockZAddons§c] §fLevel §e$levelInput §fdoesn't exist for §e${slayer.displayName}§f."
                 )
@@ -84,7 +82,7 @@ object SlayerCommands {
 
         val xpPerBoss = SlayerBossXp.Level.valueOf(slayer.name).xp.getOrNull(tierInput - 1)
         if (xpPerBoss == null) {
-            client.player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal(
                     "§c[§6CasualSkyblockZAddons§c] §fTier §e$tierInput §fdoesn't exist for §e${slayer.displayName}§f."
                 )
@@ -94,7 +92,7 @@ object SlayerCommands {
 
         val pricePerBoss = SlayerCost.Cost.valueOf(slayer.name).prices.getOrNull(tierInput - 1)
         if (pricePerBoss == null) {
-            client.player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal(
                     "§c[§6CasualSkyblockZAddons§c] §fSpawn cost for tier §e$tierInput §fdoesn't exist for §e${slayer.displayName}§f."
                 )
@@ -106,7 +104,7 @@ object SlayerCommands {
         val totalCost = bossesLeft?.let { SlayerCalc.calcPrice(it, pricePerBoss) }
         val xpToNextLevel = targetXp - currentXp
 
-        client.player?.sendSystemMessage(
+        mc.player?.sendSystemMessage(
             Component.literal(
                 "§c[§6CasualSkyblockZAddons§c]\n" +
                         "§fSlayer §e${slayer.displayName} §7(§eT$tierInput§7)\n" +

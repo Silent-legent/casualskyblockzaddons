@@ -3,6 +3,7 @@ package com.cbza.net
 import com.cbza.net.Info.currentVersion
 import com.cbza.net.Info.FirstLogin
 import com.cbza.net.api.astrum.Astrum
+import com.cbza.net.commands.FarmingCommands
 import com.cbza.net.commands.MainCommands
 import com.cbza.net.commands.MiningCommands
 import com.cbza.net.commands.ShortCommands
@@ -54,6 +55,7 @@ class CasualskyblockzaddonsClient : ClientModInitializer {
 
 		MainCommands.register()
 		MiningCommands.register()
+		FarmingCommands.register()
 		ShortCommands.register()
 		SlayerCommands.register()
 

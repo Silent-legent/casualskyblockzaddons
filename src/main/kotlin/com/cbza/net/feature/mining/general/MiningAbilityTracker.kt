@@ -8,6 +8,7 @@ import com.cbza.net.event.events.ServerJoinEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.mc
 
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
@@ -200,7 +201,6 @@ object MiningAbilityTracker {
 
     fun render(graphics: RenderContext) {
         val popup = getActivePopup() ?: return
-        val mc = Minecraft.getInstance()
         val screenWidth = mc.window.guiScaledWidth
         val screenHeight = mc.window.guiScaledHeight
         val scale = config.mining.miningAbilityAnnouncerPos.scale

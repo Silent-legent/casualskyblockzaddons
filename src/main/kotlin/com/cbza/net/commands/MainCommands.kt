@@ -1,10 +1,12 @@
 package com.cbza.net.commands
 
+import com.cbza.net.api.cushion.mc
+import com.cbza.net.api.cushion.screen
+import com.cbza.net.api.cushion.setScreen
 import com.cbza.net.config.ConfigScreen
 import com.cbza.net.config.HudEditorScreen
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
-import net.minecraft.client.Minecraft
 
 object MainCommands {
     fun register() {
@@ -32,15 +34,18 @@ object MainCommands {
                                     .executes {
                                         sendMiningCommands()
                                         1
-                                    }
-                            )
+                                    })
+                            .then(literal("Farming")
+                                .executes {
+                                    sendFarmingCommands()
+                                    1
+                                })
                             .then(
                                 literal("Slayer")
                                     .executes {
                                         sendSlayerCommands()
                                         1
-                                    }
-                            )
+                                    })
                             .then(
                                 literal("Short")
                                     .executes {
@@ -53,29 +58,18 @@ object MainCommands {
     }
 
     private fun openConfigScreen() {
-        val client = Minecraft.getInstance()
-        client.execute {
-            //? if >=26.2 {
-            //client.gui.setScreen(ConfigScreen(client.gui.screen()))
-            //?} else {
-            client.setScreen(ConfigScreen(client.screen))
-            //?}
+        mc.execute {
+            setScreen(ConfigScreen(screen))
         }
     }
 
     private fun openHudEditor() {
-        val client = Minecraft.getInstance()
-        client.execute {
-            //? if >=26.2 {
-            //client.gui.setScreen(HudEditorScreen())
-            //?} else {
-            client.setScreen(HudEditorScreen())
-            //?}
+        mc.execute {
+            setScreen(HudEditorScreen())
         }
     }
 
     private fun sendHelpMessage() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§f══════════════§7\n" +
                     "§c[§6CasualSkyblockZAddons§c]\n" +
@@ -87,28 +81,33 @@ object MainCommands {
                     "§e/csz help short§7- Shows every short command.\n" +
                     "§f══════════════§7"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
     }
     private fun sendDungeonCommands() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§c[§6CasualSkyblockZAddons§c]\n" +
                     "§fDungeon Commands:\n" +
                     "There are currently no §eDungeon§7 commands"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
+    }
+    private fun sendFarmingCommands() {
+        val msg = net.minecraft.network.chat.Component.literal(
+            "§c[§6CasualSkyblockZAddons§c]\n" +
+                    "§Farming Commands:\n" +
+                    "§e/PestCooldown <cooldown(seconds)> §7- Sets the cooldown on the pest spawn warning.\n"
+        )
+        mc.player?.sendSystemMessage(msg)
     }
     private fun sendForagingCommands() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§c[§6CasualSkyblockZAddons§c]\n" +
                     "§fForaging Commands:\n" +
                     "There are currently no §Foraging§7 commands"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
     }
     private fun sendMiningCommands() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§f══════════════§7\n" +
                     "§c[§6CasualSkyblockZAddons§c]\n" +
@@ -117,10 +116,9 @@ object MainCommands {
                     "§e/calculatetick <miningSpeed> <block §7- Calculates ticks-to-break for a block at a given Mining Speed, + speed needed for the next tick.\n" +
                     "§f══════════════§7"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
     }
     private fun sendSlayerCommands() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§f══════════════§7\n" +
                     "§c[§6CasualSkyblockZAddons§c]\n" +
@@ -128,10 +126,9 @@ object MainCommands {
                     "§e/slayerxp <slayer> <level> <tier> [currentXp] §7- Calculates XP needed, bosses remaining, and spawn cost to reach the target level. (Skip currentXp if you already killed one boss.)\n" +
                     "§f══════════════§7"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
     }
     private fun sendShortCommands() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§f══════════════§7\n" +
                     "§c[§6CasualSkyblockZAddons§c]\n" +
@@ -156,6 +153,6 @@ object MainCommands {
                     "§e/jerry, /workshop§7- Warps u to the Jerry's Workshop.\n" +
                     "§f══════════════§7"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
     }
 }

@@ -1,13 +1,13 @@
 package com.cbza.net.feature.dungeons
 
 import com.cbza.net.api.astrum.Astrum
+import com.cbza.net.api.cushion.mc
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.event.events.RenderEvent
 
-import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
@@ -31,7 +31,6 @@ object MimicChest {
     }
 
     private val trackedChests = mutableSetOf<BlockPos>()
-    private val openedChests = mutableSetOf<BlockPos>()
     private var tickCounter = 0
     private var clearChestsDelay = 0
 
@@ -50,34 +49,36 @@ object MimicChest {
     }
 
     fun tick() {
+        if (!ModConfig.get().dungeons.mimicChest) {
+            reset()
+            return
+        }
+
         if (clearChestsDelay > 0) {
             clearChestsDelay--
             if (clearChestsDelay == 0) {
                 trackedChests.clear()
-                openedChests.clear()
             }
         }
 
         if (!SkyBlockIsland.THE_CATACOMBS.inIsland()) {
-            trackedChests.clear()
-            openedChests.clear()
-            tickCounter = 0
+            reset()
             return
         }
 
         tickCounter++
-        if (tickCounter < 10) return
+        if (tickCounter < ModConfig.get().dungeons.mimicChestCheckTimer) return
         tickCounter = 0
 
-        val player = Minecraft.getInstance().player ?: return
-        val level = Minecraft.getInstance().level ?: return
-        val radius = 16
+        val player = mc.player ?: return
+        val level = mc.level ?: return
+        val radius = ModConfig.get().dungeons.mimicChestRadius
+        val center = player.blockPosition()
 
         for (x in -radius..radius) {
             for (y in -radius..radius) {
                 for (z in -radius..radius) {
-                    val pos = player.blockPosition().offset(x, y, z)
-                    if (pos in openedChests) continue
+                    val pos = center.offset(x, y, z)
                     if (level.getBlockState(pos).block == Blocks.TRAPPED_CHEST) {
                         trackedChests.add(pos)
                     }
@@ -85,6 +86,11 @@ object MimicChest {
             }
         }
         trackedChests.removeIf { chestPos -> level.getBlockState(chestPos).block != Blocks.TRAPPED_CHEST }
+    }
+    fun reset() {
+        trackedChests.clear()
+        clearChestsDelay = 0
+        tickCounter = 0
     }
 
     fun clearChests() {

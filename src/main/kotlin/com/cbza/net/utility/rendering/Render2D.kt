@@ -7,9 +7,9 @@
 package com.cbza.net.utility.rendering
 
 import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.mc
 
 import net.minecraft.ChatFormatting
-import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -23,7 +23,6 @@ import kotlin.math.*
 
 object Render2D {
     private val formattingRegex = "(?<!\\\\\\\\)&(?=[0-9a-fk-or])".toRegex()
-    val client = Minecraft.getInstance()
 
     fun drawImage(ctx: RenderContext, image: Identifier?, x: Int, y: Int, width: Int, height: Int, color: Color) {
         drawImage(ctx, image, x, y, width, height, color.rgb)
@@ -66,7 +65,7 @@ object Render2D {
         }
 
         ctx.text(
-            client.font,
+            mc.font,
             str.replace(formattingRegex, "${ChatFormatting.PREFIX_CODE}"),
             x,
             y,
@@ -86,7 +85,7 @@ object Render2D {
         }
 
         ctx.text(
-            client.font,
+            mc.font,
             str,
             x,
             y,
@@ -106,7 +105,7 @@ object Render2D {
         }
 
         ctx.text(
-            client.font,
+            mc.font,
             str.replace(formattingRegex, "${ChatFormatting.PREFIX_CODE}"),
             x,
             y,
@@ -122,28 +121,28 @@ object Render2D {
         context.pose().translate(x, y)
         context.pose().scale(scale, scale)
         context.item(item, 0, 0)
-        context.itemDecorations(client.font, item, 0, 0)
+        context.itemDecorations(mc.font, item, 0, 0)
         context.pose().popMatrix()
     }
 
     fun String.width(): Int {
         val lines = split('\n')
-        return lines.maxOf { client.font.width(it.stripColor()) }
+        return lines.maxOf { mc.font.width(it.stripColor()) }
     }
 
     fun MutableComponent.width(): Int {
         val lines = splitLines()
-        return lines.maxOf { client.font.width(it)}
+        return lines.maxOf { mc.font.width(it)}
     }
 
     fun String.height(): Int {
         val lineCount = count { it == '\n' } + 1
-        return client.font.lineHeight * lineCount
+        return mc.font.lineHeight * lineCount
     }
 
     fun MutableComponent.height(): Int {
         val lineCount = this.string.count { it == '\n' } + 1
-        return client.font.lineHeight * lineCount
+        return mc.font.lineHeight * lineCount
     }
 
     fun renderScrolled(ctx: RenderContext, x: Int, y: Int, width: Int, height: Int, scrollOffset: Float, block: () -> Unit) {

@@ -13,6 +13,7 @@ import com.cbza.net.utility.tracking.TpsTracker
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.event.events.RenderEvent
+import com.cbza.net.api.cushion.mc
 
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.client.Minecraft
@@ -62,7 +63,6 @@ object PingGlide {
         if (!_isCurrentlyMining) return
         val blockPos = _currentBlockPos ?: return
 
-        val mc = Minecraft.getInstance()
         val safe = isSafeToMove()
 
         val outlineColor = if (safe) Color(0,255,0, 255) else Color(255, 0, 0, 255)
@@ -133,7 +133,7 @@ object PingGlide {
             _isCurrentlyMining = false
             return
         }
-        val mc = Minecraft.getInstance()
+
         val hit = mc.hitResult as? BlockHitResult
         val targetPos = hit?.blockPos
 

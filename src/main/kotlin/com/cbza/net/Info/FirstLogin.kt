@@ -1,10 +1,9 @@
 package com.cbza.net.Info
 
+import com.cbza.net.api.cushion.mc
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ServerJoinEvent
-// import com.cbza.net.feature.mining.general.MiningAbilityTracker.onServerJoin
-import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
@@ -23,8 +22,7 @@ object FirstLogin {
         Thread {
             Thread.sleep(3000)
 
-            val client = Minecraft.getInstance()
-            client.execute {
+            mc.execute {
                 val discordUrl = "https://discord.gg/UVN99sypv"
 
                 val discordLink = Component.literal(discordUrl)
@@ -53,7 +51,7 @@ object FirstLogin {
                         )
                     )
 
-                client.player?.sendSystemMessage(message)
+                mc.player?.sendSystemMessage(message)
 
                 ModConfig.get().firstTimeUsing = true
                 ModConfig.save()

@@ -1,5 +1,6 @@
 package com.cbza.net.feature.mining.hollows.map
 
+import com.cbza.net.api.cushion.mc
 import com.cbza.net.config.ModConfig
 import com.cbza.net.feature.mining.hollows.map.NucleusMap.markOdawaUnreliable
 import com.cbza.net.utility.TabListReader
@@ -94,7 +95,7 @@ object WishingCompassSolver {
         }
 
         if (currentTrail.isEmpty()) {
-            val player = Minecraft.getInstance().player
+            val player = mc.player
             trailOrigin = if (player != null) Triple(player.x, player.y, player.z) else Triple(x, y, z)
         }
 
@@ -121,7 +122,7 @@ object WishingCompassSolver {
             if (compassJustShattered) {
                 compassJustShattered = false
                 pendingRay = null
-                Minecraft.getInstance().player?.sendSystemMessage(
+                mc.player?.sendSystemMessage(
                     Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                             "§fOdawa isn't in this lobby. Make sure you have a §5Jungle Key§f before searching for the Jungle Temple.")
                 )
@@ -130,7 +131,7 @@ object WishingCompassSolver {
         }
 
         if (isCompassUnreliableFor(targetPoi)) {
-            Minecraft.getInstance().player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                         "§fIgnoring compass reading for §e$targetPoi§f, its crystal is placed/found. So this reading can't be trusted.")
             )
@@ -230,12 +231,12 @@ object WishingCompassSolver {
 
         if (first == null) {
             pendingRay = ray
-            Minecraft.getInstance().player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal("§c[§6CasuakSKyblockZAddons§c]\n" +
                         "§fDirection captured for §e${ray.targetPoi}§f. Move to a different spot and use another compass to solve it.")
             )
             if (ray.targetPoi == "Odawa" && !hasJungleKey()) {
-                Minecraft.getInstance().player?.sendSystemMessage(
+                mc.player?.sendSystemMessage(
                     Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                             "§fHINT!. You need a §5Jungle Key§f to find the Jungle Temple.")
                 )
@@ -245,12 +246,12 @@ object WishingCompassSolver {
 
         if (first.targetPoi != ray.targetPoi) {
             pendingRay = ray
-            Minecraft.getInstance().player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                         "§fTarget changed to §e${ray.targetPoi}§f, direction captured. Use it again elsewhere to solve.")
             )
             if (ray.targetPoi == "Odawa" && !hasJungleKey()) {
-                Minecraft.getInstance().player?.sendSystemMessage(
+                mc.player?.sendSystemMessage(
                     Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                             "§fHINT!. You need a §5Jungle Key§f to find the Jungle Temple.")
                 )
@@ -260,7 +261,7 @@ object WishingCompassSolver {
 
         val baselineDist = distance3D(first.origin, ray.origin)
         if (baselineDist < MIN_BASELINE_DISTANCE) {
-            Minecraft.getInstance().player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                         "§fToo close to your first use (§e${"%.1f".format(baselineDist)}§f blocks). Move further away and use the compass again.")
             )
@@ -270,7 +271,7 @@ object WishingCompassSolver {
         pendingRay = null
         val solved = closestPointBetweenRays(first, ray)
         if (solved == null) {
-            Minecraft.getInstance().player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                         "§fRays too close to parallel to solve. Try again from a more different angle.")
             )
@@ -282,7 +283,7 @@ object WishingCompassSolver {
         if (ray.targetPoi == "Odawa" && !NucleusMap.isInJungleQuadrant(x, z)) {
             val firstTime = markOdawaUnreliable()
             if (firstTime) {
-                Minecraft.getInstance().player?.sendSystemMessage(
+                mc.player?.sendSystemMessage(
                     Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                             "§fOdawa didn't spawn in this lobby.")
                 )
@@ -290,7 +291,7 @@ object WishingCompassSolver {
             return
         }
 
-        Minecraft.getInstance().player?.sendSystemMessage(
+        mc.player?.sendSystemMessage(
             Component.literal("§c[§6CasualSkyblockZAddons§c]\n" +
                     "§fSolved §e${ray.targetPoi}§f: x:${"%.1f".format(x)} z:${"%.1f".format(z)}")
         )

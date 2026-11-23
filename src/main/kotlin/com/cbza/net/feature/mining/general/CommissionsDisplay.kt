@@ -5,8 +5,9 @@ import com.cbza.net.config.ModConfig
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.utility.TabListReader
 import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.mc
+import com.cbza.net.api.cushion.screen
 
-import net.minecraft.client.Minecraft
 import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 
 object CommissionsDisplay {
@@ -28,21 +29,17 @@ object CommissionsDisplay {
 
             val mcm = ModConfig.get().mining
             if (!mcm.commissionsDisplay) return
-        //? if >=26.2 {
-        //if (Minecraft.getInstance().gui.screen() is HudEditorScreen) return
-        //?} else {
-            if (Minecraft.getInstance().screen is HudEditorScreen) return
-        //?}
 
-            val lines = TabListReader.getCommissionLines()
-            if (lines.isEmpty()) return
+        if (screen is HudEditorScreen) return
 
-            val mc = Minecraft.getInstance()
-            val startX = mcm.commissionDisplayPos.x
-            val startY = mcm.commissionDisplayPos.x
-            val scale = mcm.commissionDisplayPos.scale
-            val lineHeight = 10
-            val nameColor = ColorCatalog.WHITE
+        val lines = TabListReader.getCommissionLines()
+        if (lines.isEmpty()) return
+
+        val startX = mcm.commissionDisplayPos.x
+        val startY = mcm.commissionDisplayPos.y
+        val scale = mcm.commissionDisplayPos.scale
+        val lineHeight = 10
+        val nameColor = ColorCatalog.WHITE
 
             graphics.pose().pushMatrix()
             graphics.pose().scale(scale, scale)

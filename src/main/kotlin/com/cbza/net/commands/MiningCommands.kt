@@ -1,5 +1,6 @@
 package com.cbza.net.commands
 
+import com.cbza.net.api.cushion.mc
 import com.cbza.net.feature.mining.hollows.map.NucleusMap
 import com.cbza.net.utility.BlockStrength
 import com.mojang.brigadier.arguments.IntegerArgumentType
@@ -7,7 +8,6 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
-import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 
 object MiningCommands {
@@ -45,25 +45,23 @@ object MiningCommands {
     }
 
     private fun shareLocations(name: String) {
-        val client = Minecraft.getInstance()
         val coords = NucleusMap.discoveredPois[name]
 
         if (coords == null) {
-            client.player?.sendSystemMessage(Component.literal("§cPOI '$name' not discovered yet."))
+            mc.player?.sendSystemMessage(Component.literal("§cPOI '$name' not discovered yet."))
         } else {
             val (x, z) = coords
-            val y = client.player?.blockY ?: 0
-            client.player?.connection?.sendCommand("ac x: ${x.toInt()} y: $y z: ${z.toInt()} $name")
-            client.player?.sendSystemMessage(Component.literal("§aShared location for $name!"))
+            val y = mc.player?.blockY ?: 0
+            mc.player?.connection?.sendCommand("ac x: ${x.toInt()} y: $y z: ${z.toInt()} $name")
+            mc.player?.sendSystemMessage(Component.literal("§aShared location for $name!"))
         }
     }
 
     private fun calculateTick(miningSpeed: Int, blockKey: String) {
-        val client = Minecraft.getInstance()
 
         val strength = BlockStrength.strengths[blockKey]
         if (strength == null) {
-            client.player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal(
                     "§c[§6CasualSkyblockZAddons§c] §fUnknown block/gemstone '§e$blockKey§f'.\n" +
                             "§7Valid options: §e${BlockStrength.strengths.keys.joinToString(", ")}"
@@ -74,7 +72,7 @@ object MiningCommands {
 
         val ticks = BlockStrength.calculateTicks(blockKey, miningSpeed)
         if (ticks == null) {
-            client.player?.sendSystemMessage(
+            mc.player?.sendSystemMessage(
                 Component.literal("§c[§6CasualSkyblockZAddons§c] §fInvalid mining speed.")
             )
             return
@@ -89,7 +87,7 @@ object MiningCommands {
             }
             ?: "§7Already at the minimum tick count (4)."
 
-        client.player?.sendSystemMessage(
+        mc.player?.sendSystemMessage(
             Component.literal(
                 "§f══════════════§7\n" +
                         "§c[§6CasualSkyblockZAddons§c]\n" +

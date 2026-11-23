@@ -13,8 +13,6 @@ object RarityBackground {
     private val missStreakBySlot: MutableMap<Int, Int> = HashMap()
     private val lastWasDyedBySlot: MutableMap<Int, Boolean> = HashMap()
 
-    private const val MISS_TOLERANCE = 35
-
     private fun slotKey(x: Int, y: Int): Int = x * 100000 + y
 
     fun getRarityColor(itemStack: ItemStack?, x: Int, y: Int): Int {
@@ -64,7 +62,7 @@ object RarityBackground {
         missStreakBySlot[key] = streak
 
         val remembered = lastColorBySlot[key]
-        return if (remembered != null && streak <= MISS_TOLERANCE) {
+        return if (remembered != null && streak <= ModConfig.get().general.rarityBackgroundTolerance) {
             remembered
         } else {
             lastColorBySlot.remove(key)
@@ -76,7 +74,7 @@ object RarityBackground {
     private fun computeRarityColor(lines: List<String>): Int {
         val linesToCheck = minOf(8, lines.size)
         for (i in 0 until linesToCheck) {
-            val rawLine = stripLeadingIcon(lines[lines.size - 1 - i].trim())
+            val rawLine = stripLeadingIcon(lines[lines.size - 1 - i].trim()).removePrefix("SHINY ")
 
             val color = when {
                 rawLine.startsWith("ADMIN") -> ColorCatalog.TRANSLUCENT_DARK_RED

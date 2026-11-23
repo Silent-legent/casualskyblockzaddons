@@ -4,6 +4,8 @@ import com.cbza.net.config.ModConfig
 import com.cbza.net.config.config
 import com.cbza.net.api.cushion.RenderContext
 import com.cbza.net.api.cushion.ChatScreen
+import com.cbza.net.api.cushion.mc
+import com.cbza.net.api.cushion.screen
 
 import com.cbza.net.utility.ColorCatalog
 import net.minecraft.client.Minecraft
@@ -16,16 +18,10 @@ object InventoryHudOverlay {
     val MARGIN = 4
 
     private fun isInGameUi(): Boolean {
-        val mc = Minecraft.getInstance()
-        //? if >=26.2 {
-        //return mc.level != null && (mc.gui.screen() == null || mc.gui.screen() is ChatScreen)
-        //?} else {
-        return mc.level != null && (mc.screen == null || mc.screen is ChatScreen)
-        //?}
+        return mc.level != null && (screen == null || screen is ChatScreen)
     }
 
     fun getDefaultPosition(): Pair<Int, Int> {
-        val mc = Minecraft.getInstance()
 
         val screenWidth = mc.window.guiScaledWidth
         val screenHeight = mc.window.guiScaledHeight

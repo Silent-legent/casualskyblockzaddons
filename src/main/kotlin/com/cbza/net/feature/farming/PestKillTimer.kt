@@ -16,8 +16,6 @@ enum class PestState { UNKNOWN, COUNTING, READY }
 
 object PestKillTimer {
 
-    var spawnIntervalSeconds = 135
-
     private var state = PestState.UNKNOWN
     private var ticksLeft = 0
     private var warnedSoon = false
@@ -72,7 +70,7 @@ object PestKillTimer {
     private fun onPestsSpawned() {
         if (!onGarden()) return
         state = PestState.COUNTING
-        ticksLeft = spawnIntervalSeconds * 20
+        ticksLeft = ModConfig.get().farming.spawnIntervalSeconds * 20
         warnedSoon = false
         lastCountdownSecond = -1
         tabCooldown = 100

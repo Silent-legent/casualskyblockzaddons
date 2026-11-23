@@ -19,9 +19,6 @@ import com.cbza.net.api.cushion.Identifier
 
 import net.minecraft.client.gui.components.Button
 import net.minecraft.util.ARGB
-import java.awt.Color
-
-// import java.awt.Color
 
 class HudEditorScreen : Screen(ChatComponent.literal("HUD Editor")) {
 

@@ -33,6 +33,7 @@ class ModConfig {
 
 	class General {
 		var showRarityBackgrounds = true
+		var rarityBackgroundTolerance = 35
 
 		var playerInventory = false
 		var playerInventoryPos = HudPosition(-1,  -1, 1.0f)
@@ -59,11 +60,14 @@ class ModConfig {
 
 	class Dungeons {
 		var mimicChest = true
+		var mimicChestRadius = 16
+		var mimicChestCheckTimer = 10
 	}
 
 	class Farming {
 		var PestKillTimer = true
 		var pestKillTimerPos = HudPosition(100, 50, 2.0f)
+		var spawnIntervalSeconds = 135
 	}
 
 	class Rift {

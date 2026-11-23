@@ -7,6 +7,7 @@ import com.cbza.net.event.events.SoundPlayedEvent
 import com.cbza.net.event.events.TickEvent
 import com.cbza.net.utility.ColorCatalog
 import com.cbza.net.api.cushion.RenderContext
+import com.cbza.net.api.cushion.mc
 
 import net.minecraft.client.Minecraft
 import net.minecraft.sounds.SoundEvents
@@ -63,7 +64,6 @@ object PuffKillAnnouncer {
         lastPopupTime = now
         popupExpireTime = now + POPUP_DURATION_MS
 
-        val mc = Minecraft.getInstance()
         mc.execute {
             mc.player?.playSound(
                 SoundEvents.NOTE_BLOCK_PLING.value(),
@@ -107,21 +107,18 @@ object PuffKillAnnouncer {
     }
 
     fun sendMINwarning() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§c[§6CasualSkyblockZAddons§c]\n" +
                     "§5Gravity I§c §fexpires in 1min!"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
     }
 
     fun sendCountdownMessage(seconds: Int) {
-        val client = Minecraft.getInstance()
-        val mc = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§5Gravity I§c §fexpires in ${seconds}sec!"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
         mc.execute {
             mc.player?.playSound(
                 SoundEvents.NOTE_BLOCK_PLING.value(),
@@ -132,11 +129,10 @@ object PuffKillAnnouncer {
     }
 
     fun sendExpiredMessage() {
-        val client = Minecraft.getInstance()
         val msg = net.minecraft.network.chat.Component.literal(
             "§5Gravity I§c §fhas expired!"
         )
-        client.player?.sendSystemMessage(msg)
+        mc.player?.sendSystemMessage(msg)
 
     }
 

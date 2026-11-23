@@ -1,6 +1,7 @@
 package com.cbza.net.feature.mining.hollows
 
 import com.cbza.net.api.astrum.Astrum
+import com.cbza.net.api.cushion.mc
 import com.cbza.net.config.ModConfig
 import com.cbza.net.event.EventBus
 import com.cbza.net.event.events.ChatEvent
@@ -62,7 +63,6 @@ object PowderChestSolver {
 	}
 
 	private fun isRecentlyMining(): Boolean {
-		val mc = Minecraft.getInstance()
 		return mc.options.keyAttack.isDown
 	}
 
